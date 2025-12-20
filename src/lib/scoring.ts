@@ -1076,3 +1076,236 @@ export function comprehensiveSideAnalysis(
     harmonyScore,
   };
 }
+
+// ============================================
+// RECOMMENDATION SYSTEM INTEGRATION
+// ============================================
+
+import type { MetricInput } from './recommendations/engine';
+import type { RecommendationPlan } from './recommendations/types';
+
+/**
+ * Convert front analysis results to MetricInput format for recommendation engine
+ */
+export function frontAnalysisToMetricInputs(
+  analysis: ComprehensiveFrontAnalysis
+): MetricInput[] {
+  const inputs: MetricInput[] = [];
+
+  if (analysis.fwhr) {
+    inputs.push({
+      metricId: 'fwhr',
+      metricName: 'Facial Width-to-Height Ratio',
+      currentValue: analysis.fwhr.value,
+      idealValue: (analysis.fwhr.idealRange.min + analysis.fwhr.idealRange.max) / 2,
+      idealRange: analysis.fwhr.idealRange,
+      score: analysis.fwhr.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.leftCanthalTilt) {
+    inputs.push({
+      metricId: 'canthalTilt',
+      metricName: 'Canthal Tilt',
+      currentValue: analysis.leftCanthalTilt.value,
+      idealValue: 6, // midpoint of 4-8
+      idealRange: analysis.leftCanthalTilt.idealRange,
+      score: analysis.leftCanthalTilt.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.nasalIndex) {
+    inputs.push({
+      metricId: 'nasalIndex',
+      metricName: 'Nasal Index',
+      currentValue: analysis.nasalIndex.value,
+      idealValue: (analysis.nasalIndex.idealRange.min + analysis.nasalIndex.idealRange.max) / 2,
+      idealRange: analysis.nasalIndex.idealRange,
+      score: analysis.nasalIndex.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.jawRatio) {
+    inputs.push({
+      metricId: 'jawWidthRatio',
+      metricName: 'Jaw Width Ratio',
+      currentValue: analysis.jawRatio.value,
+      idealValue: (analysis.jawRatio.idealRange.min + analysis.jawRatio.idealRange.max) / 2,
+      idealRange: analysis.jawRatio.idealRange,
+      score: analysis.jawRatio.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.facialThirds?.upper) {
+    inputs.push({
+      metricId: 'facialThirdsUpper',
+      metricName: 'Upper Facial Third',
+      currentValue: analysis.facialThirds.upper.value,
+      idealValue: 33.33,
+      idealRange: analysis.facialThirds.upper.idealRange,
+      score: analysis.facialThirds.upper.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.facialThirds?.middle) {
+    inputs.push({
+      metricId: 'facialThirdsMiddle',
+      metricName: 'Middle Facial Third',
+      currentValue: analysis.facialThirds.middle.value,
+      idealValue: 33.33,
+      idealRange: analysis.facialThirds.middle.idealRange,
+      score: analysis.facialThirds.middle.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.facialThirds?.lower) {
+    inputs.push({
+      metricId: 'facialThirdsLower',
+      metricName: 'Lower Facial Third',
+      currentValue: analysis.facialThirds.lower.value,
+      idealValue: 33.33,
+      idealRange: analysis.facialThirds.lower.idealRange,
+      score: analysis.facialThirds.lower.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.mouthNoseRatio) {
+    inputs.push({
+      metricId: 'lipRatio',
+      metricName: 'Mouth to Nose Ratio',
+      currentValue: analysis.mouthNoseRatio.value,
+      idealValue: 1.55,
+      idealRange: analysis.mouthNoseRatio.idealRange,
+      score: analysis.mouthNoseRatio.score,
+      profileType: 'front',
+    });
+  }
+
+  if (analysis.ipdRatio) {
+    inputs.push({
+      metricId: 'interpupillaryDistance',
+      metricName: 'Interpupillary Distance Ratio',
+      currentValue: analysis.ipdRatio.value,
+      idealValue: 46,
+      idealRange: analysis.ipdRatio.idealRange,
+      score: analysis.ipdRatio.score,
+      profileType: 'front',
+    });
+  }
+
+  return inputs;
+}
+
+/**
+ * Convert side analysis results to MetricInput format for recommendation engine
+ */
+export function sideAnalysisToMetricInputs(
+  analysis: ComprehensiveSideAnalysis
+): MetricInput[] {
+  const inputs: MetricInput[] = [];
+
+  if (analysis.gonialAngle) {
+    inputs.push({
+      metricId: 'gonialAngle',
+      metricName: 'Gonial Angle',
+      currentValue: analysis.gonialAngle.value,
+      idealValue: (analysis.gonialAngle.idealRange.min + analysis.gonialAngle.idealRange.max) / 2,
+      idealRange: analysis.gonialAngle.idealRange,
+      score: analysis.gonialAngle.score,
+      profileType: 'side',
+    });
+  }
+
+  if (analysis.nasolabialAngle) {
+    inputs.push({
+      metricId: 'nasolabialAngle',
+      metricName: 'Nasolabial Angle',
+      currentValue: analysis.nasolabialAngle.value,
+      idealValue: (analysis.nasolabialAngle.idealRange.min + analysis.nasolabialAngle.idealRange.max) / 2,
+      idealRange: analysis.nasolabialAngle.idealRange,
+      score: analysis.nasolabialAngle.score,
+      profileType: 'side',
+    });
+  }
+
+  if (analysis.eLine?.upperLip) {
+    inputs.push({
+      metricId: 'eLineUpperLip',
+      metricName: 'E-Line Upper Lip',
+      currentValue: analysis.eLine.upperLip.value,
+      idealValue: (analysis.eLine.upperLip.idealRange.min + analysis.eLine.upperLip.idealRange.max) / 2,
+      idealRange: analysis.eLine.upperLip.idealRange,
+      score: analysis.eLine.upperLip.score,
+      profileType: 'side',
+    });
+  }
+
+  if (analysis.eLine?.lowerLip) {
+    inputs.push({
+      metricId: 'eLineLowerLip',
+      metricName: 'E-Line Lower Lip',
+      currentValue: analysis.eLine.lowerLip.value,
+      idealValue: (analysis.eLine.lowerLip.idealRange.min + analysis.eLine.lowerLip.idealRange.max) / 2,
+      idealRange: analysis.eLine.lowerLip.idealRange,
+      score: analysis.eLine.lowerLip.score,
+      profileType: 'side',
+    });
+  }
+
+  if (analysis.mentolabialAngle) {
+    inputs.push({
+      metricId: 'mentoLabialAngle',
+      metricName: 'Mentolabial Angle',
+      currentValue: analysis.mentolabialAngle.value,
+      idealValue: 130,
+      idealRange: analysis.mentolabialAngle.idealRange,
+      score: analysis.mentolabialAngle.score,
+      profileType: 'side',
+    });
+  }
+
+  if (analysis.nasofrontalAngle) {
+    inputs.push({
+      metricId: 'nasofrontalAngle',
+      metricName: 'Nasofrontal Angle',
+      currentValue: analysis.nasofrontalAngle.value,
+      idealValue: 125,
+      idealRange: analysis.nasofrontalAngle.idealRange,
+      score: analysis.nasofrontalAngle.score,
+      profileType: 'side',
+    });
+  }
+
+  return inputs;
+}
+
+/**
+ * Generate a complete recommendation plan from front and side analysis
+ */
+export async function generateFullRecommendationPlan(
+  frontAnalysis: ComprehensiveFrontAnalysis,
+  sideAnalysis: ComprehensiveSideAnalysis,
+  gender: 'male' | 'female' = 'male'
+): Promise<RecommendationPlan> {
+  // Dynamically import to avoid circular dependencies
+  const { generateRecommendationPlan } = await import('./recommendations/engine');
+
+  // Combine metric inputs
+  const frontInputs = frontAnalysisToMetricInputs(frontAnalysis);
+  const sideInputs = sideAnalysisToMetricInputs(sideAnalysis);
+  const allMetrics = [...frontInputs, ...sideInputs];
+
+  // Calculate overall scores
+  const overallScore = (frontAnalysis.overallScore + sideAnalysis.overallScore) / 2;
+  const harmonyPercent = (frontAnalysis.harmonyScore + sideAnalysis.harmonyScore) / 2;
+
+  // Generate the recommendation plan
+  return generateRecommendationPlan(allMetrics, overallScore, harmonyPercent, gender);
+}
