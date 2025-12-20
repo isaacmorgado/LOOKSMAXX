@@ -122,16 +122,16 @@ function getLandmark(landmarks: LandmarkPoint[], id: string): Point | null {
 
 /**
  * Gonial Angle - Jaw angle measurement
- * Uses: tragion, gonion_inferior_side, menton_side
+ * Uses: tragus, gonionBottom, menton
  * Ideal: 120° - 130° (male), 125° - 135° (female)
  */
 export function calculateGonialAngle(
   sideLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): ScoreResult | null {
-  const tragion = getLandmark(sideLandmarks, 'tragion');
-  const gonion_inferior = getLandmark(sideLandmarks, 'gonion_inferior_side');
-  const menton = getLandmark(sideLandmarks, 'menton_side');
+  const tragion = getLandmark(sideLandmarks, 'tragus');
+  const gonion_inferior = getLandmark(sideLandmarks, 'gonionBottom');
+  const menton = getLandmark(sideLandmarks, 'menton');
 
   if (!tragion || !gonion_inferior || !menton) return null;
 
@@ -158,16 +158,16 @@ export function calculateGonialAngle(
 
 /**
  * Nasolabial Angle - Angle between columella and upper lip
- * Uses: columella_nasi, subnasale_side, labrale_superius_side
+ * Uses: columella, subnasale, labraleSuperius
  * Ideal: 90° - 105° (male), 95° - 115° (female)
  */
 export function calculateNasolabialAngle(
   sideLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): ScoreResult | null {
-  const columella = getLandmark(sideLandmarks, 'columella_nasi');
-  const subnasale = getLandmark(sideLandmarks, 'subnasale_side');
-  const labrale_superius = getLandmark(sideLandmarks, 'labrale_superius_side');
+  const columella = getLandmark(sideLandmarks, 'columella');
+  const subnasale = getLandmark(sideLandmarks, 'subnasale');
+  const labrale_superius = getLandmark(sideLandmarks, 'labraleSuperius');
 
   if (!columella || !subnasale || !labrale_superius) return null;
 
@@ -194,7 +194,7 @@ export function calculateNasolabialAngle(
 
 /**
  * E-Line (Ricketts' Esthetic Line) - Lip protrusion analysis
- * Uses: pronasale, pogonion, labrale_superius_side, labrale_inferius_side
+ * Uses: pronasale, pogonion, labraleSuperius, labraleInferius
  * Ideal: Upper lip 4mm behind (male) / 2mm behind (female)
  *        Lower lip 2mm behind (male) / 0mm (female)
  */
@@ -204,8 +204,8 @@ export function calculateELine(
 ): { upperLip: ScoreResult; lowerLip: ScoreResult; combined: ScoreResult } | null {
   const pronasale = getLandmark(sideLandmarks, 'pronasale');
   const pogonion = getLandmark(sideLandmarks, 'pogonion');
-  const labrale_superius = getLandmark(sideLandmarks, 'labrale_superius_side');
-  const labrale_inferius = getLandmark(sideLandmarks, 'labrale_inferius_side');
+  const labrale_superius = getLandmark(sideLandmarks, 'labraleSuperius');
+  const labrale_inferius = getLandmark(sideLandmarks, 'labraleInferius');
 
   if (!pronasale || !pogonion || !labrale_superius || !labrale_inferius) return null;
 
@@ -257,13 +257,13 @@ export function calculateELine(
 
 /**
  * Mentolabial Angle - Angle at the labiomental fold
- * Uses: labrale_inferius_side, sublabiale, pogonion
+ * Uses: labraleInferius, sublabiale, pogonion
  * Ideal: 120° - 140°
  */
 export function calculateMentolabialAngle(
   sideLandmarks: LandmarkPoint[]
 ): ScoreResult | null {
-  const labrale_inferius = getLandmark(sideLandmarks, 'labrale_inferius_side');
+  const labrale_inferius = getLandmark(sideLandmarks, 'labraleInferius');
   const sublabiale = getLandmark(sideLandmarks, 'sublabiale');
   const pogonion = getLandmark(sideLandmarks, 'pogonion');
 

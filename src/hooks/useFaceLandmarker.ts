@@ -7,11 +7,9 @@ import {
   FaceLandmarkerResult,
 } from '@mediapipe/tasks-vision';
 
-const MODEL_URL =
-  'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
-
-const VISION_WASM_URL =
-  'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm';
+// Self-hosted for better reliability
+const MODEL_URL = '/wasm/face_landmarker.task';
+const VISION_WASM_URL = '/wasm';
 
 export interface FaceLandmark {
   x: number;

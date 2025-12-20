@@ -152,6 +152,94 @@
     }
 
     .stats { font-size: 0.9em; color: #7f8fa6; margin-bottom: 10px; }
+
+    .phase-indicator {
+      background: #0f3460;
+      padding: 8px 12px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .phase-indicator.front { border-left: 4px solid #4ecca3; }
+    .phase-indicator.side { border-left: 4px solid #e94560; }
+
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #16213e;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid #4ecca3;
+    }
+    .modal h2 {
+      color: #4ecca3;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+    .modal-points {
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    .modal-point {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #333;
+      font-size: 0.9em;
+    }
+    .modal-point:last-child { border-bottom: none; }
+    .modal-point .name { color: #eee; }
+    .modal-point .coords { color: #7f8fa6; font-family: monospace; }
+    .modal-point.missing .name { color: #e94560; }
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1em;
+      transition: all 0.2s;
+    }
+    .btn-continue {
+      background: #4ecca3;
+      color: #1a1a2e;
+    }
+    .btn-continue:hover { background: #38a169; }
+    .btn-stay {
+      background: #7f8fa6;
+      color: #fff;
+    }
+    .btn-stay:hover { background: #9ba8b9; }
+    .modal-summary {
+      color: #7f8fa6;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -177,7 +265,11 @@
       <div class="progress">
         <div class="progress-bar" id="progressBar" style="width: 0%"></div>
       </div>
-      <div class="stats" id="stats">0 / 47 landmarks placed</div>
+      <div class="stats" id="stats">0 / 51 landmarks placed</div>
+
+      <div class="phase-indicator front" id="phaseIndicator">
+        Phase 1: Front Face
+      </div>
 
       <div class="current-landmark" id="currentLandmark">
         <div class="label">Current Landmark:</div>
@@ -202,9 +294,22 @@
     </div>
   </div>
 
+  <!-- Completion Modal -->
+  <div class="modal-overlay" id="completionModal">
+    <div class="modal">
+      <h2 id="modalTitle">Front Face Mapping Complete!</h2>
+      <p class="modal-summary" id="modalSummary">You have mapped all front face landmarks.</p>
+      <div class="modal-points" id="modalPoints"></div>
+      <div class="modal-buttons">
+        <button class="btn-stay" id="btnStay">Stay on Front Face</button>
+        <button class="btn-continue" id="btnContinue">Continue to Side Profile</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Front profile landmarks in order
-    const LANDMARKS = [
+    // Front profile landmarks (51 points)
+    const FRONT_LANDMARKS = [
       { id: 'trichion', label: 'Hairline', group: 'Head' },
       { id: 'left_pupila', label: 'Left Pupil', group: 'Left Eye' },
       { id: 'left_canthus_medialis', label: 'Left Inner Corner', group: 'Left Eye' },
@@ -259,26 +364,88 @@
       { id: 'right_cervical_lateralis', label: 'Right Neck', group: 'Neck' },
     ];
 
+    // Side profile landmarks (31 points)
+    const SIDE_LANDMARKS = [
+      { id: 'side_trichion', label: 'Hairline', group: 'Head' },
+      { id: 'side_glabella', label: 'Glabella', group: 'Head' },
+      { id: 'side_nasion', label: 'Nasion', group: 'Head' },
+      { id: 'side_sellion', label: 'Sellion', group: 'Nose' },
+      { id: 'side_rhinion', label: 'Rhinion', group: 'Nose' },
+      { id: 'side_supratip', label: 'Supratip', group: 'Nose' },
+      { id: 'side_pronasale', label: 'Nose Tip', group: 'Nose' },
+      { id: 'side_columella', label: 'Columella', group: 'Nose' },
+      { id: 'side_subnasale', label: 'Subnasale', group: 'Nose' },
+      { id: 'side_ala_nasi', label: 'Nostril', group: 'Nose' },
+      { id: 'side_labrale_superius', label: 'Upper Lip', group: 'Mouth' },
+      { id: 'side_stomion', label: 'Lip Junction', group: 'Mouth' },
+      { id: 'side_labrale_inferius', label: 'Lower Lip', group: 'Mouth' },
+      { id: 'side_labiomental_sulcus', label: 'Labiomental Sulcus', group: 'Chin' },
+      { id: 'side_pogonion', label: 'Pogonion', group: 'Chin' },
+      { id: 'side_gnathion', label: 'Gnathion', group: 'Chin' },
+      { id: 'side_menton', label: 'Menton', group: 'Chin' },
+      { id: 'side_cervical_point', label: 'Cervical Point', group: 'Neck' },
+      { id: 'side_throat_point', label: 'Throat Point', group: 'Neck' },
+      { id: 'side_pupil', label: 'Pupil', group: 'Eye' },
+      { id: 'side_canthus_lateralis', label: 'Outer Eye Corner', group: 'Eye' },
+      { id: 'side_upper_eyelid', label: 'Upper Eyelid', group: 'Eye' },
+      { id: 'side_lower_eyelid', label: 'Lower Eyelid', group: 'Eye' },
+      { id: 'side_brow_head', label: 'Brow Head', group: 'Brow' },
+      { id: 'side_brow_peak', label: 'Brow Peak', group: 'Brow' },
+      { id: 'side_brow_tail', label: 'Brow Tail', group: 'Brow' },
+      { id: 'side_tragus', label: 'Tragus', group: 'Ear' },
+      { id: 'side_ear_top', label: 'Ear Top', group: 'Ear' },
+      { id: 'side_ear_bottom', label: 'Ear Bottom', group: 'Ear' },
+      { id: 'side_gonion', label: 'Gonion', group: 'Jaw' },
+      { id: 'side_ramus', label: 'Ramus', group: 'Jaw' },
+    ];
+
+    // Current phase: 'front' or 'side'
+    let currentPhase = 'front';
+
+    // Get current landmarks based on phase
+    function getCurrentLandmarks() {
+      return currentPhase === 'front' ? FRONT_LANDMARKS : SIDE_LANDMARKS;
+    }
+
     // Group colors
     const GROUP_COLORS = {
       'Head': '#FFD700',
       'Left Eye': '#00BFFF',
       'Right Eye': '#00BFFF',
+      'Eye': '#00BFFF',
       'Left Brow': '#FF69B4',
       'Right Brow': '#FF69B4',
+      'Brow': '#FF69B4',
       'Nose': '#32CD32',
       'Mouth': '#DDA0DD',
       'Jaw': '#F39C12',
       'Chin': '#E74C3C',
       'Face Width': '#9B59B6',
       'Neck': '#1ABC9C',
+      'Ear': '#3498DB',
     };
 
     let currentIndex = 0;
-    let placedPoints = {};
+    let frontPlacedPoints = {};
+    let sidePlacedPoints = {};
     let image = null;
     let imageWidth = 0;
     let imageHeight = 0;
+    let frontCompletionShown = false;
+
+    // Get placed points for current phase
+    function getPlacedPoints() {
+      return currentPhase === 'front' ? frontPlacedPoints : sidePlacedPoints;
+    }
+
+    // Set placed point for current phase
+    function setPlacedPoint(id, coords) {
+      if (currentPhase === 'front') {
+        frontPlacedPoints[id] = coords;
+      } else {
+        sidePlacedPoints[id] = coords;
+      }
+    }
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -289,10 +456,16 @@
     const btnNext = document.getElementById('btnNext');
     const btnExport = document.getElementById('btnExport');
     const btnClear = document.getElementById('btnClear');
+    const completionModal = document.getElementById('completionModal');
+    const btnStay = document.getElementById('btnStay');
+    const btnContinue = document.getElementById('btnContinue');
+    const phaseIndicator = document.getElementById('phaseIndicator');
 
     // Initialize landmark list
     function renderLandmarkList() {
-      landmarkList.innerHTML = LANDMARKS.map((lm, i) => {
+      const landmarks = getCurrentLandmarks();
+      const placedPoints = getPlacedPoints();
+      landmarkList.innerHTML = landmarks.map((lm, i) => {
         const placed = placedPoints[lm.id];
         const isCurrent = i === currentIndex;
         return `
@@ -314,16 +487,28 @@
     }
 
     function updateUI() {
-      const lm = LANDMARKS[currentIndex];
+      const landmarks = getCurrentLandmarks();
+      const placedPoints = getPlacedPoints();
+      const lm = landmarks[currentIndex];
+
       document.getElementById('landmarkName').textContent = lm.label;
-      document.getElementById('landmarkIndex').textContent = `ID: ${lm.id} | Group: ${lm.group}`;
+      document.getElementById('landmarkIndex').textContent = `Step ${currentIndex + 1} of ${landmarks.length} | ${lm.group}`;
 
       btnPrev.disabled = currentIndex === 0;
-      btnNext.disabled = currentIndex === LANDMARKS.length - 1;
+      btnNext.disabled = currentIndex === landmarks.length - 1;
 
       const placedCount = Object.keys(placedPoints).length;
-      document.getElementById('stats').textContent = `${placedCount} / ${LANDMARKS.length} landmarks placed`;
-      document.getElementById('progressBar').style.width = `${(placedCount / LANDMARKS.length) * 100}%`;
+      document.getElementById('stats').textContent = `${placedCount} / ${landmarks.length} landmarks placed`;
+      document.getElementById('progressBar').style.width = `${(placedCount / landmarks.length) * 100}%`;
+
+      // Update phase indicator
+      if (currentPhase === 'front') {
+        phaseIndicator.textContent = 'Phase 1: Front Face';
+        phaseIndicator.className = 'phase-indicator front';
+      } else {
+        phaseIndicator.textContent = 'Phase 2: Side Profile';
+        phaseIndicator.className = 'phase-indicator side';
+      }
 
       renderLandmarkList();
       redraw();
@@ -332,12 +517,15 @@
     function redraw() {
       if (!image) return;
 
+      const landmarks = getCurrentLandmarks();
+      const placedPoints = getPlacedPoints();
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(image, 0, 0);
 
       // Draw all placed points
       Object.entries(placedPoints).forEach(([id, point]) => {
-        const lm = LANDMARKS.find(l => l.id === id);
+        const lm = landmarks.find(l => l.id === id);
         const color = GROUP_COLORS[lm?.group] || '#fff';
         const x = point.x * imageWidth;
         const y = point.y * imageHeight;
@@ -361,7 +549,7 @@
       });
 
       // Highlight current landmark if placed
-      const currentLm = LANDMARKS[currentIndex];
+      const currentLm = landmarks[currentIndex];
       if (placedPoints[currentLm.id]) {
         const point = placedPoints[currentLm.id];
         const x = point.x * imageWidth;
@@ -423,15 +611,20 @@
     canvas.addEventListener('click', (e) => {
       if (!image) return;
 
+      const landmarks = getCurrentLandmarks();
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) / imageWidth;
       const y = (e.clientY - rect.top) / imageHeight;
 
-      const lm = LANDMARKS[currentIndex];
-      placedPoints[lm.id] = { x, y };
+      const lm = landmarks[currentIndex];
+      setPlacedPoint(lm.id, { x, y });
 
-      // Auto-advance to next
-      if (currentIndex < LANDMARKS.length - 1) {
+      // Check if we just placed the last front face landmark
+      if (currentPhase === 'front' && currentIndex === landmarks.length - 1 && !frontCompletionShown) {
+        frontCompletionShown = true;
+        showCompletionModal();
+      } else if (currentIndex < landmarks.length - 1) {
+        // Auto-advance to next
         currentIndex++;
       }
       updateUI();
@@ -445,15 +638,21 @@
     });
 
     btnNext.addEventListener('click', () => {
-      if (currentIndex < LANDMARKS.length - 1) {
+      const landmarks = getCurrentLandmarks();
+      if (currentIndex < landmarks.length - 1) {
         currentIndex++;
         updateUI();
       }
     });
 
     btnClear.addEventListener('click', () => {
-      if (confirm('Clear all placed points?')) {
-        placedPoints = {};
+      if (confirm('Clear all placed points for current phase?')) {
+        if (currentPhase === 'front') {
+          frontPlacedPoints = {};
+          frontCompletionShown = false;
+        } else {
+          sidePlacedPoints = {};
+        }
         currentIndex = 0;
         updateUI();
       }
@@ -462,14 +661,26 @@
     btnExport.addEventListener('click', () => {
       const data = {
         timestamp: new Date().toISOString(),
-        totalLandmarks: LANDMARKS.length,
-        placedCount: Object.keys(placedPoints).length,
-        landmarks: LANDMARKS.map(lm => ({
-          id: lm.id,
-          label: lm.label,
-          group: lm.group,
-          coordinates: placedPoints[lm.id] || null
-        }))
+        front: {
+          totalLandmarks: FRONT_LANDMARKS.length,
+          placedCount: Object.keys(frontPlacedPoints).length,
+          landmarks: FRONT_LANDMARKS.map(lm => ({
+            id: lm.id,
+            label: lm.label,
+            group: lm.group,
+            coordinates: frontPlacedPoints[lm.id] || null
+          }))
+        },
+        side: {
+          totalLandmarks: SIDE_LANDMARKS.length,
+          placedCount: Object.keys(sidePlacedPoints).length,
+          landmarks: SIDE_LANDMARKS.map(lm => ({
+            id: lm.id,
+            label: lm.label,
+            group: lm.group,
+            coordinates: sidePlacedPoints[lm.id] || null
+          }))
+        }
       };
 
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -483,14 +694,69 @@
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
+      const landmarks = getCurrentLandmarks();
       if (e.key === 'ArrowLeft' && currentIndex > 0) {
         currentIndex--;
         updateUI();
-      } else if (e.key === 'ArrowRight' && currentIndex < LANDMARKS.length - 1) {
+      } else if (e.key === 'ArrowRight' && currentIndex < landmarks.length - 1) {
         currentIndex++;
         updateUI();
       }
     });
+
+    // Show completion modal with summary of placed points
+    function showCompletionModal() {
+      const modalPoints = document.getElementById('modalPoints');
+      const placedCount = Object.keys(frontPlacedPoints).length;
+
+      document.getElementById('modalTitle').textContent = 'Front Face Mapping Complete!';
+      document.getElementById('modalSummary').textContent =
+        `You have placed ${placedCount} of ${FRONT_LANDMARKS.length} landmarks.`;
+
+      // Generate point summary
+      modalPoints.innerHTML = FRONT_LANDMARKS.map(lm => {
+        const point = frontPlacedPoints[lm.id];
+        if (point) {
+          return `
+            <div class="modal-point">
+              <span class="name">${lm.label}</span>
+              <span class="coords">(${point.x.toFixed(3)}, ${point.y.toFixed(3)})</span>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="modal-point missing">
+              <span class="name">${lm.label} (not placed)</span>
+              <span class="coords">---</span>
+            </div>
+          `;
+        }
+      }).join('');
+
+      completionModal.classList.add('show');
+    }
+
+    // Hide modal
+    function hideModal() {
+      completionModal.classList.remove('show');
+    }
+
+    // Modal button handlers
+    btnStay.addEventListener('click', () => {
+      hideModal();
+    });
+
+    btnContinue.addEventListener('click', () => {
+      hideModal();
+      switchToSidePhase();
+    });
+
+    // Switch to side profile phase
+    function switchToSidePhase() {
+      currentPhase = 'side';
+      currentIndex = 0;
+      updateUI();
+    }
 
     // Initial render
     renderLandmarkList();

@@ -245,144 +245,148 @@ export const FRONT_LANDMARK_IMAGES: Record<string, LandmarkImageConfig> = {
   },
 };
 
-// Side profile landmark images (31 landmarks)
+// Side profile landmark images (28 landmarks)
+// Matches FaceIQ Labs exact naming - IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts
 export const SIDE_LANDMARK_IMAGES: Record<string, LandmarkImageConfig> = {
-  // Skull/Head
+  // 1. vertex
   vertex: {
     imageName: 'vertex',
-    fallbackDescription: 'Place at the highest point of your head',
+    fallbackDescription: 'Mark the highest point of the head\'s curve',
   },
-  external_occipital_region: {
+  // 2. occiput
+  occiput: {
     imageName: 'occiput',
-    fallbackDescription: 'Place at the back of your head where it protrudes most',
+    fallbackDescription: 'Mark the most prominent point on the back of the head\'s curve',
   },
-  trichion_profile: {
-    imageName: 'trichion',
-    fallbackDescription: 'Place at your hairline in profile view',
-  },
-  frontalis: {
-    imageName: 'forehead',
-    fallbackDescription: 'Place at the most prominent point of your forehead',
-  },
-
-  // Upper Face
-  glabella: {
-    imageName: 'glabella',
-    fallbackDescription: 'Place between your eyebrows at the brow ridge',
-  },
-  corneal_apex: {
-    imageName: 'cornealApex',
-    fallbackDescription: 'Place at the most forward point of your cornea',
-  },
-  lateral_eyelid: {
-    imageName: 'eyelidEnd',
-    fallbackDescription: 'Place at the lateral end of your eyelid',
-  },
-  lower_eyelid_profile: {
-    imageName: 'lowerEyelid',
-    fallbackDescription: 'Place at the lower eyelid margin',
-  },
-  zygoma_lateralis: {
-    imageName: 'cheekbone',
-    fallbackDescription: 'Place at the most prominent point of your cheekbone',
-  },
-
-  // Nose
-  nasion: {
-    imageName: 'nasion',
-    fallbackDescription: 'Place at the deepest point of your nasal bridge',
-  },
-  rhinion: {
-    imageName: 'rhinion',
-    fallbackDescription: 'Place at the junction of bone and cartilage on your nose bridge',
-  },
-  supratip: {
-    imageName: 'supratip',
-    fallbackDescription: 'Place just above your nose tip',
-  },
+  // 3. pronasale
   pronasale: {
     imageName: 'pronasale',
-    fallbackDescription: 'Place at the most forward point of your nose tip',
+    fallbackDescription: 'Mark the farthest projecting point of the nose tip',
   },
-  infratip: {
-    imageName: 'infratip',
-    fallbackDescription: 'Place just below your nose tip',
+  // 4. neckPoint
+  neckPoint: {
+    imageName: 'neckPoint',
+    fallbackDescription: 'Follow the neck contour down to the Adam\'s apple area',
   },
-  columella: {
-    imageName: 'columella',
-    fallbackDescription: 'Place at the base of your columella (between nostrils)',
-  },
-  subnasale_profile: {
-    imageName: 'subnasale',
-    fallbackDescription: 'Place where your nose meets your upper lip',
-  },
-  subalare: {
-    imageName: 'subalare',
-    fallbackDescription: 'Place at the lower edge of your nostril',
-  },
-
-  // Lips
-  labrale_superius_profile: {
-    imageName: 'labraleSuperius',
-    fallbackDescription: 'Place at the most forward point of your upper lip',
-  },
-  labrale_inferius_profile: {
-    imageName: 'labraleInferius',
-    fallbackDescription: 'Place at the most forward point of your lower lip',
-  },
-  cheilion_profile: {
-    imageName: 'cheilion',
-    fallbackDescription: 'Place at the corner of your mouth',
-  },
-  sublabiale: {
-    imageName: 'sublabiale',
-    fallbackDescription: 'Place in the groove below your lower lip',
-  },
-
-  // Jaw & Chin
-  orbitale: {
-    imageName: 'orbitale',
-    fallbackDescription: 'Place at the lowest point of your eye socket',
-  },
-  gonion_superior_profile: {
-    imageName: 'gonionTop',
-    fallbackDescription: 'Place at the upper jaw angle',
-  },
-  gonion_inferior_profile: {
-    imageName: 'gonionBottom',
-    fallbackDescription: 'Place at the lower jaw angle',
-  },
-  pogonion: {
-    imageName: 'pogonion',
-    fallbackDescription: 'Place at the most forward point of your chin',
-  },
-  menton_profile: {
-    imageName: 'menton',
-    fallbackDescription: 'Place at the lowest point of your chin',
-  },
-
-  // Ear
+  // 5. porion
   porion: {
     imageName: 'porion',
-    fallbackDescription: 'Place at the top of your ear canal opening',
+    fallbackDescription: 'Mark the uppermost point of the ear canal opening, above the tragus',
   },
+  // 6. orbitale
+  orbitale: {
+    imageName: 'orbitale',
+    fallbackDescription: 'Trace the undereye contour and mark the most prominent part of the orbital rim',
+  },
+  // 7. tragus
   tragus: {
     imageName: 'tragus',
-    fallbackDescription: 'Place at the small flap covering your ear canal',
+    fallbackDescription: 'Mark the back part of the small flap in front of the ear canal',
   },
-  intertragic_notch: {
+  // 8. intertragicNotch
+  intertragicNotch: {
     imageName: 'intertragicNotch',
-    fallbackDescription: 'Place at the notch between tragus and antitragus',
+    fallbackDescription: 'Locate the small groove between the tragus and antitragus',
   },
-
-  // Neck
-  cervical_point: {
+  // 9. cornealApex
+  cornealApex: {
+    imageName: 'cornealApex',
+    fallbackDescription: 'Mark the most prominent and forward point of the eye',
+  },
+  // 10. cheekbone
+  cheekbone: {
+    imageName: 'cheekbone',
+    fallbackDescription: 'From the side, mark the bump of the cheekbone below/behind the eye',
+  },
+  // 11. trichion
+  trichion: {
+    imageName: 'trichion',
+    fallbackDescription: 'Mark the highest point of the hairline, where the forehead ends',
+  },
+  // 12. glabella
+  glabella: {
+    imageName: 'glabella',
+    fallbackDescription: 'Locate the most prominent point of the brow ridge between the eyebrows',
+  },
+  // 13. nasion
+  nasion: {
+    imageName: 'nasion',
+    fallbackDescription: 'Mark the small dip between the brow ridge and nose bridge, around eye level',
+  },
+  // 14. rhinion
+  rhinion: {
+    imageName: 'rhinion',
+    fallbackDescription: 'Mark the dorsal point of the nose, the most prominent point of the nose bridge',
+  },
+  // 15. supratip
+  supratip: {
+    imageName: 'supratip',
+    fallbackDescription: 'Follow the bridge toward the tip and mark the highest point right before the nose tip',
+  },
+  // 16. infratip
+  infratip: {
+    imageName: 'infratip',
+    fallbackDescription: 'Follow the nose contour down from the tip and mark the lowest point before the nostrils',
+  },
+  // 17. columella
+  columella: {
+    imageName: 'columella',
+    fallbackDescription: 'Mark the part of the nose that connects the nostrils, to the left of the infratip',
+  },
+  // 18. subnasale
+  subnasale: {
+    imageName: 'subnasale',
+    fallbackDescription: 'Mark the crease point at the base of the nose, where the nose creates an angle with the upper lip',
+  },
+  // 19. subalare
+  subalare: {
+    imageName: 'subalare',
+    fallbackDescription: 'Mark the most prominent edge of the nose wing, near the cheek closest to the eyes',
+  },
+  // 20. labraleSuperius
+  labraleSuperius: {
+    imageName: 'labraleSuperius',
+    fallbackDescription: 'Find the most prominent point of the upper lip, typically the highest point of the lip\'s natural curve',
+  },
+  // 21. cheilion
+  cheilion: {
+    imageName: 'cheilion',
+    fallbackDescription: 'Mark the rearmost lip corner where the upper and lower lips touch in profile',
+  },
+  // 22. labraleInferius
+  labraleInferius: {
+    imageName: 'labraleInferius',
+    fallbackDescription: 'Find the most prominent point of the lower lip, typically the lowest point of the lip\'s natural curve',
+  },
+  // 23. sublabiale
+  sublabiale: {
+    imageName: 'sublabiale',
+    fallbackDescription: 'From profile, mark the deepest spot between the lower lip and chin',
+  },
+  // 24. pogonion
+  pogonion: {
+    imageName: 'pogonion',
+    fallbackDescription: 'Mark the most prominent and forward point of the chin',
+  },
+  // 25. menton
+  menton: {
+    imageName: 'menton',
+    fallbackDescription: 'Trace the chin contour downward and mark its lowest point',
+  },
+  // 26. cervicalPoint
+  cervicalPoint: {
     imageName: 'cervicalPoint',
-    fallbackDescription: 'Place at the deepest point of your neck curve',
+    fallbackDescription: 'Mark the most indented point where the underside of the jaw turns into the neck',
   },
-  neckpoint: {
-    imageName: 'neckPoint',
-    fallbackDescription: 'Place at the neck reference point',
+  // 27. gonionTop
+  gonionTop: {
+    imageName: 'gonionTop',
+    fallbackDescription: 'Locate the upper part of the jaw angle where the ramus forms an angle with the mandible',
+  },
+  // 28. gonionBottom
+  gonionBottom: {
+    imageName: 'gonionBottom',
+    fallbackDescription: 'Locate the lower part of the jaw angle, where the jaw begins to curve towards the chin',
   },
 };
 

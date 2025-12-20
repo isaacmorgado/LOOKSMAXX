@@ -155,17 +155,35 @@ export function GuidedLandmarkPlacement({
   }, []);
 
   const handleZoomIn = () => {
-    setZoomLevel((prev) => Math.min(prev + 1, 3) as 1 | 2 | 3);
+    if (zoomLevel >= 3) return;
+    const newLevel = (zoomLevel + 1) as 2 | 3;
+    // Adjust pan to keep the same center point visible
+    const oldZoom = zoom;
+    const newZoom = newLevel === 2 ? 4 : 8;
+    const zoomRatio = newZoom / oldZoom;
+    setPan(prev => ({
+      x: prev.x * zoomRatio,
+      y: prev.y * zoomRatio,
+    }));
+    setZoomLevel(newLevel);
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => {
-      const newLevel = Math.max(prev - 1, 1) as 1 | 2 | 3;
-      if (newLevel === 1) {
-        setPan({ x: 0, y: 0 });
-      }
-      return newLevel;
-    });
+    if (zoomLevel <= 1) return;
+    const newLevel = (zoomLevel - 1) as 1 | 2;
+    if (newLevel === 1) {
+      setPan({ x: 0, y: 0 });
+    } else {
+      // Adjust pan to keep the same center point visible
+      const oldZoom = zoom;
+      const newZoom = 4; // level 2 = 4x
+      const zoomRatio = newZoom / oldZoom;
+      setPan(prev => ({
+        x: prev.x * zoomRatio,
+        y: prev.y * zoomRatio,
+      }));
+    }
+    setZoomLevel(newLevel);
   };
 
   const handleResetZoom = () => {
@@ -174,11 +192,24 @@ export function GuidedLandmarkPlacement({
   };
 
   const handleSetZoomLevel = useCallback((level: 1 | 2 | 3) => {
-    setZoomLevel(level);
     if (level === 1) {
+      // Reset to level 1: no pan
+      setZoomLevel(1);
       setPan({ x: 0, y: 0 });
+    } else {
+      // Adjust pan to keep the same center point visible when zoom changes
+      // Transform is: scale(zoom) translate(pan.x / zoom, pan.y / zoom) with origin center
+      // Effective offset = pan / zoom, so to maintain same offset: newPan / newZoom = oldPan / oldZoom
+      // Therefore: newPan = oldPan * newZoom / oldZoom
+      const newZoom = level === 2 ? 4 : 8;
+      const zoomRatio = newZoom / zoom;
+      setPan(prev => ({
+        x: prev.x * zoomRatio,
+        y: prev.y * zoomRatio,
+      }));
+      setZoomLevel(level);
     }
-  }, []);
+  }, [zoom]);
 
   // Arrow key movement for fine landmark adjustment
   const moveLandmark = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {

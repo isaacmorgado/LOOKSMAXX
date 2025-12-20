@@ -2,10 +2,14 @@
  * Face Landmark Detection using MediaPipe Tasks Vision
  * Maps detected landmarks to our custom facial landmarks
  *
- * Uses the shared singleton service for optimal performance
+ * Detection hierarchy:
+ * - Front profile: MediaPipe Face Mesh (478 landmarks)
+ * - Side profile: Server-side InsightFace (106 landmarks) → Edge-based fallback
  */
 
 import { faceDetectionService } from './faceDetectionService';
+import { detectSideProfile } from './sideProfileDetection';
+import { detectSideProfileServer } from './serverSideDetection';
 
 // MediaPipe Face Mesh landmark indices (478 landmarks total)
 // Reference: https://github.com/google/mediapipe/blob/master/mediapipe/modules/face_geometry/data/canonical_face_model_uv_visualization.png
@@ -93,90 +97,156 @@ export const MEDIAPIPE_FRONT_MAPPING: Record<string, number> = {
 };
 
 // Side profile landmark mapping (IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts)
+// Matches FaceIQ's 28 side profile landmarks exactly
 // For side profile photos, uses MediaPipe LEFT indices (appearing on left side of image)
+// Note: FaceIQ uses a custom server-side model for side detection; this is our MediaPipe fallback
 export const MEDIAPIPE_SIDE_MAPPING: Record<string, number> = {
-  // Cranium (center/top landmarks)
+  // 1. vertex - top of head
   vertex: 10,
-  external_occipital_region: 10,
-  trichion_profile: 10,
-
-  // Forehead (center landmarks)
-  frontalis: 151,
-  glabella: 9,
-
-  // Eye Region - uses LEFT eye indices
-  corneal_apex: 468,
-  lateral_eyelid: 33,
-  palpebra_inferior_side: 145,
-  orbitale: 145,
-
-  // Nose (center/midline landmarks)
-  nasion: 6,
-  rhinion: 4,
-  supratip_break: 4,
+  // 2. occiput - back of head (no good MediaPipe equivalent, use top)
+  occiput: 10,
+  // 3. pronasale - nose tip
   pronasale: 1,
-  infratip_lobule: 2,
-  columella_nasi: 2,
-  subnasale_side: 2,
-  subalare: 129,
-
-  // Lips (mostly center landmarks)
-  labrale_superius_side: 0,
-  cheilion_side: 61,
-  labrale_inferius_side: 17,
-  sublabiale: 18,
-
-  // Chin (center landmarks)
-  pogonion: 152,
-  menton_side: 152,
-
-  // Jaw - uses LEFT jaw indices
-  gonion_superior_side: 116,
-  gonion_inferior_side: 172,
-
-  // Cheek - uses LEFT cheekbone
-  zygion_soft_tissue: 234,
-
-  // Ear - uses LEFT ear area
+  // 4. neckPoint - lower neck (no good equivalent, use chin)
+  neckPoint: 152,
+  // 5. porion - ear canal opening (use ear area)
   porion: 127,
-  tragion: 127,
-  incisura_intertragica: 127,
-
-  // Neck
-  cervicale: 152,
-  anterior_cervical_landmark: 152,
+  // 6. orbitale - lowest point of orbital rim
+  orbitale: 145,
+  // 7. tragus - ear cartilage
+  tragus: 127,
+  // 8. intertragicNotch - notch in ear
+  intertragicNotch: 127,
+  // 9. cornealApex - forward point of cornea
+  cornealApex: 468,
+  // 10. cheekbone - zygomatic prominence
+  cheekbone: 234,
+  // 11. trichion - hairline
+  trichion: 10,
+  // 12. glabella - between brows
+  glabella: 9,
+  // 13. nasion - nasal root depression
+  nasion: 6,
+  // 14. rhinion - dorsal nose point
+  rhinion: 4,
+  // 15. supratip - above nose tip
+  supratip: 4,
+  // 16. infratip - below nose tip
+  infratip: 2,
+  // 17. columella - nasal septum
+  columella: 2,
+  // 18. subnasale - nose base meets upper lip
+  subnasale: 2,
+  // 19. subalare - nostril wing
+  subalare: 129,
+  // 20. labraleSuperius - upper lip
+  labraleSuperius: 0,
+  // 21. cheilion - mouth corner
+  cheilion: 61,
+  // 22. labraleInferius - lower lip
+  labraleInferius: 17,
+  // 23. sublabiale - below lower lip
+  sublabiale: 18,
+  // 24. pogonion - chin point
+  pogonion: 152,
+  // 25. menton - chin bottom
+  menton: 152,
+  // 26. cervicalPoint - high neck point
+  cervicalPoint: 152,
+  // 27. gonionTop - upper jaw angle
+  gonionTop: 116,
+  // 28. gonionBottom - lower jaw angle
+  gonionBottom: 172,
 };
 
 export interface DetectedLandmarks {
   landmarks: Array<{ id: string; x: number; y: number }>;
   confidence: number;
   faceBox: { x: number; y: number; width: number; height: number };
+  frankfortPlane?: {
+    angle: number;
+    orbitale: { x: number; y: number };
+    porion: { x: number; y: number };
+  };
 }
 
 /**
  * Detect facial landmarks from an image URL
- * Uses the singleton FaceDetectionService for optimal performance
+ *
+ * Detection hierarchy:
+ * - Front profile: MediaPipe Face Mesh (478 landmarks) - unchanged
+ * - Side profile: Server-side InsightFace → Edge-based fallback → Manual placement
  */
 export async function detectFromImageUrl(
   imageUrl: string,
   mode: 'front' | 'side'
 ): Promise<DetectedLandmarks | null> {
   try {
+    // ============================================
+    // SIDE PROFILE: Use server-side detection
+    // ============================================
+    if (mode === 'side') {
+      console.log('[Detection] Side profile mode - trying server-side detection...');
+
+      // Try server-side InsightFace first (best accuracy)
+      const serverResult = await detectSideProfileServer(imageUrl);
+      if (serverResult) {
+        console.log('[Detection] Server-side detection succeeded');
+        return {
+          landmarks: serverResult.landmarks,
+          confidence: serverResult.confidence,
+          faceBox: serverResult.faceBox,
+          frankfortPlane: serverResult.frankfortPlane,
+        };
+      }
+
+      console.log('[Detection] Server-side failed, trying edge-based detection...');
+
+      // Fallback to edge-based detection
+      const sideResult = await detectSideProfile(imageUrl);
+      if (sideResult) {
+        console.log('[Detection] Edge-based side profile detection succeeded');
+        return {
+          landmarks: sideResult.landmarks,
+          confidence: sideResult.confidence,
+          faceBox: {
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1,
+          },
+        };
+      }
+
+      console.log('[Detection] All side profile detection methods failed - manual placement required');
+      return null;
+    }
+
+    // ============================================
+    // FRONT PROFILE: Use MediaPipe (UNCHANGED)
+    // ============================================
     // Load the image
     const img = await loadImage(imageUrl);
 
     // Use the singleton service
     const result = await faceDetectionService.detect(img);
 
-    if (!result.faceLandmarks || result.faceLandmarks.length === 0) {
+    // Check if MediaPipe detected a face
+    const mediaPipeSucceeded = result.faceLandmarks && result.faceLandmarks.length > 0;
+
+    if (!mediaPipeSucceeded) {
       console.log('No faces detected');
       return null;
     }
 
     const faceLandmarks = result.faceLandmarks[0];
 
-    // Select mapping based on mode
-    const mapping = mode === 'front' ? MEDIAPIPE_FRONT_MAPPING : MEDIAPIPE_SIDE_MAPPING;
+    // Front profile uses MediaPipe mapping
+    const mapping = MEDIAPIPE_FRONT_MAPPING;
+
+    // Neck landmarks need +5% yOffset per FaceIQ landmarkers.js
+    const NECK_Y_OFFSET = 0.05;
+    const NECK_LANDMARKS = ['left_cervical_lateralis', 'right_cervical_lateralis'];
 
     // Map keypoints to our landmarks
     const landmarks = Object.entries(mapping).map(([id, index]) => {
@@ -184,11 +254,14 @@ export async function detectFromImageUrl(
       const safeIndex = Math.min(index, faceLandmarks.length - 1);
       const landmark = faceLandmarks[safeIndex];
 
+      // Apply yOffset for neck landmarks
+      const yOffset = NECK_LANDMARKS.includes(id) ? NECK_Y_OFFSET : 0;
+
       return {
         id,
         // MediaPipe returns normalized coordinates (0-1)
         x: landmark ? landmark.x : 0.5,
-        y: landmark ? landmark.y : 0.5,
+        y: landmark ? Math.min(landmark.y + yOffset, 1) : 0.5,
       };
     });
 

@@ -71,15 +71,33 @@ export function useZoomPan(options: UseZoomPanOptions = {}): UseZoomPanReturn {
   const [isDragging, setIsDragging] = useState(false);
 
   const setZoomLevel = useCallback(
-    (level: number) => {
+    (level: number, containerCenter?: { x: number; y: number }) => {
       const clampedLevel = Math.max(minZoom, Math.min(maxZoom, level));
-      setZoomLevelState(clampedLevel);
+
       // Reset pan when zooming to 1x
       if (clampedLevel === 1) {
+        setZoomLevelState(1);
         setPan({ x: 0, y: 0 });
+        return;
       }
+
+      // If container center is provided, adjust pan to keep the same point centered
+      if (containerCenter) {
+        setPan(prevPan => {
+          // Current center in image space: imageCenter = (containerCenter - pan) / oldZoom
+          // New pan to show same center: newPan = containerCenter - imageCenter * newZoom
+          const imageCenterX = (containerCenter.x - prevPan.x) / zoomLevel;
+          const imageCenterY = (containerCenter.y - prevPan.y) / zoomLevel;
+          return {
+            x: containerCenter.x - imageCenterX * clampedLevel,
+            y: containerCenter.y - imageCenterY * clampedLevel,
+          };
+        });
+      }
+
+      setZoomLevelState(clampedLevel);
     },
-    [minZoom, maxZoom]
+    [minZoom, maxZoom, zoomLevel]
   );
 
   const resetZoom = useCallback(() => {

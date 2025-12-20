@@ -628,29 +628,25 @@ export const FRONT_PROFILE_LANDMARKS: LandmarkPoint[] = [
 ];
 
 // ============================================
-// SIDE PROFILE LANDMARKS (38 Points)
+// SIDE PROFILE LANDMARKS (28 Points)
+// Matches FaceIQ Labs exact naming and order
 // ============================================
 
 export const SIDE_LANDMARK_CATEGORIES: LandmarkCategory[] = [
   {
     name: 'Cranium',
     color: '#FF6B6B',
-    landmarks: ['vertex', 'external_occipital_region', 'trichion_profile'],
+    landmarks: ['vertex', 'occiput', 'trichion'],
   },
   {
     name: 'Forehead',
     color: '#4ECDC4',
-    landmarks: ['frontalis', 'glabella'],
+    landmarks: ['glabella'],
   },
   {
     name: 'Eye Region',
     color: '#45B7D1',
-    landmarks: [
-      'corneal_apex',
-      'lateral_eyelid',
-      'palpebra_inferior_side',
-      'orbitale',
-    ],
+    landmarks: ['cornealApex', 'orbitale'],
   },
   {
     name: 'Nose',
@@ -658,349 +654,330 @@ export const SIDE_LANDMARK_CATEGORIES: LandmarkCategory[] = [
     landmarks: [
       'nasion',
       'rhinion',
-      'supratip_break',
+      'supratip',
       'pronasale',
-      'infratip_lobule',
-      'columella_nasi',
-      'subnasale_side',
+      'infratip',
+      'columella',
+      'subnasale',
       'subalare',
     ],
   },
   {
     name: 'Lips',
     color: '#DDA0DD',
-    landmarks: [
-      'labrale_superius_side',
-      'cheilion_side',
-      'labrale_inferius_side',
-      'sublabiale',
-    ],
+    landmarks: ['labraleSuperius', 'cheilion', 'labraleInferius', 'sublabiale'],
   },
   {
     name: 'Chin',
     color: '#E74C3C',
-    landmarks: ['pogonion', 'menton_side'],
+    landmarks: ['pogonion', 'menton'],
   },
   {
     name: 'Jaw',
     color: '#F39C12',
-    landmarks: ['gonion_superior_side', 'gonion_inferior_side'],
+    landmarks: ['gonionTop', 'gonionBottom'],
   },
   {
     name: 'Cheek',
     color: '#9B59B6',
-    landmarks: ['zygion_soft_tissue'],
+    landmarks: ['cheekbone'],
   },
   {
     name: 'Ear',
     color: '#3498DB',
-    landmarks: ['porion', 'tragion', 'incisura_intertragica'],
+    landmarks: ['porion', 'tragus', 'intertragicNotch'],
   },
   {
     name: 'Neck',
     color: '#1ABC9C',
-    landmarks: ['cervicale', 'anterior_cervical_landmark'],
+    landmarks: ['cervicalPoint', 'neckPoint'],
   },
 ];
 
+// FaceIQ order: vertex, occiput, pronasale, neckPoint, porion, orbitale, tragus,
+// intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion, rhinion,
+// supratip, infratip, columella, subnasale, subalare, labraleSuperius, cheilion,
+// labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom
 export const SIDE_PROFILE_LANDMARKS: LandmarkPoint[] = [
-  // Cranium
+  // 1. vertex
   {
     id: 'vertex',
     label: 'Top of Head',
     medicalTerm: 'Vertex',
-    description: 'Highest point of cranium',
+    description: 'Highest point on the head in profile',
     x: 0.45,
     y: 0.02,
     category: 'Cranium',
   },
+  // 2. occiput
   {
-    id: 'external_occipital_region',
+    id: 'occiput',
     label: 'Occiput',
     medicalTerm: 'External Occipital Region',
-    description: 'Back of skull',
+    description: 'Back-of-head prominence',
     x: 0.85,
     y: 0.15,
     category: 'Cranium',
   },
-  {
-    id: 'trichion_profile',
-    label: 'Hairline (profile)',
-    medicalTerm: 'Trichion',
-    description: 'Anterior hairline (profile view)',
-    x: 0.35,
-    y: 0.1,
-    category: 'Cranium',
-  },
-
-  // Forehead
-  {
-    id: 'frontalis',
-    label: 'Forehead',
-    medicalTerm: 'Frontalis',
-    description: 'Forehead region',
-    x: 0.3,
-    y: 0.18,
-    category: 'Forehead',
-  },
-  {
-    id: 'glabella',
-    label: 'Glabella',
-    medicalTerm: 'Glabella',
-    description: 'Most prominent point between eyebrows',
-    x: 0.32,
-    y: 0.28,
-    category: 'Forehead',
-  },
-
-  // Eye Region
-  {
-    id: 'corneal_apex',
-    label: 'Corneal Apex',
-    medicalTerm: 'Corneal Apex',
-    description: 'Most anterior point of cornea',
-    x: 0.28,
-    y: 0.34,
-    category: 'Eye Region',
-  },
-  {
-    id: 'lateral_eyelid',
-    label: 'Eyelid End',
-    medicalTerm: 'Lateral Eyelid',
-    description: 'Lateral extent of palpebral fissure',
-    x: 0.35,
-    y: 0.34,
-    category: 'Eye Region',
-  },
-  {
-    id: 'palpebra_inferior_side',
-    label: 'Lower Eyelid',
-    medicalTerm: 'Left Palpebra Inferior',
-    description: 'Lower eyelid margin (profile view)',
-    x: 0.3,
-    y: 0.36,
-    category: 'Eye Region',
-  },
-  {
-    id: 'orbitale',
-    label: 'Orbitale',
-    medicalTerm: 'Orbitale',
-    description: 'Lowest point of infraorbital margin',
-    x: 0.35,
-    y: 0.38,
-    category: 'Eye Region',
-  },
-
-  // Nose
-  {
-    id: 'nasion',
-    label: 'Nasal Bridge Front',
-    medicalTerm: 'Nasion',
-    description: 'Deepest point of nasal root',
-    x: 0.35,
-    y: 0.32,
-    category: 'Nose',
-  },
-  {
-    id: 'rhinion',
-    label: 'Rhinion',
-    medicalTerm: 'Rhinion',
-    description: 'Junction of bony and cartilaginous nose',
-    x: 0.28,
-    y: 0.4,
-    category: 'Nose',
-  },
-  {
-    id: 'supratip_break',
-    label: 'Supratip',
-    medicalTerm: 'Supratip Break',
-    description: 'Depression above nasal tip',
-    x: 0.22,
-    y: 0.46,
-    category: 'Nose',
-  },
+  // 3. pronasale
   {
     id: 'pronasale',
     label: 'Nose Tip',
     medicalTerm: 'Pronasale',
-    description: 'Most anterior point of nasal tip',
+    description: 'Most forward point of the nose tip',
     x: 0.18,
     y: 0.48,
     category: 'Nose',
   },
+  // 4. neckPoint
   {
-    id: 'infratip_lobule',
-    label: 'Infratip',
-    medicalTerm: 'Infratip Lobule',
-    description: 'Area below nasal tip',
-    x: 0.2,
-    y: 0.5,
-    category: 'Nose',
+    id: 'neckPoint',
+    label: 'Neck Point',
+    medicalTerm: 'Anterior Cervical Landmark',
+    description: 'Lower neck inflection on the front border',
+    x: 0.4,
+    y: 0.88,
+    category: 'Neck',
   },
-  {
-    id: 'columella_nasi',
-    label: 'Columella',
-    medicalTerm: 'Columella Nasi',
-    description: 'Fleshy external end of nasal septum',
-    x: 0.24,
-    y: 0.52,
-    category: 'Nose',
-  },
-  {
-    id: 'subnasale_side',
-    label: 'Subnasale',
-    medicalTerm: 'Subnasale',
-    description: 'Junction of columella and upper lip',
-    x: 0.3,
-    y: 0.54,
-    category: 'Nose',
-  },
-  {
-    id: 'subalare',
-    label: 'Subalare',
-    medicalTerm: 'Subalare',
-    description: 'Junction of alar base and upper lip',
-    x: 0.28,
-    y: 0.53,
-    category: 'Nose',
-  },
-
-  // Lips
-  {
-    id: 'labrale_superius_side',
-    label: 'Upper Lip',
-    medicalTerm: 'Labrale Superius',
-    description: 'Upper lip vermilion border',
-    x: 0.28,
-    y: 0.58,
-    category: 'Lips',
-  },
-  {
-    id: 'cheilion_side',
-    label: 'Mouth Corner',
-    medicalTerm: 'Cheilion',
-    description: 'Oral commissure (profile view)',
-    x: 0.35,
-    y: 0.62,
-    category: 'Lips',
-  },
-  {
-    id: 'labrale_inferius_side',
-    label: 'Lower Lip',
-    medicalTerm: 'Labrale Inferius',
-    description: 'Lower lip vermilion border',
-    x: 0.3,
-    y: 0.66,
-    category: 'Lips',
-  },
-  {
-    id: 'sublabiale',
-    label: 'Labiomental Fold',
-    medicalTerm: 'Sublabiale',
-    description: 'Deepest point of labiomental sulcus',
-    x: 0.32,
-    y: 0.7,
-    category: 'Lips',
-  },
-
-  // Chin
-  {
-    id: 'pogonion',
-    label: 'Chin Point',
-    medicalTerm: 'Pogonion (soft tissue)',
-    description: 'Most anterior point of chin',
-    x: 0.3,
-    y: 0.76,
-    category: 'Chin',
-  },
-  {
-    id: 'menton_side',
-    label: 'Chin Bottom',
-    medicalTerm: 'Menton (soft tissue)',
-    description: 'Lowest point of chin',
-    x: 0.35,
-    y: 0.82,
-    category: 'Chin',
-  },
-
-  // Jaw
-  {
-    id: 'gonion_superior_side',
-    label: 'Upper Jaw Angle',
-    medicalTerm: 'Gonion Superior',
-    description: 'Superior mandibular angle',
-    x: 0.7,
-    y: 0.6,
-    category: 'Jaw',
-  },
-  {
-    id: 'gonion_inferior_side',
-    label: 'Lower Jaw Angle',
-    medicalTerm: 'Gonion Inferior',
-    description: 'Inferior mandibular angle',
-    x: 0.65,
-    y: 0.72,
-    category: 'Jaw',
-  },
-
-  // Cheek
-  {
-    id: 'zygion_soft_tissue',
-    label: 'Cheekbone',
-    medicalTerm: 'Zygion (soft tissue over zygoma)',
-    description: 'Soft tissue over zygomatic arch',
-    x: 0.45,
-    y: 0.42,
-    category: 'Cheek',
-  },
-
-  // Ear
+  // 5. porion
   {
     id: 'porion',
     label: 'Porion',
     medicalTerm: 'Porion (soft tissue)',
-    description: 'Superior aspect of external auditory meatus',
+    description: 'Upper margin of ear canal opening, used for Frankfort horizontal plane',
     x: 0.75,
     y: 0.35,
     category: 'Ear',
   },
+  // 6. orbitale
   {
-    id: 'tragion',
+    id: 'orbitale',
+    label: 'Orbitale',
+    medicalTerm: 'Orbitale',
+    description: 'Lowest point on the orbital rim',
+    x: 0.35,
+    y: 0.38,
+    category: 'Eye Region',
+  },
+  // 7. tragus
+  {
+    id: 'tragus',
     label: 'Tragus',
     medicalTerm: 'Tragion (soft tissue)',
-    description: 'Superior margin of tragus',
+    description: 'Cartilage nub in front of the ear canal',
     x: 0.72,
     y: 0.42,
     category: 'Ear',
   },
+  // 8. intertragicNotch
   {
-    id: 'incisura_intertragica',
+    id: 'intertragicNotch',
     label: 'Intertragic Notch',
     medicalTerm: 'Incisura Intertragica',
-    description: 'Notch between tragus and antitragus',
+    description: 'Notch between tragus and antitragus cartilages',
     x: 0.73,
     y: 0.45,
     category: 'Ear',
   },
-
-  // Neck
+  // 9. cornealApex
   {
-    id: 'cervicale',
+    id: 'cornealApex',
+    label: 'Corneal Apex',
+    medicalTerm: 'Corneal Apex',
+    description: 'Most forward point of the eye (cornea)',
+    x: 0.28,
+    y: 0.34,
+    category: 'Eye Region',
+  },
+  // 10. cheekbone
+  {
+    id: 'cheekbone',
+    label: 'Cheekbone',
+    medicalTerm: 'Zygion (soft-tissue over zygoma)',
+    description: 'Zygomatic prominence',
+    x: 0.45,
+    y: 0.42,
+    category: 'Cheek',
+  },
+  // 11. trichion
+  {
+    id: 'trichion',
+    label: 'Hairline (Profile)',
+    medicalTerm: 'Trichion',
+    description: 'Forehead hairline point',
+    x: 0.35,
+    y: 0.1,
+    category: 'Cranium',
+  },
+  // 12. glabella
+  {
+    id: 'glabella',
+    label: 'Glabella',
+    medicalTerm: 'Glabella',
+    description: 'Mid-forehead point between brows',
+    x: 0.32,
+    y: 0.28,
+    category: 'Forehead',
+  },
+  // 13. nasion
+  {
+    id: 'nasion',
+    label: 'Nasal Bridge Root',
+    medicalTerm: 'Nasion',
+    description: 'Nasal root depression',
+    x: 0.35,
+    y: 0.32,
+    category: 'Nose',
+  },
+  // 14. rhinion
+  {
+    id: 'rhinion',
+    label: 'Rhinion',
+    medicalTerm: 'Rhinion',
+    description: 'Dorsal point of the nose',
+    x: 0.28,
+    y: 0.4,
+    category: 'Nose',
+  },
+  // 15. supratip
+  {
+    id: 'supratip',
+    label: 'Supratip',
+    medicalTerm: 'Supratip Break',
+    description: 'Dorsal point just above the tip',
+    x: 0.22,
+    y: 0.46,
+    category: 'Nose',
+  },
+  // 16. infratip
+  {
+    id: 'infratip',
+    label: 'Infratip',
+    medicalTerm: 'Infratip Lobule',
+    description: 'Point between nose tip and columella',
+    x: 0.2,
+    y: 0.5,
+    category: 'Nose',
+  },
+  // 17. columella
+  {
+    id: 'columella',
+    label: 'Columella',
+    medicalTerm: 'Columella Nasi',
+    description: 'Inferior border of the nasal septum between nostrils',
+    x: 0.24,
+    y: 0.52,
+    category: 'Nose',
+  },
+  // 18. subnasale
+  {
+    id: 'subnasale',
+    label: 'Subnasale',
+    medicalTerm: 'Subnasale',
+    description: 'Where nose base meets upper lip',
+    x: 0.3,
+    y: 0.54,
+    category: 'Nose',
+  },
+  // 19. subalare
+  {
+    id: 'subalare',
+    label: 'Subalare',
+    medicalTerm: 'Subalare',
+    description: 'Lowest point of the nostril wing on the visible side',
+    x: 0.28,
+    y: 0.53,
+    category: 'Nose',
+  },
+  // 20. labraleSuperius
+  {
+    id: 'labraleSuperius',
+    label: 'Upper Lip',
+    medicalTerm: 'Labrale Superius',
+    description: 'Most forward point of the upper lip vermilion',
+    x: 0.28,
+    y: 0.58,
+    category: 'Lips',
+  },
+  // 21. cheilion
+  {
+    id: 'cheilion',
+    label: 'Mouth Corner',
+    medicalTerm: 'Cheilion',
+    description: 'Mouth corner where the lips meet',
+    x: 0.35,
+    y: 0.62,
+    category: 'Lips',
+  },
+  // 22. labraleInferius
+  {
+    id: 'labraleInferius',
+    label: 'Lower Lip',
+    medicalTerm: 'Labrale Inferius',
+    description: 'Most forward point of the lower lip vermilion',
+    x: 0.3,
+    y: 0.66,
+    category: 'Lips',
+  },
+  // 23. sublabiale
+  {
+    id: 'sublabiale',
+    label: 'Labiomental Fold',
+    medicalTerm: 'Sublabiale',
+    description: 'Deepest point of the crease between lower lip and chin',
+    x: 0.32,
+    y: 0.7,
+    category: 'Lips',
+  },
+  // 24. pogonion
+  {
+    id: 'pogonion',
+    label: 'Chin Point',
+    medicalTerm: 'Pogonion (soft tissue)',
+    description: 'Most forward point on the soft-tissue chin',
+    x: 0.3,
+    y: 0.76,
+    category: 'Chin',
+  },
+  // 25. menton
+  {
+    id: 'menton',
+    label: 'Chin Bottom',
+    medicalTerm: 'Menton (soft tissue)',
+    description: 'Lowest point on the soft-tissue chin',
+    x: 0.35,
+    y: 0.82,
+    category: 'Chin',
+  },
+  // 26. cervicalPoint
+  {
+    id: 'cervicalPoint',
     label: 'Cervical Point',
-    medicalTerm: 'Cervicale (soft tissue reference)',
-    description: 'Cervical point for profile analysis',
+    medicalTerm: 'Cervicale (soft-tissue reference)',
+    description: 'High neck point just under the jaw',
     x: 0.5,
     y: 0.9,
     category: 'Neck',
   },
+  // 27. gonionTop
   {
-    id: 'anterior_cervical_landmark',
-    label: 'Neck Point',
-    medicalTerm: 'Anterior Cervical Landmark',
-    description: 'Anterior neck landmark',
-    x: 0.4,
-    y: 0.88,
-    category: 'Neck',
+    id: 'gonionTop',
+    label: 'Upper Jaw Angle',
+    medicalTerm: 'Gonion Superior',
+    description: 'Upper angle point of the jaw from side profile',
+    x: 0.7,
+    y: 0.6,
+    category: 'Jaw',
+  },
+  // 28. gonionBottom
+  {
+    id: 'gonionBottom',
+    label: 'Lower Jaw Angle',
+    medicalTerm: 'Gonion Inferior',
+    description: 'Lower angle point of the jaw from side profile',
+    x: 0.65,
+    y: 0.72,
+    category: 'Jaw',
   },
 ];
 

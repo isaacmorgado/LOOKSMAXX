@@ -75,18 +75,22 @@ export function SideProfileManualTool({
           // Map our landmark IDs to face-api indices
           let detectedPoint = null;
 
+          // FaceIQ landmark IDs: vertex, occiput, pronasale, neckPoint, porion, orbitale,
+          // tragus, intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion,
+          // rhinion, supratip, infratip, columella, subnasale, subalare, labraleSuperius,
+          // cheilion, labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom
           switch (lm.id) {
             // Chin/Jaw landmarks
-            case 'menton_side':
+            case 'menton':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.MENTON];
               break;
             case 'pogonion':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.MENTON];
               break;
-            case 'gonion_inferior_side':
+            case 'gonionBottom':
               detectedPoint = detectedLandmarks[4]; // Jaw contour point
               break;
-            case 'gonion_superior_side':
+            case 'gonionTop':
               detectedPoint = detectedLandmarks[3]; // Higher jaw point
               break;
 
@@ -100,21 +104,21 @@ export function SideProfileManualTool({
             case 'rhinion':
               detectedPoint = detectedLandmarks[28]; // Mid nose bridge
               break;
-            case 'subnasale_side':
+            case 'subnasale':
               detectedPoint = detectedLandmarks[33]; // Nose bottom center
               break;
-            case 'columella_nasi':
+            case 'columella':
               detectedPoint = detectedLandmarks[33];
               break;
 
             // Lip landmarks
-            case 'labrale_superius_side':
+            case 'labraleSuperius':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.UPPER_LIP_TOP];
               break;
-            case 'labrale_inferius_side':
+            case 'labraleInferius':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.LOWER_LIP_BOTTOM];
               break;
-            case 'cheilion_side':
+            case 'cheilion':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.LEFT_MOUTH_CORNER];
               break;
             case 'sublabiale':
@@ -130,14 +134,8 @@ export function SideProfileManualTool({
               break;
 
             // Eye region
-            case 'corneal_apex':
+            case 'cornealApex':
               detectedPoint = detectedLandmarks[FACE_API_LANDMARK_MAPPING.LEFT_EYE_OUTER];
-              break;
-            case 'lateral_eyelid':
-              detectedPoint = detectedLandmarks[36]; // Outer eye corner
-              break;
-            case 'palpebra_inferior_side':
-              detectedPoint = detectedLandmarks[40]; // Lower eyelid
               break;
             case 'orbitale':
               detectedPoint = detectedLandmarks[41]; // Lower eye socket
@@ -157,7 +155,7 @@ export function SideProfileManualTool({
               break;
 
             // Ear landmarks (use jaw contour as proxy)
-            case 'tragion':
+            case 'tragus':
               detectedPoint = detectedLandmarks[1]; // Upper jaw near ear
               break;
             case 'porion':

@@ -101,163 +101,32 @@ function mapFaceApiToSideLandmarks(
     let x = landmark.x;
     let y = landmark.y;
 
+    // FaceIQ landmark order: vertex, occiput, pronasale, neckPoint, porion, orbitale,
+    // tragus, intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion,
+    // rhinion, supratip, infratip, columella, subnasale, subalare, labraleSuperius,
+    // cheilion, labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom
     switch (landmark.id) {
-      // Cranium - estimate from jaw and nose
+      // 1. vertex - top of head
       case 'vertex':
         y = Math.min(normalized[19].y, normalized[24].y) - 0.15;
         x = (normalized[27].x + normalized[0].x) / 2;
         break;
-      case 'trichion_profile':
-        y = Math.min(normalized[19].y, normalized[24].y) - 0.08;
-        x = normalized[27].x;
-        break;
-      case 'external_occipital_region':
+      // 2. occiput - back of head
+      case 'occiput':
         x = isLeftProfile ? normalized[16].x + 0.05 : normalized[0].x - 0.05;
         y = normalized[27].y - 0.1;
         break;
-
-      // Forehead
-      case 'frontalis':
-        x = normalized[27].x - 0.02;
-        y = normalized[27].y - 0.08;
-        break;
-      case 'glabella':
-        x = normalized[27].x;
-        y = normalized[27].y;
-        break;
-
-      // Eye region - use visible eye
-      case 'corneal_apex':
-        if (isLeftProfile) {
-          x = normalized[42].x - 0.02;
-          y = (normalized[43].y + normalized[47].y) / 2;
-        } else {
-          x = normalized[36].x + 0.02;
-          y = (normalized[37].y + normalized[41].y) / 2;
-        }
-        break;
-      case 'lateral_eyelid':
-        if (isLeftProfile) {
-          x = normalized[45].x;
-          y = normalized[45].y;
-        } else {
-          x = normalized[36].x;
-          y = normalized[36].y;
-        }
-        break;
-      case 'palpebra_inferior_side':
-        if (isLeftProfile) {
-          x = (normalized[46].x + normalized[47].x) / 2;
-          y = (normalized[46].y + normalized[47].y) / 2;
-        } else {
-          x = (normalized[40].x + normalized[41].x) / 2;
-          y = (normalized[40].y + normalized[41].y) / 2;
-        }
-        break;
-      case 'orbitale':
-        if (isLeftProfile) {
-          x = normalized[47].x;
-          y = normalized[47].y + 0.02;
-        } else {
-          x = normalized[41].x;
-          y = normalized[41].y + 0.02;
-        }
-        break;
-
-      // Nose - well supported by 68-point model
-      case 'nasion':
-        x = normalized[27].x;
-        y = normalized[27].y;
-        break;
-      case 'rhinion':
-        x = normalized[28].x;
-        y = normalized[28].y;
-        break;
-      case 'supratip_break':
-        x = normalized[29].x;
-        y = normalized[29].y;
-        break;
+      // 3. pronasale - nose tip
       case 'pronasale':
         x = normalized[30].x;
         y = normalized[30].y;
         break;
-      case 'infratip_lobule':
-        x = (normalized[30].x + normalized[33].x) / 2;
-        y = (normalized[30].y + normalized[33].y) / 2;
-        break;
-      case 'columella_nasi':
-        x = normalized[33].x;
-        y = (normalized[30].y + normalized[33].y) / 2;
-        break;
-      case 'subnasale_side':
-        x = normalized[33].x;
-        y = normalized[33].y;
-        break;
-      case 'subalare':
-        x = isLeftProfile ? normalized[35].x : normalized[31].x;
-        y = isLeftProfile ? normalized[35].y : normalized[31].y;
-        break;
-
-      // Lips - well supported
-      case 'labrale_superius_side':
-        x = normalized[51].x;
-        y = normalized[51].y;
-        break;
-      case 'cheilion_side':
-        x = isLeftProfile ? normalized[54].x : normalized[48].x;
-        y = isLeftProfile ? normalized[54].y : normalized[48].y;
-        break;
-      case 'labrale_inferius_side':
-        x = normalized[57].x;
-        y = normalized[57].y;
-        break;
-      case 'sublabiale':
-        x = normalized[57].x;
-        y = normalized[57].y + 0.03;
-        break;
-
-      // Chin
-      case 'pogonion':
+      // 4. neckPoint - lower neck
+      case 'neckPoint':
         x = normalized[8].x;
-        y = normalized[8].y - 0.02;
+        y = normalized[8].y + 0.06;
         break;
-      case 'menton_side':
-        x = normalized[8].x;
-        y = normalized[8].y;
-        break;
-
-      // Jaw
-      case 'gonion_superior_side':
-        if (isLeftProfile) {
-          x = normalized[12].x;
-          y = normalized[12].y;
-        } else {
-          x = normalized[4].x;
-          y = normalized[4].y;
-        }
-        break;
-      case 'gonion_inferior_side':
-        if (isLeftProfile) {
-          x = (normalized[10].x + normalized[11].x) / 2;
-          y = (normalized[10].y + normalized[11].y) / 2;
-        } else {
-          x = (normalized[5].x + normalized[6].x) / 2;
-          y = (normalized[5].y + normalized[6].y) / 2;
-        }
-        break;
-
-      // Cheek
-      case 'zygion_soft_tissue':
-        if (isLeftProfile) {
-          x = normalized[15].x;
-          y = (normalized[45].y + normalized[12].y) / 2;
-        } else {
-          x = normalized[1].x;
-          y = (normalized[36].y + normalized[4].y) / 2;
-        }
-        break;
-
-      // Ear - estimate from jaw contour
+      // 5. porion - ear canal opening
       case 'porion':
         if (isLeftProfile) {
           x = normalized[16].x;
@@ -267,7 +136,18 @@ function mapFaceApiToSideLandmarks(
           y = normalized[27].y;
         }
         break;
-      case 'tragion':
+      // 6. orbitale - lowest orbital rim
+      case 'orbitale':
+        if (isLeftProfile) {
+          x = normalized[47].x;
+          y = normalized[47].y + 0.02;
+        } else {
+          x = normalized[41].x;
+          y = normalized[41].y + 0.02;
+        }
+        break;
+      // 7. tragus - ear cartilage
+      case 'tragus':
         if (isLeftProfile) {
           x = normalized[16].x - 0.01;
           y = (normalized[27].y + normalized[36].y) / 2;
@@ -276,7 +156,8 @@ function mapFaceApiToSideLandmarks(
           y = (normalized[27].y + normalized[36].y) / 2;
         }
         break;
-      case 'incisura_intertragica':
+      // 8. intertragicNotch - notch in ear
+      case 'intertragicNotch':
         if (isLeftProfile) {
           x = normalized[16].x - 0.02;
           y = (normalized[27].y + normalized[12].y) / 2;
@@ -285,15 +166,125 @@ function mapFaceApiToSideLandmarks(
           y = (normalized[27].y + normalized[4].y) / 2;
         }
         break;
-
-      // Neck - estimate from chin
-      case 'cervicale':
+      // 9. cornealApex - forward point of cornea
+      case 'cornealApex':
+        if (isLeftProfile) {
+          x = normalized[42].x - 0.02;
+          y = (normalized[43].y + normalized[47].y) / 2;
+        } else {
+          x = normalized[36].x + 0.02;
+          y = (normalized[37].y + normalized[41].y) / 2;
+        }
+        break;
+      // 10. cheekbone - zygomatic prominence
+      case 'cheekbone':
+        if (isLeftProfile) {
+          x = normalized[15].x;
+          y = (normalized[45].y + normalized[12].y) / 2;
+        } else {
+          x = normalized[1].x;
+          y = (normalized[36].y + normalized[4].y) / 2;
+        }
+        break;
+      // 11. trichion - hairline
+      case 'trichion':
+        y = Math.min(normalized[19].y, normalized[24].y) - 0.08;
+        x = normalized[27].x;
+        break;
+      // 12. glabella - between brows
+      case 'glabella':
+        x = normalized[27].x;
+        y = normalized[27].y;
+        break;
+      // 13. nasion - nasal root depression
+      case 'nasion':
+        x = normalized[27].x;
+        y = normalized[27].y;
+        break;
+      // 14. rhinion - dorsal nose point
+      case 'rhinion':
+        x = normalized[28].x;
+        y = normalized[28].y;
+        break;
+      // 15. supratip - above nose tip
+      case 'supratip':
+        x = normalized[29].x;
+        y = normalized[29].y;
+        break;
+      // 16. infratip - below nose tip
+      case 'infratip':
+        x = (normalized[30].x + normalized[33].x) / 2;
+        y = (normalized[30].y + normalized[33].y) / 2;
+        break;
+      // 17. columella - nasal septum
+      case 'columella':
+        x = normalized[33].x;
+        y = (normalized[30].y + normalized[33].y) / 2;
+        break;
+      // 18. subnasale - nose base meets upper lip
+      case 'subnasale':
+        x = normalized[33].x;
+        y = normalized[33].y;
+        break;
+      // 19. subalare - nostril wing
+      case 'subalare':
+        x = isLeftProfile ? normalized[35].x : normalized[31].x;
+        y = isLeftProfile ? normalized[35].y : normalized[31].y;
+        break;
+      // 20. labraleSuperius - upper lip
+      case 'labraleSuperius':
+        x = normalized[51].x;
+        y = normalized[51].y;
+        break;
+      // 21. cheilion - mouth corner
+      case 'cheilion':
+        x = isLeftProfile ? normalized[54].x : normalized[48].x;
+        y = isLeftProfile ? normalized[54].y : normalized[48].y;
+        break;
+      // 22. labraleInferius - lower lip
+      case 'labraleInferius':
+        x = normalized[57].x;
+        y = normalized[57].y;
+        break;
+      // 23. sublabiale - below lower lip
+      case 'sublabiale':
+        x = normalized[57].x;
+        y = normalized[57].y + 0.03;
+        break;
+      // 24. pogonion - chin point
+      case 'pogonion':
+        x = normalized[8].x;
+        y = normalized[8].y - 0.02;
+        break;
+      // 25. menton - chin bottom
+      case 'menton':
+        x = normalized[8].x;
+        y = normalized[8].y;
+        break;
+      // 26. cervicalPoint - high neck point
+      case 'cervicalPoint':
         x = normalized[8].x + 0.1;
         y = normalized[8].y + 0.08;
         break;
-      case 'anterior_cervical_landmark':
-        x = normalized[8].x;
-        y = normalized[8].y + 0.06;
+      // 27. gonionTop - upper jaw angle
+      case 'gonionTop':
+        if (isLeftProfile) {
+          x = normalized[12].x;
+          y = normalized[12].y;
+        } else {
+          x = normalized[4].x;
+          y = normalized[4].y;
+        }
+        break;
+      // 28. gonionBottom - lower jaw angle
+      case 'gonionBottom':
+        if (isLeftProfile) {
+          x = (normalized[10].x + normalized[11].x) / 2;
+          y = (normalized[10].y + normalized[11].y) / 2;
+        } else {
+          x = (normalized[5].x + normalized[6].x) / 2;
+          y = (normalized[5].y + normalized[6].y) / 2;
+        }
         break;
     }
 

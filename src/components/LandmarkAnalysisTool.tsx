@@ -10,12 +10,12 @@ import {
   ChevronDown,
   Check,
   Info,
-  Eye,
-  EyeOff,
   Scan,
   Loader2,
   Move,
   Focus,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import {
   LandmarkPoint,
@@ -62,16 +62,34 @@ export function LandmarkAnalysisTool({
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(2.5); // Start zoomed in for precision
+
+  // Reset state when mode changes (fixes side profile starting at step 52)
+  useEffect(() => {
+    const newLandmarks = mode === 'front' ? FRONT_PROFILE_LANDMARKS : SIDE_PROFILE_LANDMARKS;
+    setCurrentStepIndex(0);
+    setPlacedLandmarks(new Set());
+    setHasAutoDetected(false);
+    setDetectionFailed(false);
+    setLandmarks(newLandmarks);
+    setPan({ x: 0, y: 0 });
+    setZoomLevel(2.5);
+  }, [mode]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [showAllPoints, setShowAllPoints] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'info' | 'reference'>('info');
   const [isDetecting, setIsDetecting] = useState(true);
   const [hasAutoDetected, setHasAutoDetected] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  const [detectionFailed, setDetectionFailed] = useState(false);
   const [placedLandmarks, setPlacedLandmarks] = useState<Set<string>>(new Set());
+  // Frankfort Plane for side profile visualization (from server detection)
+  const [frankfortPlane, setFrankfortPlane] = useState<{
+    angle: number;
+    orbitale: { x: number; y: number };
+    porion: { x: number; y: number };
+  } | null>(null);
 
   const currentLandmarkId = orderedIds[currentStepIndex];
   const currentLandmark = landmarks.find((lm) => lm.id === currentLandmarkId);
@@ -295,9 +313,11 @@ export function LandmarkAnalysisTool({
     });
   }, [autoZoomEnabled, landmarks, getImageBounds, containerSize, imageDimensions]);
 
-  // Auto-detect landmarks using MediaPipe
+  // Auto-detect landmarks using Human.js/MediaPipe
   const handleAutoDetect = useCallback(async () => {
     setIsDetecting(true);
+    setDetectionFailed(false);
+    setFrankfortPlane(null);
     try {
       const result = await detectFromImageUrl(imageUrl, mode);
       console.log('[DEBUG] Detection result:', result);
@@ -314,11 +334,25 @@ export function LandmarkAnalysisTool({
           })
         );
         setHasAutoDetected(true);
+        setDetectionFailed(false);
+
+        // Capture Frankfort Plane for side profile (from server-side detection)
+        if (mode === 'side' && result.frankfortPlane) {
+          console.log('[DEBUG] Frankfort Plane:', result.frankfortPlane);
+          setFrankfortPlane(result.frankfortPlane);
+        }
+
         // Zoom to first landmark after detection
         zoomToLandmark(orderedIds[0]);
+      } else {
+        // Detection returned no results - common for side profile
+        console.log('[DEBUG] No landmarks detected - manual placement required');
+        setDetectionFailed(true);
+        setHasAutoDetected(false);
       }
     } catch (error) {
       console.error('Auto-detection failed:', error);
+      setDetectionFailed(true);
     } finally {
       setIsDetecting(false);
     }
@@ -579,8 +613,25 @@ export function LandmarkAnalysisTool({
                   <button
                     key={level}
                     onClick={() => {
-                      setZoomLevel(level);
-                      if (level === 1) setPan({ x: 0, y: 0 });
+                      if (level === 1) {
+                        // Reset to 1x: no zoom, no pan
+                        setZoomLevel(1);
+                        setPan({ x: 0, y: 0 });
+                      } else if (containerSize) {
+                        // Adjust pan to keep the same center point visible when zoom changes
+                        // Current center in image space: imageCenter = (containerCenter - pan) / oldZoom
+                        // New pan to show same center: newPan = containerCenter - imageCenter * newZoom
+                        const containerCenterX = containerSize.width / 2;
+                        const containerCenterY = containerSize.height / 2;
+                        const imageCenterX = (containerCenterX - pan.x) / zoomLevel;
+                        const imageCenterY = (containerCenterY - pan.y) / zoomLevel;
+                        const newPanX = containerCenterX - imageCenterX * level;
+                        const newPanY = containerCenterY - imageCenterY * level;
+                        setZoomLevel(level);
+                        setPan({ x: newPanX, y: newPanY });
+                      } else {
+                        setZoomLevel(level);
+                      }
                     }}
                     className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
                       zoomLevel === level
@@ -635,20 +686,6 @@ export function LandmarkAnalysisTool({
               {autoZoomEnabled ? 'Auto-Zoom: ON' : 'Auto-Zoom: OFF'}
             </button>
 
-            {/* Show All Points Toggle - only available after all landmarks placed */}
-            {placedLandmarks.size === totalSteps && (
-              <button
-                onClick={() => setShowAllPoints(!showAllPoints)}
-                className={`w-full py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 ${
-                  showAllPoints
-                    ? 'bg-[#00f3ff] text-black'
-                    : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-                }`}
-              >
-                {showAllPoints ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                {showAllPoints ? 'Show All Points' : 'Show Current Only'}
-              </button>
-            )}
           </div>
         </div>
 
@@ -683,9 +720,8 @@ export function LandmarkAnalysisTool({
                 draggable={false}
               />
 
-              {/* Placed landmarks - only visible after all landmarks placed and toggle is on */}
-              {showAllPoints && placedLandmarks.size === totalSteps && landmarks.map((landmark) => {
-                if (landmark.id === currentLandmarkId) return null;
+              {/* Placed landmarks - always visible as they're placed */}
+              {landmarks.filter(lm => placedLandmarks.has(lm.id) && lm.id !== currentLandmarkId).map((landmark) => {
                 const lmColor = getLandmarkColor(landmark.id, categories);
                 const pos = getLandmarkPixelPosition(landmark.x, landmark.y);
 
@@ -700,71 +736,132 @@ export function LandmarkAnalysisTool({
                       transformOrigin: 'center center',
                     }}
                   >
-                    {/* Outer glow */}
+                    {/* Small persistent dot - matches FaceIQ style */}
                     <div
                       className="absolute rounded-full"
                       style={{
-                        width: 32,
-                        height: 32,
-                        left: -16,
-                        top: -16,
-                        background: `radial-gradient(circle, ${lmColor}40 0%, transparent 70%)`,
-                      }}
-                    />
-                    {/* Inner dot */}
-                    <div
-                      className="absolute rounded-full border-2 border-white/50"
-                      style={{
-                        width: 10,
-                        height: 10,
-                        left: -5,
-                        top: -5,
+                        width: 8,
+                        height: 8,
+                        left: -4,
+                        top: -4,
                         backgroundColor: lmColor,
+                        boxShadow: `0 0 4px ${lmColor}, 0 0 8px ${lmColor}60`,
+                        border: '1px solid rgba(255,255,255,0.5)',
                       }}
                     />
                   </div>
                 );
               })}
+
+              {/* Frankfort Horizontal Plane - green reference line for side profiles */}
+              {mode === 'side' && frankfortPlane && (
+                <svg
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  {(() => {
+                    const bounds = getImageBounds();
+                    const orbitaleX = bounds.offsetX + frankfortPlane.orbitale.x * bounds.renderedWidth;
+                    const orbitaleY = bounds.offsetY + frankfortPlane.orbitale.y * bounds.renderedHeight;
+                    const porionX = bounds.offsetX + frankfortPlane.porion.x * bounds.renderedWidth;
+                    const porionY = bounds.offsetY + frankfortPlane.porion.y * bounds.renderedHeight;
+
+                    // Extend the line beyond the points for visibility
+                    const dx = porionX - orbitaleX;
+                    const dy = porionY - orbitaleY;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const extendFactor = length > 0 ? 0.3 : 0;
+                    const startX = orbitaleX - (dx / length) * bounds.renderedWidth * extendFactor;
+                    const startY = orbitaleY - (dy / length) * bounds.renderedWidth * extendFactor;
+                    const endX = porionX + (dx / length) * bounds.renderedWidth * extendFactor;
+                    const endY = porionY + (dy / length) * bounds.renderedWidth * extendFactor;
+
+                    return (
+                      <>
+                        {/* Main Frankfort line */}
+                        <line
+                          x1={startX}
+                          y1={startY}
+                          x2={endX}
+                          y2={endY}
+                          stroke="#22c55e"
+                          strokeWidth={2 / zoomLevel}
+                          strokeDasharray={`${6 / zoomLevel} ${4 / zoomLevel}`}
+                          opacity={0.8}
+                        />
+                        {/* Orbitale point marker */}
+                        <circle
+                          cx={orbitaleX}
+                          cy={orbitaleY}
+                          r={4 / zoomLevel}
+                          fill="#22c55e"
+                          stroke="white"
+                          strokeWidth={1 / zoomLevel}
+                        />
+                        {/* Porion point marker */}
+                        <circle
+                          cx={porionX}
+                          cy={porionY}
+                          r={4 / zoomLevel}
+                          fill="#22c55e"
+                          stroke="white"
+                          strokeWidth={1 / zoomLevel}
+                        />
+                        {/* Angle indicator */}
+                        <text
+                          x={startX}
+                          y={startY - 10 / zoomLevel}
+                          fill="#22c55e"
+                          fontSize={12 / zoomLevel}
+                          fontWeight="bold"
+                        >
+                          FH: {frankfortPlane.angle.toFixed(1)}°
+                        </text>
+                      </>
+                    );
+                  })()}
+                </svg>
+              )}
             </div>
 
-            {/* FIXED CENTER GLOWING ORB - stays in place, user pans image to align */}
+            {/* FIXED CENTER TARGETING DOT - small precise point for accurate placement */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
-              {/* Animated pulsing glow */}
-              <motion.div
-                className="absolute rounded-full"
+              {/* Crosshair lines for precision */}
+              <div
+                className="absolute"
                 style={{
-                  width: 80,
-                  height: 80,
-                  background: `radial-gradient(circle, ${color}30 0%, transparent 70%)`,
-                }}
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.6, 0.3, 0.6],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
+                  width: 20,
+                  height: 1,
+                  backgroundColor: '#00f3ff',
+                  opacity: 0.6,
                 }}
               />
-              {/* Static outer glow */}
+              <div
+                className="absolute"
+                style={{
+                  width: 1,
+                  height: 20,
+                  backgroundColor: '#00f3ff',
+                  opacity: 0.6,
+                }}
+              />
+              {/* Subtle glow ring */}
               <div
                 className="absolute rounded-full"
                 style={{
-                  width: 48,
-                  height: 48,
-                  background: `radial-gradient(circle, ${color}66 0%, transparent 70%)`,
+                  width: 12,
+                  height: 12,
+                  background: 'radial-gradient(circle, #00f3ff33 0%, transparent 70%)',
                 }}
               />
-              {/* Main orb */}
+              {/* Center dot - small and precise */}
               <div
-                className="relative rounded-full shadow-lg"
+                className="relative rounded-full"
                 style={{
-                  width: 16,
-                  height: 16,
-                  backgroundColor: color,
-                  boxShadow: `0 0 20px ${color}, 0 0 40px ${color}50`,
-                  border: '2px solid white',
+                  width: 4,
+                  height: 4,
+                  backgroundColor: '#00f3ff',
+                  boxShadow: '0 0 6px #00f3ff, 0 0 12px #00f3ff80',
                 }}
               />
             </div>
@@ -776,6 +873,30 @@ export function LandmarkAnalysisTool({
                 <p className="text-white text-lg font-medium">Detecting landmarks...</p>
                 <p className="text-neutral-400 text-sm mt-2">This may take a few seconds</p>
               </div>
+            )}
+
+            {/* Detection Failed Banner */}
+            {detectionFailed && !isDetecting && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-12 left-3 right-3 z-30"
+              >
+                <div className="bg-amber-500/20 border border-amber-500/50 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <p className="text-amber-200 text-xs flex-1">
+                    {mode === 'side'
+                      ? 'Auto-detection could not find profile. Please place landmarks manually for best accuracy.'
+                      : 'Could not detect face. Please place landmarks manually.'}
+                  </p>
+                  <button
+                    onClick={() => setDetectionFailed(false)}
+                    className="text-amber-400 hover:text-amber-200 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
             )}
 
             {/* Zoom indicator */}
