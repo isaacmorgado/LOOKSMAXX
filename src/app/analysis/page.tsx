@@ -4,19 +4,45 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUpload } from '@/contexts/UploadContext';
 import { useGender } from '@/contexts/GenderContext';
+import { useEthnicity, EthnicityOption } from '@/contexts/EthnicityContext';
 import { LandmarkAnalysisTool } from '@/components/LandmarkAnalysisTool';
-import { ResultsDashboard } from '@/components/ResultsDashboard';
 import { LandmarkPoint } from '@/lib/landmarks';
+import { Ethnicity } from '@/lib/faceiq-scoring';
 
-type AnalysisStep = 'front' | 'side' | 'results';
+// Map EthnicityContext options to faceiq-scoring Ethnicity type
+function mapEthnicityOption(option: EthnicityOption): Ethnicity {
+  const mapping: Record<EthnicityOption, Ethnicity> = {
+    'white': 'white',
+    'black': 'black',
+    'asian': 'east_asian',
+    'south-asian': 'south_asian',
+    'hispanic': 'hispanic',
+    'middle-eastern': 'middle_eastern',
+    'pacific-islander': 'pacific_islander',
+    'native-american': 'native_american',
+    'mixed': 'other',
+  };
+  return mapping[option] || 'other';
+}
+
+type AnalysisStep = 'front' | 'side';
 
 export default function AnalysisPage() {
   const router = useRouter();
   const { frontPhoto, sidePhoto } = useUpload();
   const { gender } = useGender();
+  const { ethnicities } = useEthnicity();
   const [currentStep, setCurrentStep] = useState<AnalysisStep>('front');
   const [frontLandmarks, setFrontLandmarks] = useState<LandmarkPoint[]>([]);
-  const [sideLandmarks, setSideLandmarks] = useState<LandmarkPoint[]>([]);
+  // Side landmarks are passed directly through handlers, no need to store in state
+  const [, setSideLandmarks] = useState<LandmarkPoint[]>([]);
+
+  // Get primary ethnicity for scoring (first selected, or 'other' if none/mixed)
+  const primaryEthnicity: Ethnicity = ethnicities.length === 1
+    ? mapEthnicityOption(ethnicities[0])
+    : ethnicities.length > 1
+      ? 'other'  // Mixed ethnicity
+      : 'other'; // None selected
 
   // Redirect if no photos uploaded
   if (!frontPhoto && !sidePhoto) {
@@ -38,18 +64,36 @@ export default function AnalysisPage() {
     );
   }
 
+  // Navigate to results page with stored data
+  const navigateToResults = (front: LandmarkPoint[], side: LandmarkPoint[]) => {
+    // Store analysis data in sessionStorage for the results page
+    const analysisResults = {
+      frontLandmarks: front,
+      sideLandmarks: side,
+      frontPhoto: frontPhoto?.preview || '',
+      sidePhoto: sidePhoto?.preview,
+      gender: gender || 'male',
+      ethnicity: primaryEthnicity,
+    };
+
+    sessionStorage.setItem('analysisResults', JSON.stringify(analysisResults));
+    router.push('/results');
+  };
+
   const handleFrontComplete = (landmarks: LandmarkPoint[]) => {
     setFrontLandmarks(landmarks);
     if (sidePhoto) {
       setCurrentStep('side');
     } else {
-      setCurrentStep('results');
+      // No side photo - go directly to results
+      navigateToResults(landmarks, []);
     }
   };
 
   const handleSideComplete = (landmarks: LandmarkPoint[]) => {
     setSideLandmarks(landmarks);
-    setCurrentStep('results');
+    // Both front and side complete - go to results
+    navigateToResults(frontLandmarks, landmarks);
   };
 
   const handleBackFromFront = () => {
@@ -58,10 +102,6 @@ export default function AnalysisPage() {
 
   const handleBackFromSide = () => {
     setCurrentStep('front');
-  };
-
-  const handleBackFromResults = () => {
-    setCurrentStep(sidePhoto ? 'side' : 'front');
   };
 
   // Front Profile Analysis
@@ -87,30 +127,6 @@ export default function AnalysisPage() {
         onComplete={handleSideComplete}
         onBack={handleBackFromSide}
       />
-    );
-  }
-
-  // Results Dashboard
-  if (currentStep === 'results') {
-    return (
-      <main className="min-h-screen bg-black">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <button
-            onClick={handleBackFromResults}
-            className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm mb-6"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Analysis
-          </button>
-          <ResultsDashboard
-            frontLandmarks={frontLandmarks}
-            sideLandmarks={sideLandmarks}
-            gender={gender || 'male'}
-          />
-        </div>
-      </main>
     );
   }
 
