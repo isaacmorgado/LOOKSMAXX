@@ -261,6 +261,7 @@ class ApiClient {
     password: string;
     username: string;
     termsAccepted: boolean;
+    referralCode?: string;
   }): Promise<{ access_token: string; token_type: string; user: { id: string; email: string; username: string; plan: string } }> {
     return this.request('/auth/register', {
       method: 'POST',
@@ -269,6 +270,7 @@ class ApiClient {
         password: data.password,
         username: data.username,
         terms_accepted: data.termsAccepted,
+        referral_code: data.referralCode,
       },
     });
   }
@@ -277,6 +279,24 @@ class ApiClient {
     return this.request('/auth/login', {
       method: 'POST',
       body: data,
+    });
+  }
+
+  async validateReferralCode(code: string): Promise<{ valid: boolean; message: string | null }> {
+    return this.request(`/auth/validate-referral/${encodeURIComponent(code)}`);
+  }
+
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: { token, new_password: newPassword },
     });
   }
 }

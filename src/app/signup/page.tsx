@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -35,13 +35,16 @@ function LoaderIcon({ className }: { className?: string }) {
   );
 }
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     username: "",
+    referralCode: "",
     termsAccepted: false,
   });
   const [usernameStatus, setUsernameStatus] = useState<{
@@ -49,8 +52,21 @@ export default function SignupPage() {
     available: boolean | null;
     reason: string | null;
   }>({ checking: false, available: null, reason: null });
+  const [referralStatus, setReferralStatus] = useState<{
+    checking: boolean;
+    valid: boolean | null;
+    message: string | null;
+  }>({ checking: false, valid: null, message: null });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Pre-fill referral code from URL if present
+  useEffect(() => {
+    const ref = searchParams.get("ref") || searchParams.get("referral");
+    if (ref) {
+      setFormData(prev => ({ ...prev, referralCode: ref.toUpperCase() }));
+    }
+  }, [searchParams]);
 
   // Debounced username check
   const checkUsernameAvailability = useCallback(async (username: string) => {
@@ -73,6 +89,27 @@ export default function SignupPage() {
     }
   }, []);
 
+  // Debounced referral code validation
+  const validateReferralCode = useCallback(async (code: string) => {
+    if (!code) {
+      setReferralStatus({ checking: false, valid: null, message: null });
+      return;
+    }
+
+    setReferralStatus({ checking: true, valid: null, message: null });
+
+    try {
+      const result = await api.validateReferralCode(code);
+      setReferralStatus({
+        checking: false,
+        valid: result.valid,
+        message: result.message,
+      });
+    } catch {
+      setReferralStatus({ checking: false, valid: null, message: "Validation failed" });
+    }
+  }, []);
+
   useEffect(() => {
     if (formData.username.length >= 3) {
       const timer = setTimeout(() => {
@@ -85,6 +122,17 @@ export default function SignupPage() {
       setUsernameStatus({ checking: false, available: null, reason: null });
     }
   }, [formData.username, checkUsernameAvailability]);
+
+  useEffect(() => {
+    if (formData.referralCode.length >= 3) {
+      const timer = setTimeout(() => {
+        validateReferralCode(formData.referralCode);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setReferralStatus({ checking: false, valid: null, message: null });
+    }
+  }, [formData.referralCode, validateReferralCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +159,12 @@ export default function SignupPage() {
       return;
     }
 
+    // If referral code is provided but invalid, warn but allow signup
+    if (formData.referralCode && referralStatus.valid === false) {
+      setError("The referral code is invalid. You can continue without it or enter a valid code.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -119,6 +173,7 @@ export default function SignupPage() {
         password: formData.password,
         username: formData.username,
         termsAccepted: formData.termsAccepted,
+        referralCode: formData.referralCode || undefined,
       });
 
       // Store token and redirect
@@ -140,10 +195,10 @@ export default function SignupPage() {
     formData.termsAccepted;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black px-4 py-8">
       <div className="w-full max-w-sm">
         {/* Logo and Header */}
-        <div className="mb-10">
+        <div className="mb-8">
           <div className="flex justify-center mb-6">
             <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
               <span className="text-[#00f3ff] text-sm font-bold">L</span>
@@ -166,6 +221,7 @@ export default function SignupPage() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
+              placeholder="you@example.com"
               required
             />
           </div>
@@ -222,6 +278,7 @@ export default function SignupPage() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
+              placeholder="Minimum 8 characters"
               required
               minLength={8}
             />
@@ -242,10 +299,51 @@ export default function SignupPage() {
                   ? "border-red-500"
                   : "border-neutral-700 focus:border-[#00f3ff]"
               }`}
+              placeholder="Re-enter your password"
               required
             />
             {formData.confirmPassword && formData.password !== formData.confirmPassword && (
               <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
+            )}
+          </div>
+
+          {/* Referral Code */}
+          <div>
+            <label className="block text-sm text-neutral-400 mb-1.5">
+              Referral Code <span className="text-neutral-600">(optional)</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.referralCode}
+                onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
+                placeholder="INFLUENCER-CODE"
+                className={`w-full h-11 px-3.5 pr-10 text-sm bg-black border rounded-lg text-white focus:outline-none transition-all ${
+                  referralStatus.valid === true
+                    ? "border-green-500"
+                    : referralStatus.valid === false
+                    ? "border-red-500"
+                    : "border-neutral-700 focus:border-[#00f3ff]"
+                }`}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {referralStatus.checking ? (
+                  <LoaderIcon className="w-4 h-4 text-neutral-500" />
+                ) : referralStatus.valid === true ? (
+                  <CheckIcon className="w-4 h-4 text-green-500" />
+                ) : referralStatus.valid === false ? (
+                  <XIcon className="w-4 h-4 text-red-500" />
+                ) : null}
+              </div>
+            </div>
+            {referralStatus.message && (
+              <p
+                className={`text-xs mt-1 ${
+                  referralStatus.valid ? "text-green-400" : "text-red-400"
+                }`}
+              >
+                {referralStatus.message}
+              </p>
             )}
           </div>
 
@@ -283,9 +381,16 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading || !isFormValid}
-            className="w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all"
+            className="w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
           >
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? (
+              <>
+                <LoaderIcon className="w-4 h-4" />
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </button>
 
           {/* Login Link */}
@@ -298,5 +403,17 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <LoaderIcon className="w-8 h-8 text-[#00f3ff]" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }

@@ -1,23 +1,18 @@
-# LOOKSMAXX
+# LOOKSMAXX Frontend
 
-A facial metrics analysis and visualization system with Next.js frontend and MediaPipe-based facial landmark detection. Now with FaceIQ-compatible scoring and results UI.
+Next.js 14 facial metrics analysis app with FaceIQ-compatible scoring.
 
-## Current Focus
-Section: Enhancement - Female Ethnicity Overrides
-Files: `src/lib/insights-engine.ts`
+## Live URL
+https://looksmaxx-app.vercel.app
 
-## Last Session (2025-12-21)
+## Code Quality
 
-Expanded all 8 female ethnicity overrides (lines 1039-1399) with full specifications matching male pattern:
-- Added `mean`, `std_dev`, and `flaws` properties to female_white, female_black, female_east_asian, female_south_asian, female_hispanic, female_middle_eastern, female_native_american, female_pacific_islander
-- Each override now has complete scoring parameters instead of just ideal ranges
-- TypeScript verification passed
+```bash
+npm run lint && npx tsc --noEmit
+```
 
-Stopped at: Female overrides complete, ready for testing
+## FaceIQ Parity Status ✅
 
-## FaceIQ Parity Status (2025-12-23)
-
-### ✅ Fully Completed
 | Feature | File | Details |
 |---------|------|---------|
 | **All 66 Bezier Curves** | `src/lib/faceiq-bezier-curves.ts` | Complete cubic Bezier interpolation |
@@ -27,7 +22,8 @@ Stopped at: Female overrides complete, ready for testing
 | **Order of Operations** | `src/lib/recommendations/engine.ts:517-607` | `generateOrderOfOperations()` with prerequisites |
 | **16 Ethnicity Overrides** | `src/lib/insights-engine.ts` | 8 male + 8 female with full scoring params |
 
-### ✅ Female Analysis Flow (Tested 2025-12-23)
+## Female Analysis ✅
+
 | Component | Status | Details |
 |-----------|--------|---------|
 | **8 Ethnicity Overrides** | ✓ Pass | All female ethnicities have distinct ideal ranges |
@@ -37,6 +33,19 @@ Stopped at: Female overrides complete, ready for testing
 | **Gender Filtering** | ✓ Pass | Engine correctly filters by gender |
 | **Insights/Flaws** | ✓ Pass | 8 female overrides with flaws property |
 
-### 🔲 Remaining
+## Key Pages
+
+- `/` - Landing page
+- `/signup` - Registration with username + T&C
+- `/login` - Login page
+- `/terms` - Terms & Conditions
+- `/gender` - Gender selection
+- `/ethnicity` - Ethnicity selection
+- `/upload` - Photo upload
+- `/analysis` - Face analysis
+- `/results` - Results with leaderboard
+
+## Remaining
+
 1. Implement supplement/product e-commerce layer (see `supplement_implementation.md`)
 2. Debug blank results page issue

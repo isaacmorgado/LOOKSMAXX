@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -18,42 +17,66 @@ function LoaderIcon({ className }: { className?: string }) {
   );
 }
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!formData.email || !formData.password) {
-      setError("Please enter your email and password");
+    if (!email) {
+      setError("Please enter your email");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await api.login({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Store token and redirect
-      localStorage.setItem("auth_token", response.access_token);
-      api.setToken(response.access_token);
-      router.push("/gender");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      await api.requestPasswordReset(email);
+      setIsSuccess(true);
+    } catch {
+      // Don't reveal if email exists or not for security
+      setIsSuccess(true);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black px-4">
+        <div className="w-full max-w-sm text-center">
+          <div className="flex justify-center mb-6">
+            <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckIcon className="w-6 h-6 text-green-500" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-semibold text-white mb-2">Check your email</h1>
+          <p className="text-neutral-400 mb-6">
+            If an account exists for {email}, we&apos;ve sent a password reset link.
+            Please check your inbox and spam folder.
+          </p>
+          <Link
+            href="/login"
+            className="inline-block w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] text-black font-medium rounded-lg transition-all leading-[44px]"
+          >
+            Back to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black px-4">
@@ -66,10 +89,10 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center text-white mb-2">
-            Sign in to LOOKSMAXX
+            Reset your password
           </h1>
           <p className="text-sm text-neutral-400 text-center">
-            Enter your email and password to continue
+            Enter your email and we&apos;ll send you a reset link
           </p>
         </div>
 
@@ -79,31 +102,10 @@ export default function LoginPage() {
             <label className="block text-sm text-neutral-400 mb-1.5">Email</label>
             <input
               type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
               placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-sm text-neutral-400">Password</label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-[#00f3ff] hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
-              placeholder="Enter your password"
               required
             />
           </div>
@@ -124,38 +126,18 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <LoaderIcon className="w-4 h-4" />
-                Signing in...
+                Sending...
               </>
             ) : (
-              "Sign In"
+              "Send Reset Link"
             )}
           </button>
 
-          {/* Terms and Privacy */}
-          <p className="text-xs text-center text-neutral-500">
-            By signing in, you agree to our{" "}
-            <Link
-              href="/terms"
-              target="_blank"
-              className="text-neutral-300 hover:text-white underline underline-offset-2"
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              target="_blank"
-              className="text-neutral-300 hover:text-white underline underline-offset-2"
-            >
-              Privacy Policy
-            </Link>
-          </p>
-
-          {/* Create Account Link */}
+          {/* Back to Login */}
           <p className="text-center text-neutral-500 text-sm pt-2">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#00f3ff] hover:underline">
-              Sign up
+            Remember your password?{" "}
+            <Link href="/login" className="text-[#00f3ff] hover:underline">
+              Sign in
             </Link>
           </p>
         </form>
