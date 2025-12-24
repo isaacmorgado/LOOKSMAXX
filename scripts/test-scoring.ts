@@ -6,7 +6,19 @@
  * Run with: npx ts-node scripts/test-scoring.ts
  */
 
-// Direct type definitions (avoiding import issues)
+/* eslint-disable @typescript-eslint/no-require-imports */
+const {
+  analyzeFrontProfile,
+  analyzeSideProfile,
+  analyzeHarmony,
+  calculateFaceIQScore,
+  getMetricConfigForDemographics,
+} = require('../src/lib/faceiq-scoring');
+
+type Gender = 'male' | 'female';
+type Ethnicity = 'white' | 'black' | 'east_asian' | 'south_asian' | 'hispanic' | 'middle_eastern' | 'native_american' | 'pacific_islander' | 'other';
+
+// Direct type definitions
 interface LandmarkPoint {
   id: string;
   label: string;
@@ -16,16 +28,6 @@ interface LandmarkPoint {
   y: number;
   category: string;
 }
-
-type Gender = 'male' | 'female';
-type Ethnicity = 'white' | 'black' | 'east_asian' | 'south_asian' | 'hispanic' | 'middle_eastern' | 'native_american' | 'pacific_islander' | 'other';
-
-// We'll dynamically import the functions
-let analyzeFrontProfile: any;
-let analyzeSideProfile: any;
-let analyzeHarmony: any;
-let calculateFaceIQScore: any;
-let getMetricConfigForDemographics: any;
 
 // ============================================
 // MOCK LANDMARK DATA (from landmarks-3d-2.json 2D coords)
@@ -292,7 +294,7 @@ async function runTests() {
   console.log('-'.repeat(50));
 
   for (const test of METRIC_TESTS) {
-    const config = getMetricConfigForDemographics(test.metricId, { gender: test.gender, ethnicity: test.ethnicity });
+    const config = getMetricConfigForDemographics(test.metricId, test.gender, test.ethnicity);
 
     if (!config) {
       console.log(`  ${FAIL} ${test.description}: Metric config not found for ${test.metricId}`);
@@ -366,7 +368,7 @@ async function runTests() {
   const bezierMetrics = ['faceWidthToHeight', 'lowerThirdProportion', 'eyeAspectRatio', 'totalFacialWidthToHeight', 'cheekboneHeight'];
 
   for (const metricId of bezierMetrics) {
-    const config = getMetricConfigForDemographics(metricId, { gender: 'male', ethnicity: 'white' });
+    const config = getMetricConfigForDemographics(metricId, 'male', 'white');
     if (!config) {
       console.log(`  ${WARN} ${metricId}: Config not found`);
       warnings++;
@@ -416,7 +418,7 @@ async function runTests() {
     const ranges: string[] = [];
 
     for (const demo of demographics) {
-      const config = getMetricConfigForDemographics(metricId, demo);
+      const config = getMetricConfigForDemographics(metricId, demo.gender, demo.ethnicity);
       if (config) {
         ranges.push(`[${config.idealMin.toFixed(1)}-${config.idealMax.toFixed(1)}]`);
         console.log(`    ${demo.gender}/${demo.ethnicity}: [${config.idealMin.toFixed(1)} - ${config.idealMax.toFixed(1)}]`);
