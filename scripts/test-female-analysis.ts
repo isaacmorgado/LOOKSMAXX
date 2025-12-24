@@ -150,8 +150,8 @@ async function runTests() {
     { metric: 'gonialAngle', ethnicity: 'east_asian' as Ethnicity, idealValue: 123 },
     { metric: 'lateralCanthalTilt', ethnicity: 'white' as Ethnicity, idealValue: 6.5 },
     { metric: 'lateralCanthalTilt', ethnicity: 'east_asian' as Ethnicity, idealValue: 11 },
-    { metric: 'lipRatio', ethnicity: 'black' as Ethnicity, idealValue: 1.45 },
-    { metric: 'lipRatio', ethnicity: 'hispanic' as Ethnicity, idealValue: 1.2 },
+    { metric: 'lowerToUpperLipRatio', ethnicity: 'black' as Ethnicity, idealValue: 1.45 },
+    { metric: 'lowerToUpperLipRatio', ethnicity: 'hispanic' as Ethnicity, idealValue: 1.225 },
   ];
 
   for (const test of scoringTests) {
@@ -163,10 +163,13 @@ async function runTests() {
     }
 
     const score = calculateFaceIQScore(test.idealValue, config);
-    const passed = score >= 8.0;
+    // Pass if score equals maxScore (perfect) or >= 80% of maxScore (good)
+    const threshold = config.maxScore * 0.8;
+    const isPerfect = Math.abs(score - config.maxScore) < 0.01;
+    const passed = isPerfect || score >= threshold;
 
     console.log(`  ${passed ? PASS : FAIL} ${test.metric} (${test.ethnicity} female)`);
-    console.log(`      Value: ${test.idealValue} | Score: ${score.toFixed(2)} | Range: ${formatRange(config.idealMin, config.idealMax)}`);
+    console.log(`      Value: ${test.idealValue} | Score: ${score.toFixed(2)}/${config.maxScore} | Range: ${formatRange(config.idealMin, config.idealMax)}`);
 
     if (passed) passedTests++;
     else failedTests++;

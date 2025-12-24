@@ -402,7 +402,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   // ==========================================
   // LIP METRICS - Ethnicity variation
   // ==========================================
-  lipRatio: {
+  lowerToUpperLipRatio: {
     // African/Hispanic: fuller lips natural
     // Black Female: Highest fullness requirement in the app - thin lips heavily penalized
     // Extracted from FaceIQ Female:African.htc - combines neoteny with phenotypic lip fullness
@@ -3047,6 +3047,13 @@ export function calculateFaceIQScore(
     softZoneScore = 8.0, // Default "Good" score for acceptable-but-not-ideal values
   } = config;
 
+  // IMPORTANT: Check demographic-adjusted ideal range FIRST
+  // This ensures that demographic overrides are respected even when Bezier curves exist
+  // (Bezier curves are optimized for base ranges and don't auto-adjust for demographics)
+  if (value >= idealMin && value <= idealMax) {
+    return maxScore;
+  }
+
   // Use custom curve if available in config
   if (customCurve && customCurve.mode === 'custom') {
     return interpolateCustomCurve(value, customCurve.points, maxScore);
@@ -3056,11 +3063,6 @@ export function calculateFaceIQScore(
   const bezierCurve = FACEIQ_BEZIER_CURVES[id];
   if (bezierCurve && bezierCurve.mode === 'custom') {
     return interpolateCustomCurve(value, bezierCurve.points, maxScore);
-  }
-
-  // Perfect score within ideal range
-  if (value >= idealMin && value <= idealMax) {
-    return maxScore;
   }
 
   // Handle directional/dimorphic scoring
