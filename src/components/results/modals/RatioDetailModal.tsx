@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, AlertTriangle, Sparkles, Info, BarChart3 } from 'lucide-react';
 import { FaceIQScoreResult, Gender, Ethnicity, FACEIQ_METRICS } from '@/lib/faceiq-scoring';
 import { generateAIDescription, getSeverityFromScore } from '@/lib/aiDescriptions';
-import { getScoreColor } from '@/types/results';
+import { getScoreColor, Ratio } from '@/types/results';
 import { GradientRangeBar } from '../visualization/GradientRangeBar';
+import { FaceOverlay } from '../visualization/FaceOverlay';
+import { LandmarkPoint } from '@/lib/landmarks';
 
 // ============================================
 // TYPES
@@ -22,6 +24,9 @@ interface RatioDetailModalProps {
   hasPrevious?: boolean;
   hasNext?: boolean;
   facePhoto?: string;
+  landmarks?: LandmarkPoint[];
+  allRatios?: Ratio[];
+  profileType?: 'front' | 'side';
   gender?: Gender;
   ethnicity?: Ethnicity;
 }
@@ -593,6 +598,9 @@ export function RatioDetailModal({
   hasPrevious = false,
   hasNext = false,
   facePhoto,
+  landmarks = [],
+  allRatios = [],
+  profileType = 'front',
   gender,
   ethnicity,
 }: RatioDetailModalProps) {
@@ -618,6 +626,29 @@ export function RatioDetailModal({
       ratio.category
     );
   }, [ratio]);
+
+  // Find the full Ratio object for FaceOverlay visualization
+  const selectedRatioForOverlay = useMemo((): Ratio | null => {
+    if (!ratio) return null;
+    // Try to find the matching ratio in allRatios
+    const found = allRatios.find(r => r.id === ratio.metricId || r.name === ratio.name);
+    if (found) return found;
+
+    // Create a minimal Ratio object from FaceIQScoreResult for visualization
+    return {
+      id: ratio.metricId,
+      name: ratio.name,
+      value: ratio.value,
+      score: ratio.score,
+      standardizedScore: ratio.standardizedScore || ratio.score,
+      idealMin: ratio.idealMin,
+      idealMax: ratio.idealMax,
+      category: ratio.category,
+      unit: ratio.unit === 'ratio' ? 'x' : ratio.unit === 'percent' ? '%' : ratio.unit === 'degrees' ? '°' : '',
+      qualityLevel: ratio.qualityTier || 'good',
+      severity: ratio.severity || 'moderate',
+    } as Ratio;
+  }, [ratio, allRatios]);
 
   // Early returns
   if (!mounted) return null;
@@ -784,18 +815,15 @@ export function RatioDetailModal({
 
               {/* Two Column Layout */}
               <div className="grid lg:grid-cols-2 gap-4">
-                {/* Face Image (if available) */}
+                {/* Face Image with Visualization */}
                 {facePhoto && (
                   <div>
-                    <div className="relative rounded-xl overflow-hidden border border-neutral-700 bg-neutral-800">
-                      <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
-                        <img
-                          src={facePhoto}
-                          alt="Face"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
+                    <FaceOverlay
+                      photo={facePhoto}
+                      landmarks={landmarks}
+                      selectedRatio={selectedRatioForOverlay}
+                      profileType={profileType}
+                    />
                   </div>
                 )}
 

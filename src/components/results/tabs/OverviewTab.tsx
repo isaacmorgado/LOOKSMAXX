@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { User, ScanFace, Sparkles, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { User, ScanFace, Sparkles, ChevronRight, TrendingUp, TrendingDown, Lightbulb } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { TabContent } from '../ResultsLayout';
 import { ScoreBar, AnimatedScore, ShareButton, ExportButton } from '../shared';
@@ -10,6 +11,7 @@ import { FacialRadarChart } from '../visualization/FacialRadarChart';
 import { RatioDetailModal } from '../modals/RatioDetailModal';
 import { getScoreColor, ResponsibleRatio, Ratio } from '@/types/results';
 import { FaceIQScoreResult } from '@/lib/faceiq-scoring';
+import { RankedMetric, getWeightTierColor } from '@/lib/looksmax-scoring';
 import { useState, useCallback, useMemo } from 'react';
 
 // ============================================
@@ -39,7 +41,14 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
         {/* Photo or icon */}
         <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
           {photo ? (
-            <img src={photo} alt={title} className="w-full h-full object-cover" />
+            <Image
+              src={photo}
+              alt={title}
+              width={64}
+              height={64}
+              className="object-cover"
+              unoptimized
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               {icon}
@@ -72,11 +81,130 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
 }
 
 // ============================================
+// QUICK INSIGHTS - TOP/BOTTOM METRICS WITH ADVICE
+// ============================================
+
+interface MetricInsightCardProps {
+  metric: RankedMetric;
+  type: 'strength' | 'improvement';
+  index: number;
+}
+
+function MetricInsightCard({ metric, type, index }: MetricInsightCardProps) {
+  const isStrength = type === 'strength';
+  const color = getScoreColor(metric.score);
+  const weightTierClass = getWeightTierColor(metric.weightTier);
+
+  return (
+    <motion.div
+      className={`bg-neutral-900/80 border rounded-xl p-4 ${
+        isStrength ? 'border-green-500/30' : 'border-orange-500/30'
+      }`}
+      initial={{ opacity: 0, x: isStrength ? -20 : 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.1 * index }}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+          isStrength ? 'bg-green-500/20' : 'bg-orange-500/20'
+        }`}>
+          {isStrength ? (
+            <TrendingUp size={16} className="text-green-400" />
+          ) : (
+            <TrendingDown size={16} className="text-orange-400" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-medium text-white text-sm truncate">{metric.name}</h4>
+            <span className={`text-xs px-1.5 py-0.5 rounded border ${weightTierClass}`}>
+              {metric.weightTier === 'high' ? '3x' : metric.weightTier === 'medium' ? '2x' : '1x'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-lg font-bold" style={{ color }}>
+              {metric.score.toFixed(1)}
+            </span>
+            <span className="text-xs text-neutral-500">
+              Ideal: {metric.idealMin.toFixed(1)} - {metric.idealMax.toFixed(1)}
+            </span>
+          </div>
+
+          {/* Advice */}
+          <div className="flex items-start gap-2 mt-2 p-2 bg-neutral-800/50 rounded-lg">
+            <Lightbulb size={14} className={isStrength ? 'text-green-400 mt-0.5' : 'text-orange-400 mt-0.5'} />
+            <p className="text-xs text-neutral-300 leading-relaxed">{metric.advice}</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+interface QuickInsightsSectionProps {
+  topMetrics: RankedMetric[];
+  bottomMetrics: RankedMetric[];
+}
+
+function QuickInsightsSection({ topMetrics, bottomMetrics }: QuickInsightsSectionProps) {
+  if (topMetrics.length === 0 && bottomMetrics.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <Lightbulb size={20} className="text-cyan-400" />
+        Quick Insights
+      </h3>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top 3 Strengths */}
+        <div>
+          <h4 className="text-sm font-medium text-green-400 mb-3 flex items-center gap-2">
+            <TrendingUp size={14} />
+            Top Strengths
+          </h4>
+          <div className="space-y-3">
+            {topMetrics.map((metric, index) => (
+              <MetricInsightCard
+                key={metric.metricId}
+                metric={metric}
+                type="strength"
+                index={index}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom 3 - Areas to Improve */}
+        <div>
+          <h4 className="text-sm font-medium text-orange-400 mb-3 flex items-center gap-2">
+            <TrendingDown size={14} />
+            Areas to Improve
+          </h4>
+          <div className="space-y-3">
+            {bottomMetrics.map((metric, index) => (
+              <MetricInsightCard
+                key={metric.metricId}
+                metric={metric}
+                type="improvement"
+                index={index}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // HARMONY SCORE DISPLAY (with AnimatedScore and Radar Chart)
 // ============================================
 
 function HarmonyScoreDisplay() {
-  const { overallScore, frontScore, sideScore } = useResults();
+  const { overallScore, frontScore, sideScore, harmonyPercentage, harmonyScoreResult } = useResults();
   const [showRadar, setShowRadar] = useState(true);
 
   return (
@@ -89,10 +217,24 @@ function HarmonyScoreDisplay() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left: Score Display */}
         <div className="text-center flex flex-col justify-center">
-          <h2 className="text-lg font-medium text-neutral-400 mb-6">Overall Harmony Score</h2>
+          <h2 className="text-lg font-medium text-neutral-400 mb-2">Weighted Harmony Score</h2>
+
+          {/* Harmony Percentage Badge */}
+          <motion.div
+            className="flex justify-center mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: 'spring' }}
+          >
+            <div className="px-4 py-1 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 rounded-full">
+              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+                {harmonyPercentage.toFixed(1)}%
+              </span>
+            </div>
+          </motion.div>
 
           {/* Animated Score */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4">
             <AnimatedScore
               score={overallScore}
               duration={2.5}
@@ -119,10 +261,25 @@ function HarmonyScoreDisplay() {
             </div>
           </div>
 
+          {/* Weight Distribution */}
+          {harmonyScoreResult && (
+            <div className="flex justify-center gap-3 mb-4 text-xs">
+              <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                High Impact: {harmonyScoreResult.weightDistribution.highImpact.count}
+              </span>
+              <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                Medium: {harmonyScoreResult.weightDistribution.mediumImpact.count}
+              </span>
+              <span className="px-2 py-1 rounded bg-gray-500/20 text-gray-400 border border-gray-500/30">
+                Standard: {harmonyScoreResult.weightDistribution.standard.count}
+              </span>
+            </div>
+          )}
+
           <p className="text-sm text-neutral-400 max-w-md mx-auto">
-            {overallScore >= 8 ? 'Exceptional facial harmony. Your features are well-balanced and proportioned.' :
-              overallScore >= 6 ? 'Good facial harmony with some areas that could be optimized.' :
-                overallScore >= 4 ? 'Average facial harmony. Several areas have room for improvement.' :
+            {harmonyPercentage >= 80 ? 'Exceptional facial harmony. Your features are well-balanced and proportioned.' :
+              harmonyPercentage >= 60 ? 'Good facial harmony with some areas that could be optimized.' :
+                harmonyPercentage >= 40 ? 'Average facial harmony. Several areas have room for improvement.' :
                   'Below average facial harmony. Multiple areas could benefit from attention.'}
           </p>
         </div>
@@ -169,9 +326,14 @@ export function OverviewTab() {
     flaws,
     frontPhoto,
     sidePhoto,
+    frontLandmarks,
+    sideLandmarks,
     gender,
     ethnicity,
     setActiveTab,
+    topMetrics,
+    bottomMetrics,
+    setSelectedVisualizationMetric,
   } = useResults();
 
   const [selectedRatio, setSelectedRatio] = useState<FaceIQScoreResult | null>(null);
@@ -212,10 +374,13 @@ export function OverviewTab() {
       (r) => r.name === ratio.ratioName || r.id === ratio.ratioId
     );
 
+    // Update the visualization first (shows on face image)
     if (fullRatio) {
+      setSelectedVisualizationMetric(fullRatio.id);
       setSelectedRatio(ratioToFaceIQResult(fullRatio));
     } else {
       // Create a minimal FaceIQScoreResult from ResponsibleRatio
+      setSelectedVisualizationMetric(ratio.ratioId);
       setSelectedRatio({
         metricId: ratio.ratioId,
         name: ratio.ratioName,
@@ -233,32 +398,47 @@ export function OverviewTab() {
       } as FaceIQScoreResult);
     }
     setIsModalOpen(true);
-  }, [allRatios, ratioToFaceIQResult]);
+  }, [allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
 
   // Navigate to previous/next ratio in modal
   const handlePreviousRatio = useCallback(() => {
     if (currentRatioIndex > 0) {
-      setSelectedRatio(ratioToFaceIQResult(allRatios[currentRatioIndex - 1]));
+      const prevRatio = allRatios[currentRatioIndex - 1];
+      setSelectedRatio(ratioToFaceIQResult(prevRatio));
+      setSelectedVisualizationMetric(prevRatio.id);
     }
-  }, [currentRatioIndex, allRatios, ratioToFaceIQResult]);
+  }, [currentRatioIndex, allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
 
   const handleNextRatio = useCallback(() => {
     if (currentRatioIndex < allRatios.length - 1) {
-      setSelectedRatio(ratioToFaceIQResult(allRatios[currentRatioIndex + 1]));
+      const nextRatio = allRatios[currentRatioIndex + 1];
+      setSelectedRatio(ratioToFaceIQResult(nextRatio));
+      setSelectedVisualizationMetric(nextRatio.id);
     }
-  }, [currentRatioIndex, allRatios, ratioToFaceIQResult]);
+  }, [currentRatioIndex, allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
+
+  // Determine if selected ratio is from side profile
+  const isSideRatio = useMemo(() => {
+    if (!selectedRatio) return false;
+    const sideMetricIds = sideRatios.map(r => r.id);
+    return sideMetricIds.includes(selectedRatio.metricId);
+  }, [selectedRatio, sideRatios]);
 
   // Get appropriate face photo for modal
   const getModalPhoto = useCallback(() => {
     if (!selectedRatio) return frontPhoto;
+    return isSideRatio ? (sidePhoto || frontPhoto) : frontPhoto;
+  }, [selectedRatio, isSideRatio, frontPhoto, sidePhoto]);
 
-    // Check if this is a side profile metric
-    const sideMetricIds = sideRatios.map(r => r.id);
-    if (sideMetricIds.includes(selectedRatio.metricId)) {
-      return sidePhoto || frontPhoto;
-    }
-    return frontPhoto;
-  }, [selectedRatio, sideRatios, frontPhoto, sidePhoto]);
+  // Get appropriate landmarks for modal
+  const getModalLandmarks = useCallback(() => {
+    return isSideRatio ? (sideLandmarks || []) : (frontLandmarks || []);
+  }, [isSideRatio, frontLandmarks, sideLandmarks]);
+
+  // Get profile type for modal
+  const getModalProfileType = useCallback((): 'front' | 'side' => {
+    return isSideRatio ? 'side' : 'front';
+  }, [isSideRatio]);
 
   return (
     <TabContent
@@ -297,6 +477,9 @@ export function OverviewTab() {
             onClick={() => setActiveTab('side-ratios')}
           />
         </div>
+
+        {/* Quick Insights - Top/Bottom Metrics with Advice (from looksmax_engine.py) */}
+        <QuickInsightsSection topMetrics={topMetrics} bottomMetrics={bottomMetrics} />
 
         {/* Strengths & Flaws Grid - FaceIQ Style */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -353,6 +536,9 @@ export function OverviewTab() {
         hasPrevious={currentRatioIndex > 0}
         hasNext={currentRatioIndex < allRatios.length - 1}
         facePhoto={getModalPhoto()}
+        landmarks={getModalLandmarks()}
+        allRatios={allRatios}
+        profileType={getModalProfileType()}
         gender={gender}
         ethnicity={ethnicity}
       />

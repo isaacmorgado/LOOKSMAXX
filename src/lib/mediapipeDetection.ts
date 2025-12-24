@@ -83,6 +83,8 @@ export const MEDIAPIPE_FRONT_MAPPING: Record<string, number> = {
   // Cheeks
   left_zygion: 234,
   right_zygion: 454,
+  left_malar: 205,        // Cheek center point for fullness calculation
+  right_malar: 425,       // Cheek center point for fullness calculation
   left_temporal: 54,
   right_temporal: 284,
 
@@ -111,8 +113,8 @@ export const MEDIAPIPE_SIDE_MAPPING: Record<string, number> = {
   neckPoint: 152,
   // 5. porion - ear canal opening (use ear area)
   porion: 127,
-  // 6. orbitale - lowest point of orbital rim
-  orbitale: 145,
+  // 6. orbitale - lowest point of orbital rim (index 33 per FaceIQ landmarkers.js)
+  orbitale: 33,
   // 7. tragus - ear cartilage
   tragus: 127,
   // 8. intertragicNotch - notch in ear

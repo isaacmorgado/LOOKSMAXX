@@ -59,6 +59,9 @@ export interface Ratio {
     decayRate: number;
     maxScore: number;
   };
+  // FaceIQ Taxonomy classification
+  taxonomyPrimary?: string;    // 'harmony' | 'dimorphism' | 'angularity' | 'features'
+  taxonomySecondary?: string;  // Subcategory ID
 }
 
 // ============================================

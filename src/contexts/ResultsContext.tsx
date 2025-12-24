@@ -11,7 +11,22 @@ import {
   FACEIQ_METRICS,
   Ethnicity,
   Gender,
+  scoreMeasurement,
 } from '@/lib/faceiq-scoring';
+import {
+  calculateHarmonyScore,
+  getTopMetrics,
+  getBottomMetrics,
+  HarmonyScoreResult,
+  RankedMetric,
+} from '@/lib/looksmax-scoring';
+import {
+  classifyInsights,
+  convertToStrength,
+  convertToFlaw,
+  INSIGHTS_DEFINITIONS,
+} from '@/lib/insights-engine';
+import { classifyMetric } from '@/lib/taxonomy';
 import {
   Ratio,
   Strength,
@@ -42,10 +57,18 @@ interface ResultsContextType {
   flaws: Flaw[];
   recommendations: Recommendation[];
 
-  // Scores
+  // Scores (now using weighted harmony from looksmax_engine.py)
   overallScore: number;
   frontScore: number;
   sideScore: number;
+
+  // Weighted Harmony Score (from looksmax_engine.py)
+  harmonyScoreResult: HarmonyScoreResult | null;
+  harmonyPercentage: number;  // 0-100% weighted harmony
+
+  // Top 3 strengths and bottom 3 areas to improve with advice
+  topMetrics: RankedMetric[];
+  bottomMetrics: RankedMetric[];
 
   // UI state
   activeTab: ResultsTab;
@@ -95,6 +118,9 @@ function transformToRatio(result: FaceIQScoreResult, landmarks: LandmarkPoint[])
   // Get flaw/strength mappings
   const { mayIndicateFlaws, mayIndicateStrengths } = getFlawStrengthMappings(result);
 
+  // Classify metric using FaceIQ taxonomy
+  const taxonomyClassification = classifyMetric(result.name, result.category);
+
   return {
     id: result.metricId,
     name: result.name,
@@ -118,6 +144,8 @@ function transformToRatio(result: FaceIQScoreResult, landmarks: LandmarkPoint[])
       decayRate: metricConfig.decayRate,
       maxScore: metricConfig.maxScore,
     } : undefined,
+    taxonomyPrimary: taxonomyClassification?.primary,
+    taxonomySecondary: taxonomyClassification?.secondary,
   };
 }
 
@@ -1506,44 +1534,93 @@ function calculateRelevanceScore(
   return Math.min(score, 100);
 }
 
-// Calculate expected score improvement based on metric deviation and procedure effectiveness
+// Calculate expected score improvement using FaceIQ Bezier recalculation
+// Instead of simple addition, we recalculate the score at the ideal value
 function calculateExpectedImprovement(
   proc: ProcedureConfig,
   matchedRatios: Ratio[],
-  avgFlawImpact: number
+  avgFlawImpact: number,
+  gender: Gender = 'male',
+  ethnicity: Ethnicity = 'other'
 ): { min: number; max: number; potential: number } {
-  // Base improvement from procedure
-  const baseMin = proc.expectedImprovementRange.min;
-  const baseMax = proc.expectedImprovementRange.max;
-
-  // Severity multiplier: more severe issues have more room for improvement
-  const severityMultiplier = Math.min(avgFlawImpact / 2.5, 1.8);
-
-  // Metric deviation bonus: further from ideal = more potential improvement
-  let deviationBonus = 1.0;
-  if (matchedRatios.length > 0) {
-    const avgScore = matchedRatios.reduce((sum, r) => sum + r.score, 0) / matchedRatios.length;
-    // Score of 3 gives 1.4x, score of 7 gives 1.0x
-    deviationBonus = 1 + Math.max(0, (7 - avgScore) * 0.1);
+  // If no matched ratios, use fallback estimation
+  if (matchedRatios.length === 0) {
+    const baseImprovement = proc.expectedImprovementRange.max * Math.min(avgFlawImpact / 2.5, 1.5);
+    return {
+      min: Math.round(proc.expectedImprovementRange.min * 100) / 100,
+      max: Math.round(baseImprovement * 100) / 100,
+      potential: 7.5, // Default to "good" when we can't calculate precisely
+    };
   }
 
-  const adjustedMin = baseMin * severityMultiplier * deviationBonus;
-  const adjustedMax = baseMax * severityMultiplier * deviationBonus;
+  // FaceIQ-style Bezier recalculation:
+  // For each ratio, calculate what the score would be at the ideal value
+  let totalCurrentWeighted = 0;
+  let totalIdealWeighted = 0;
+  let totalWeight = 0;
 
-  // Calculate potential new score if treatment is applied
-  const avgCurrentScore = matchedRatios.length > 0
-    ? matchedRatios.reduce((sum, r) => sum + r.score, 0) / matchedRatios.length
-    : 5;
-  const potentialScore = Math.min(10, avgCurrentScore + (adjustedMax * 0.8));
+  matchedRatios.forEach(ratio => {
+    const config = FACEIQ_METRICS[ratio.id];
+    if (!config) return;
+
+    // Current score from the ratio
+    const currentScore = ratio.score;
+
+    // Calculate ideal value (midpoint of ideal range)
+    const idealValue = (config.idealMin + config.idealMax) / 2;
+
+    // Use Bezier curve to calculate what the score would be at ideal
+    const idealResult = scoreMeasurement(ratio.id, idealValue, { gender, ethnicity });
+    const idealScore = idealResult?.standardizedScore || 10;
+
+    // Weight by procedure effectiveness on this metric
+    // Procedures that target this metric get more weight
+    const isTargeted = proc.targetMetrics.includes(ratio.id);
+    const metricWeight = isTargeted ? 1.5 : 1.0;
+
+    // Also weight by how far from ideal (more room to improve = more impact)
+    const deviationWeight = Math.max(0.5, (10 - currentScore) / 5);
+
+    const weight = metricWeight * deviationWeight * config.weight;
+
+    totalCurrentWeighted += currentScore * weight;
+    totalIdealWeighted += idealScore * weight;
+    totalWeight += weight;
+  });
+
+  // Calculate weighted average scores
+  const avgCurrentScore = totalWeight > 0 ? totalCurrentWeighted / totalWeight : 5;
+  const avgIdealScore = totalWeight > 0 ? totalIdealWeighted / totalWeight : 10;
+
+  // The maximum improvement is the gap between current and ideal
+  const maxPossibleImprovement = avgIdealScore - avgCurrentScore;
+
+  // Apply procedure effectiveness factor (from expectedImprovementRange)
+  // This represents what percentage of the ideal we can realistically achieve
+  const effectivenessRatio = proc.expectedImprovementRange.max;
+
+  // Min improvement: conservative estimate
+  const minImprovement = maxPossibleImprovement * 0.3 * effectivenessRatio;
+  // Max improvement: optimistic but realistic
+  const maxImprovement = maxPossibleImprovement * 0.7 * effectivenessRatio;
+
+  // Potential score: current + realistic improvement from Bezier calculation
+  const potentialScore = Math.min(10, avgCurrentScore + (maxImprovement * 0.8));
 
   return {
-    min: Math.round(adjustedMin * 100) / 100,
-    max: Math.round(adjustedMax * 100) / 100,
+    min: Math.round(minImprovement * 100) / 100,
+    max: Math.round(maxImprovement * 100) / 100,
     potential: Math.round(potentialScore * 10) / 10,
   };
 }
 
-function generateRecommendations(flaws: Flaw[], frontRatios: Ratio[] = [], sideRatios: Ratio[] = []): Recommendation[] {
+function generateRecommendations(
+  flaws: Flaw[],
+  frontRatios: Ratio[] = [],
+  sideRatios: Ratio[] = [],
+  gender: Gender = 'male',
+  ethnicity: Ethnicity = 'other'
+): Recommendation[] {
   const recommendations: Recommendation[] = [];
   const allRatios = [...frontRatios, ...sideRatios];
 
@@ -1594,9 +1671,9 @@ function generateRecommendations(flaws: Flaw[], frontRatios: Ratio[] = [], sideR
       match.flaws.some(f => f.toLowerCase().includes(r.category.toLowerCase()))
     );
 
-    // Calculate expected improvement with the new function
+    // Calculate expected improvement with FaceIQ Bezier recalculation
     const avgFlawImpact = match.totalFlawImpact / match.flaws.length;
-    const improvement = calculateExpectedImprovement(proc, affectedRatios, avgFlawImpact);
+    const improvement = calculateExpectedImprovement(proc, affectedRatios, avgFlawImpact, gender, ethnicity);
 
     // Calculate priority score based on multiple factors
     const priorityScore =
@@ -1741,21 +1818,95 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     return analysisResults.sideAnalysis.measurements.map(m => transformToRatio(m, sideLandmarks));
   }, [analysisResults, sideLandmarks]);
 
-  // Generate strengths and flaws
-  const strengths = useMemo(() => {
+  // Generate strengths and flaws using INSIGHTS-BASED classification
+  // This processes insights.json definitions: calculates avg score of affected metrics,
+  // then classifies as strength (avg > threshold) or weakness (avg < threshold)
+  const { insightStrengths, insightFlaws } = useMemo(() => {
+    if (!analysisResults?.harmony) {
+      return { insightStrengths: [], insightFlaws: [] };
+    }
+
+    try {
+      // Classify using insights engine
+      const { strengths: classifiedStrengths, weaknesses: classifiedWeaknesses } =
+        classifyInsights(analysisResults.harmony.measurements, INSIGHTS_DEFINITIONS);
+
+      // Convert to UI-compatible types
+      const insightStrengths = classifiedStrengths.map((s) => convertToStrength(s));
+
+      let rollingLost = 0;
+      const insightFlaws = classifiedWeaknesses.map((w, i) => {
+        const flaw = convertToFlaw(w, i, rollingLost);
+        rollingLost = flaw.rollingPointsDeducted || 0;
+        return flaw;
+      });
+
+      return { insightStrengths, insightFlaws };
+    } catch (error) {
+      console.error('[ResultsContext] Error in insights classification:', error);
+      return { insightStrengths: [], insightFlaws: [] };
+    }
+  }, [analysisResults]);
+
+  // Generate grouping-based strengths/flaws (legacy approach for metrics not covered by insights)
+  const groupingStrengths = useMemo(() => {
     if (!analysisResults?.harmony) return [];
     return generateStrengthsFromAnalysis(analysisResults.harmony);
   }, [analysisResults]);
 
-  const flaws = useMemo(() => {
+  const groupingFlaws = useMemo(() => {
     if (!analysisResults?.harmony) return [];
     return generateFlawsFromAnalysis(analysisResults.harmony);
   }, [analysisResults]);
 
-  // Generate recommendations with metric-aware matching
+  // Merge insights + groupings, preferring insights (dedupe by category/metric overlap)
+  const strengths = useMemo(() => {
+    // Use insights as primary source
+    const usedMetricIds = new Set<string>();
+    insightStrengths.forEach(s => {
+      s.responsibleRatios.forEach(r => usedMetricIds.add(r.ratioId));
+    });
+
+    // Add grouping-based strengths that don't overlap
+    const nonOverlappingGrouping = groupingStrengths.filter(gs => {
+      const overlap = gs.responsibleRatios.some(r => usedMetricIds.has(r.ratioId));
+      return !overlap;
+    });
+
+    return [...insightStrengths, ...nonOverlappingGrouping];
+  }, [insightStrengths, groupingStrengths]);
+
+  const flaws = useMemo(() => {
+    // Use insights as primary source
+    const usedMetricIds = new Set<string>();
+    insightFlaws.forEach(f => {
+      f.responsibleRatios.forEach(r => usedMetricIds.add(r.ratioId));
+    });
+
+    // Add grouping-based flaws that don't overlap
+    const nonOverlappingGrouping = groupingFlaws.filter(gf => {
+      const overlap = gf.responsibleRatios.some(r => usedMetricIds.has(r.ratioId));
+      return !overlap;
+    });
+
+    // Recalculate rolling totals for merged list
+    let rollingLost = 0;
+    const merged = [...insightFlaws, ...nonOverlappingGrouping];
+    return merged.map(f => {
+      rollingLost += f.harmonyPercentageLost;
+      return {
+        ...f,
+        rollingPointsDeducted: rollingLost,
+        rollingHarmonyPercentageLost: rollingLost,
+        rollingStandardizedImpact: rollingLost / 10,
+      };
+    });
+  }, [insightFlaws, groupingFlaws]);
+
+  // Generate recommendations with metric-aware matching and Bezier recalculation
   const recommendations = useMemo(() => {
-    return generateRecommendations(flaws, frontRatios, sideRatios);
-  }, [flaws, frontRatios, sideRatios]);
+    return generateRecommendations(flaws, frontRatios, sideRatios, gender, ethnicity);
+  }, [flaws, frontRatios, sideRatios, gender, ethnicity]);
 
   // Build full harmony analysis
   const harmonyAnalysis = useMemo((): FullHarmonyAnalysis | null => {
@@ -1776,8 +1927,32 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     };
   }, [analysisResults, frontRatios, sideRatios, strengths, flaws]);
 
-  // Scores
-  const overallScore = analysisResults?.harmony?.overallScore || 0;
+  // Calculate weighted harmony score using looksmax_engine.py algorithm
+  const harmonyScoreResult = useMemo((): HarmonyScoreResult | null => {
+    if (!analysisResults?.harmony) return null;
+
+    const allMeasurements = analysisResults.harmony.measurements.map(m => ({
+      metricId: m.metricId,
+      standardizedScore: m.standardizedScore,
+    }));
+
+    return calculateHarmonyScore(allMeasurements);
+  }, [analysisResults]);
+
+  // Get top 3 and bottom 3 metrics with advice
+  const topMetrics = useMemo((): RankedMetric[] => {
+    if (!analysisResults?.harmony) return [];
+    return getTopMetrics(analysisResults.harmony.measurements, 3);
+  }, [analysisResults]);
+
+  const bottomMetrics = useMemo((): RankedMetric[] => {
+    if (!analysisResults?.harmony) return [];
+    return getBottomMetrics(analysisResults.harmony.measurements, 3);
+  }, [analysisResults]);
+
+  // Scores - now using weighted harmony
+  const harmonyPercentage = harmonyScoreResult?.harmonyPercentage || 0;
+  const overallScore = harmonyScoreResult?.weightedAverage || analysisResults?.harmony?.overallScore || 0;
   const frontScore = analysisResults?.harmony?.frontScore || 0;
   const sideScore = analysisResults?.harmony?.sideScore || 0;
 
@@ -1807,6 +1982,12 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     overallScore,
     frontScore,
     sideScore,
+    // Weighted harmony from looksmax_engine.py
+    harmonyScoreResult,
+    harmonyPercentage,
+    topMetrics,
+    bottomMetrics,
+    // UI state
     activeTab,
     setActiveTab,
     expandedMeasurementId,

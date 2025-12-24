@@ -130,7 +130,7 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Plastic and Reconstructive Surgery',
     year: 2017,
     summary: 'Demonstrates the importance of positive canthal tilt in perceived attractiveness across cultures.',
-    procedureRefs: ['SUR-05', 'MIN-07'],
+    procedureRefs: ['SUR-05', 'MIN-04'],
     genderRelevance: 'both',
   },
   {
@@ -188,7 +188,7 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Journal of Applied Social Psychology',
     year: 2011,
     summary: 'Research on how grooming affects perceived competence and attractiveness.',
-    procedureRefs: ['FND-01', 'FND-06', 'FND-07'],
+    procedureRefs: ['FND-04', 'FND-05'],
     genderRelevance: 'both',
   },
   // Orthognathic Research
@@ -227,28 +227,67 @@ function getRelevantCitations(
   gender?: Gender,
   ethnicity?: Ethnicity
 ): ResearchCitation[] {
-  return RESEARCH_CITATIONS.filter(citation => {
-    // Must match the procedure
-    if (!citation.procedureRefs.includes(procedureRefId)) return false;
+  // Calculate relevance score for sorting
+  function calculateRelevance(citation: ResearchCitation): number {
+    let score = 0;
 
-    // Check gender relevance
-    if (gender && citation.genderRelevance && citation.genderRelevance !== 'both') {
-      if (citation.genderRelevance !== gender) return false;
-    }
+    // Base score: procedure is in the list
+    if (!citation.procedureRefs.includes(procedureRefId)) return -1;
 
-    // Check ethnicity relevance
-    if (ethnicity && citation.ethnicityRelevance && ethnicity !== 'other') {
-      // Include if the ethnicity matches OR if no ethnicity filter is set on the citation
-      if (!citation.ethnicityRelevance.includes(ethnicity)) {
-        // Only exclude if the citation is ethnicity-specific
-        if (citation.ethnicityRelevance.length > 0 && citation.ethnicityRelevance.length < 6) {
-          return false;
-        }
+    // Procedure specificity: fewer refs = more specific to this procedure (+20 max)
+    score += Math.max(0, 20 - (citation.procedureRefs.length * 3));
+
+    // Gender relevance scoring
+    if (gender && citation.genderRelevance) {
+      if (citation.genderRelevance === gender) {
+        // Exact gender match - highest priority (+30)
+        score += 30;
+      } else if (citation.genderRelevance === 'both') {
+        // General/both - neutral (+10)
+        score += 10;
+      } else {
+        // Wrong gender - exclude
+        return -1;
       }
+    } else {
+      // No gender specified or citation has no gender preference
+      score += 10;
     }
 
-    return true;
-  }).slice(0, 3); // Limit to 3 most relevant citations
+    // Ethnicity relevance scoring
+    if (ethnicity && ethnicity !== 'other' && citation.ethnicityRelevance) {
+      if (citation.ethnicityRelevance.includes(ethnicity)) {
+        // Exact ethnicity match - high priority (+25)
+        score += 25;
+        // Bonus for ethnicity-specific studies (fewer ethnicities = more focused)
+        score += Math.max(0, 15 - (citation.ethnicityRelevance.length * 2));
+      } else {
+        // Citation is ethnicity-specific but doesn't match user - lower priority
+        // Still include unless very specific (1-2 ethnicities)
+        if (citation.ethnicityRelevance.length <= 2) {
+          return -1; // Too specific for different ethnicity
+        }
+        score += 5; // General enough to still be useful
+      }
+    } else {
+      // No ethnicity filter or citation applies to all
+      score += 10;
+    }
+
+    // Recency bonus: newer studies slightly preferred
+    const yearBonus = Math.max(0, (citation.year - 2000) * 0.5);
+    score += yearBonus;
+
+    return score;
+  }
+
+  // Filter, score, sort, and take top 3
+  return RESEARCH_CITATIONS
+    .map(citation => ({ citation, relevance: calculateRelevance(citation) }))
+    .filter(item => item.relevance >= 0)
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 3)
+    .map(item => item.citation);
 }
 
 interface TrackerState {

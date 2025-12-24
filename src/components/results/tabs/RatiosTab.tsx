@@ -8,66 +8,132 @@ import { TabContent } from '../ResultsLayout';
 import { MeasurementCard } from '../cards/MeasurementCard';
 import { ScoreCircle } from '../shared';
 import { FaceOverlay } from '../visualization/FaceOverlay';
-import { Ratio, MEASUREMENT_CATEGORIES } from '@/types/results';
+import { Ratio } from '@/types/results';
+import { FACEIQ_PRIMARY_CATEGORIES, getPrimaryCategory } from '@/lib/taxonomy';
 
 // ============================================
-// CATEGORY FILTER
+// HIERARCHICAL CATEGORY FILTER
 // ============================================
 
-interface CategoryFilterProps {
-  selectedCategory: string | null;
-  onSelect: (category: string | null) => void;
+interface HierarchicalCategoryFilterProps {
+  selectedPrimary: string | null;
+  selectedSecondary: string | null;
+  onSelectPrimary: (primary: string | null) => void;
+  onSelectSecondary: (secondary: string | null) => void;
   ratios: Ratio[];
 }
 
-function CategoryFilter({ selectedCategory, onSelect, ratios }: CategoryFilterProps) {
-  // Get unique categories from ratios
-  const categories = useMemo(() => {
-    const cats = new Set(ratios.map(r => r.category));
-    return Array.from(cats);
-  }, [ratios]);
-
-  // Count ratios per category
-  const categoryCounts = useMemo(() => {
+function HierarchicalCategoryFilter({
+  selectedPrimary,
+  selectedSecondary,
+  onSelectPrimary,
+  onSelectSecondary,
+  ratios
+}: HierarchicalCategoryFilterProps) {
+  // Count ratios per primary category
+  const primaryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    ratios.forEach(r => {
-      counts[r.category] = (counts[r.category] || 0) + 1;
+    FACEIQ_PRIMARY_CATEGORIES.forEach(cat => {
+      counts[cat.id] = ratios.filter(r => r.taxonomyPrimary === cat.id).length;
     });
     return counts;
   }, [ratios]);
 
+  // Count ratios per subcategory (for selected primary)
+  const secondaryCounts = useMemo(() => {
+    if (!selectedPrimary) return {};
+    const counts: Record<string, number> = {};
+    const primary = getPrimaryCategory(selectedPrimary);
+    if (primary?.subcategories) {
+      primary.subcategories.forEach(sub => {
+        counts[sub.id] = ratios.filter(r =>
+          r.taxonomyPrimary === selectedPrimary && r.taxonomySecondary === sub.id
+        ).length;
+      });
+    }
+    return counts;
+  }, [ratios, selectedPrimary]);
+
+  const primaryCategory = selectedPrimary ? getPrimaryCategory(selectedPrimary) : null;
+
+  // Color mapping for primary categories
+  const primaryColors: Record<string, string> = {
+    harmony: '#67e8f9',      // cyan
+    dimorphism: '#f472b6',   // pink
+    angularity: '#fb923c',   // orange
+    features: '#a78bfa',     // purple
+  };
+
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => onSelect(null)}
-        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-          selectedCategory === null
-            ? 'bg-cyan-500 text-black'
-            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-        }`}
-      >
-        All ({ratios.length})
-      </button>
-      {categories.map(cat => {
-        const catConfig = MEASUREMENT_CATEGORIES.find(c =>
-          c.name.toLowerCase().includes(cat.toLowerCase()) ||
-          cat.toLowerCase().includes(c.name.toLowerCase())
-        );
-        return (
-          <button
-            key={cat}
-            onClick={() => onSelect(cat)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              selectedCategory === cat
-                ? 'text-black'
-                : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-            }`}
-            style={selectedCategory === cat ? { backgroundColor: catConfig?.color || '#67e8f9' } : {}}
-          >
-            {cat} ({categoryCounts[cat] || 0})
-          </button>
-        );
-      })}
+    <div className="space-y-3">
+      {/* Primary Categories */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => {
+            onSelectPrimary(null);
+            onSelectSecondary(null);
+          }}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            selectedPrimary === null
+              ? 'bg-cyan-500 text-black'
+              : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+          }`}
+        >
+          All ({ratios.length})
+        </button>
+        {FACEIQ_PRIMARY_CATEGORIES.map(cat => {
+          const count = primaryCounts[cat.id] || 0;
+          const isSelected = selectedPrimary === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => {
+                onSelectPrimary(isSelected ? null : cat.id);
+                onSelectSecondary(null);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                isSelected
+                  ? 'text-black'
+                  : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+              }`}
+              style={isSelected ? { backgroundColor: primaryColors[cat.id] || '#67e8f9' } : {}}
+              title={cat.description}
+            >
+              {cat.name} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Subcategories (shown when primary is selected) */}
+      {selectedPrimary && primaryCategory?.subcategories && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="flex flex-wrap gap-2 pl-4 border-l-2 border-neutral-700"
+        >
+          {primaryCategory.subcategories.map(sub => {
+            const count = secondaryCounts[sub.id] || 0;
+            if (count === 0) return null; // Don't show empty subcategories
+            const isSelected = selectedSecondary === sub.id;
+            return (
+              <button
+                key={sub.id}
+                onClick={() => onSelectSecondary(isSelected ? null : sub.id)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                  isSelected
+                    ? 'bg-neutral-600 text-white'
+                    : 'bg-neutral-800/50 text-neutral-400 hover:bg-neutral-700'
+                }`}
+                title={sub.description}
+              >
+                {sub.name} ({count})
+              </button>
+            );
+          })}
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -121,7 +187,8 @@ export function RatiosTab({ profileType }: RatiosTabProps) {
   } = useResults();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [primaryFilter, setPrimaryFilter] = useState<string | null>(null);
+  const [secondaryFilter, setSecondaryFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Select data based on profile type
@@ -130,14 +197,21 @@ export function RatiosTab({ profileType }: RatiosTabProps) {
   const photo = profileType === 'front' ? frontPhoto : sidePhoto;
   const landmarks = profileType === 'front' ? frontLandmarks : sideLandmarks;
 
-  // Filter ratios
+  // Filter ratios using hierarchical taxonomy
   const filteredRatios = useMemo(() => {
     let filtered = ratios;
 
-    if (categoryFilter) {
-      filtered = filtered.filter(r => r.category === categoryFilter);
+    // Filter by primary category
+    if (primaryFilter) {
+      filtered = filtered.filter(r => r.taxonomyPrimary === primaryFilter);
     }
 
+    // Filter by secondary category (subcategory)
+    if (secondaryFilter) {
+      filtered = filtered.filter(r => r.taxonomySecondary === secondaryFilter);
+    }
+
+    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(r =>
@@ -147,7 +221,7 @@ export function RatiosTab({ profileType }: RatiosTabProps) {
     }
 
     return filtered;
-  }, [ratios, categoryFilter, searchQuery]);
+  }, [ratios, primaryFilter, secondaryFilter, searchQuery]);
 
   // Get selected ratio for visualization
   const selectedRatio = ratios.find(r => r.id === selectedVisualizationMetric);
@@ -195,9 +269,11 @@ export function RatiosTab({ profileType }: RatiosTabProps) {
               </div>
             </div>
 
-            <CategoryFilter
-              selectedCategory={categoryFilter}
-              onSelect={setCategoryFilter}
+            <HierarchicalCategoryFilter
+              selectedPrimary={primaryFilter}
+              selectedSecondary={secondaryFilter}
+              onSelectPrimary={setPrimaryFilter}
+              onSelectSecondary={setSecondaryFilter}
               ratios={ratios}
             />
           </div>

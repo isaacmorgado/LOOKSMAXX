@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ResultsProvider } from '@/contexts/ResultsContext';
 import { Results } from '@/components/results/Results';
 import { LandmarkPoint, FRONT_PROFILE_LANDMARKS, SIDE_PROFILE_LANDMARKS } from '@/lib/landmarks';
@@ -20,9 +19,18 @@ const generateDemoLandmarks = (baseLandmarks: LandmarkPoint[]): LandmarkPoint[] 
   }));
 };
 
+// Generate demo data outside component to avoid closure issues
+const createDemoData = () => ({
+  frontLandmarks: generateDemoLandmarks(FRONT_PROFILE_LANDMARKS),
+  sideLandmarks: generateDemoLandmarks(SIDE_PROFILE_LANDMARKS),
+  frontPhoto: '/demo-front.jpg',
+  sidePhoto: '/demo-side.jpg',
+  gender: 'male' as Gender,
+  ethnicity: 'white' as Ethnicity,
+});
+
 export default function ResultsPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [initialData, setInitialData] = useState<{
     frontLandmarks: LandmarkPoint[];
     sideLandmarks: LandmarkPoint[];
@@ -33,66 +41,36 @@ export default function ResultsPage() {
   } | null>(null);
 
   useEffect(() => {
-    // Try to get data from sessionStorage (set by analysis page)
-    const storedData = sessionStorage.getItem('analysisResults');
+    // Mark as mounted (client-side only)
+    setMounted(true);
 
-    if (storedData) {
-      try {
+    try {
+      // Try to get data from sessionStorage (set by analysis page)
+      const storedData = typeof window !== 'undefined'
+        ? sessionStorage.getItem('analysisResults')
+        : null;
+
+      if (storedData) {
         const parsed = JSON.parse(storedData);
         setInitialData(parsed);
-      } catch (e) {
-        console.error('Failed to parse analysis results:', e);
-        // Use demo data as fallback
-        loadDemoData();
+      } else {
+        // No stored data - use demo data
+        setInitialData(createDemoData());
       }
-    } else {
-      // No stored data - use demo data or redirect
-      loadDemoData();
+    } catch (e) {
+      console.error('Failed to load analysis results:', e);
+      // Use demo data as fallback
+      setInitialData(createDemoData());
     }
-
-    setIsLoading(false);
   }, []);
 
-  const loadDemoData = () => {
-    // Generate demo landmarks for testing
-    const demoFrontLandmarks = generateDemoLandmarks(FRONT_PROFILE_LANDMARKS);
-    const demoSideLandmarks = generateDemoLandmarks(SIDE_PROFILE_LANDMARKS);
-
-    setInitialData({
-      frontLandmarks: demoFrontLandmarks,
-      sideLandmarks: demoSideLandmarks,
-      frontPhoto: '/demo-front.jpg', // Placeholder - would be actual uploaded image
-      sidePhoto: '/demo-side.jpg',
-      gender: 'male',
-      ethnicity: 'white', // Added for testing research citations
-    });
-  };
-
-  if (isLoading) {
+  // Show loading state until mounted and data is ready
+  if (!mounted || !initialData) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-neutral-400">Loading your analysis...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!initialData) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center p-8">
-          <h1 className="text-2xl font-bold text-white mb-4">No Analysis Found</h1>
-          <p className="text-neutral-400 mb-6">
-            Please complete a facial analysis first.
-          </p>
-          <button
-            onClick={() => router.push('/analysis')}
-            className="px-6 py-3 bg-cyan-500 text-black font-medium rounded-lg hover:bg-cyan-400 transition-colors"
-          >
-            Start Analysis
-          </button>
         </div>
       </div>
     );

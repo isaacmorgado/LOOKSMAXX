@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   User,
@@ -71,10 +72,12 @@ function Sidebar({ onClose }: SidebarProps) {
       <div className="p-4 border-b border-neutral-800">
         <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-900 mb-3">
           {frontPhoto ? (
-            <img
+            <Image
               src={frontPhoto}
               alt="Your face"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -170,6 +173,7 @@ interface ResultsLayoutProps {
 
 export function ResultsLayout({ children }: ResultsLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { activeTab } = useResults();
 
   return (
     <div className="flex min-h-screen bg-black">
@@ -213,7 +217,7 @@ export function ResultsLayout({ children }: ResultsLayoutProps) {
         <main className="flex-1">
           <AnimatePresence mode="wait">
             <motion.div
-              key={useResults().activeTab}
+              key={activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}

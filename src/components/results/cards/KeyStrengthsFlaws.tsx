@@ -191,9 +191,9 @@ function ContributingRatioButton({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: animationDelay }}
       onClick={onClick}
-      className="w-full flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-lg bg-neutral-900/80 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-800/50 transition-all text-left cursor-pointer group"
+      className="w-full flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-lg border transition-all text-left cursor-pointer group bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-800/50"
     >
-      <span className="text-xs sm:text-sm text-neutral-200 font-medium group-hover:text-white transition-colors">
+      <span className="text-xs sm:text-sm font-medium transition-colors text-neutral-200 group-hover:text-white">
         {ratioName}
       </span>
       <div className="flex items-baseline gap-0.5 sm:gap-1">

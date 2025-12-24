@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, AlertTriangle, Info } from 'lucide-react';
 import { FaceIQScoreResult } from '@/lib/faceiq-scoring';
 import { generateAIDescription, getSeverityFromScore } from '@/lib/aiDescriptions';
@@ -246,10 +247,12 @@ export function MetricDetailModal({
                   <div>
                     <div className="relative rounded-xl overflow-hidden border border-neutral-700 bg-neutral-800">
                       <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
-                        <img
+                        <Image
                           src={facePhoto}
                           alt="Face"
-                          className="w-full h-full object-contain"
+                          fill
+                          className="object-contain"
+                          unoptimized
                         />
                       </div>
                     </div>
