@@ -13,10 +13,11 @@ import {
   Menu,
   X,
   ChevronRight,
+  Trophy,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { ResultsTab } from '@/types/results';
-import { ScoreCircle } from './shared';
+import { ScoreCircle, RankBadge } from './shared';
 
 // ============================================
 // TAB NAVIGATION
@@ -32,6 +33,7 @@ const TABS: TabConfig[] = [
   { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
   { id: 'front-ratios', label: 'Front Ratios', icon: <User size={18} /> },
   { id: 'side-ratios', label: 'Side Ratios', icon: <ScanFace size={18} /> },
+  { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy size={18} /> },
   { id: 'plan', label: 'Your Plan', icon: <Sparkles size={18} /> },
   { id: 'options', label: 'Options', icon: <Settings size={18} /> },
   { id: 'support', label: 'Support', icon: <HelpCircle size={18} /> },
@@ -92,6 +94,9 @@ function Sidebar({ onClose }: SidebarProps) {
         <div className="text-center">
           <p className="text-sm text-neutral-400">Harmony Score</p>
           <p className="text-2xl font-bold text-white">{overallScore.toFixed(2)}</p>
+          <div className="mt-2">
+            <RankBadge size="md" />
+          </div>
         </div>
       </div>
 
@@ -154,6 +159,7 @@ function MobileHeader({ onMenuClick }: MobileHeaderProps) {
         <span className="font-medium text-white">{currentTab?.label}</span>
       </div>
       <div className="flex items-center gap-2">
+        <RankBadge size="sm" />
         <span className="text-sm text-neutral-400">{overallScore.toFixed(1)}</span>
         <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
           <span className="text-xs text-cyan-400 font-bold">{Math.round(overallScore)}</span>

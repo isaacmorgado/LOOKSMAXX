@@ -4,7 +4,93 @@
  * Handles all authenticated requests to the Railway-hosted API
  */
 
+import type { UserRank, LeaderboardEntry, LeaderboardData, UserProfile } from '@/types/results';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// API Response types (snake_case from backend)
+interface LeaderboardApiResponse {
+  user_id: string;
+  score: number;
+  global_rank: number;
+  gender_rank: number;
+  percentile: number;
+  total_users: number;
+  gender_total: number;
+  anonymous_name: string;
+  updated_at: string;
+}
+
+interface LeaderboardEntryResponse {
+  rank: number;
+  score: number;
+  anonymous_name: string;
+  gender: 'male' | 'female';
+  face_photo_url: string | null;
+  is_current_user: boolean;
+}
+
+interface LeaderboardListResponse {
+  entries: LeaderboardEntryResponse[];
+  total_count: number;
+  user_rank: LeaderboardApiResponse | null;
+}
+
+interface UserProfileResponse {
+  rank: number;
+  score: number;
+  anonymous_name: string;
+  gender: 'male' | 'female';
+  face_photo_url: string | null;
+  top_strengths: string[];
+  top_improvements: string[];
+}
+
+// Transform functions (snake_case -> camelCase)
+function transformUserRank(data: LeaderboardApiResponse): UserRank {
+  return {
+    userId: data.user_id,
+    score: data.score,
+    globalRank: data.global_rank,
+    genderRank: data.gender_rank,
+    percentile: data.percentile,
+    totalUsers: data.total_users,
+    genderTotal: data.gender_total,
+    anonymousName: data.anonymous_name,
+    updatedAt: data.updated_at,
+  };
+}
+
+function transformLeaderboardEntry(data: LeaderboardEntryResponse): LeaderboardEntry {
+  return {
+    rank: data.rank,
+    score: data.score,
+    anonymousName: data.anonymous_name,
+    gender: data.gender,
+    facePhotoUrl: data.face_photo_url,
+    isCurrentUser: data.is_current_user,
+  };
+}
+
+function transformLeaderboardData(data: LeaderboardListResponse): LeaderboardData {
+  return {
+    entries: data.entries.map(transformLeaderboardEntry),
+    totalCount: data.total_count,
+    userRank: data.user_rank ? transformUserRank(data.user_rank) : null,
+  };
+}
+
+function transformUserProfile(data: UserProfileResponse): UserProfile {
+  return {
+    rank: data.rank,
+    score: data.score,
+    anonymousName: data.anonymous_name,
+    gender: data.gender,
+    facePhotoUrl: data.face_photo_url,
+    topStrengths: data.top_strengths,
+    topImprovements: data.top_improvements,
+  };
+}
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -112,6 +198,53 @@ class ApiClient {
     created_at: string;
   }>> {
     return this.request('/payments/history');
+  }
+
+  // Leaderboard
+  async submitScore(data: {
+    score: number;
+    analysis_id?: string;
+    gender: 'male' | 'female';
+    ethnicity?: string;
+    face_photo_url?: string;
+    top_strengths?: string[];
+    top_improvements?: string[];
+  }): Promise<UserRank> {
+    const response = await this.request<LeaderboardApiResponse>('/leaderboard/score', {
+      method: 'POST',
+      body: data,
+    });
+    return transformUserRank(response);
+  }
+
+  async getMyRank(): Promise<UserRank> {
+    const response = await this.request<LeaderboardApiResponse>('/leaderboard/rank');
+    return transformUserRank(response);
+  }
+
+  async getLeaderboard(options?: {
+    gender?: 'male' | 'female';
+    limit?: number;
+    offset?: number;
+  }): Promise<LeaderboardData> {
+    const params = new URLSearchParams();
+    if (options?.gender) params.set('gender', options.gender);
+    if (options?.limit) params.set('limit', String(options.limit));
+    if (options?.offset) params.set('offset', String(options.offset));
+    const query = params.toString() ? `?${params}` : '';
+    const response = await this.request<LeaderboardListResponse>(`/leaderboard${query}`);
+    return transformLeaderboardData(response);
+  }
+
+  async getLeaderboardAroundMe(rangeSize?: number): Promise<LeaderboardData> {
+    const query = rangeSize ? `?range_size=${rangeSize}` : '';
+    const response = await this.request<LeaderboardListResponse>(`/leaderboard/around-me${query}`);
+    return transformLeaderboardData(response);
+  }
+
+  async getUserProfile(userId: string): Promise<UserProfile> {
+    const response = await this.request<UserProfileResponse>(`/leaderboard/user/${userId}`);
+    return transformUserProfile(response);
   }
 }
 

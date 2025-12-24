@@ -7,6 +7,7 @@ import { FrontRatiosTab, SideRatiosTab } from './tabs/RatiosTab';
 import { PlanTab } from './tabs/PlanTab';
 import { OptionsTab } from './tabs/OptionsTab';
 import { SupportTab } from './tabs/SupportTab';
+import { LeaderboardTab } from './tabs/LeaderboardTab';
 
 export function Results() {
   const { activeTab } = useResults();
@@ -19,6 +20,8 @@ export function Results() {
         return <FrontRatiosTab />;
       case 'side-ratios':
         return <SideRatiosTab />;
+      case 'leaderboard':
+        return <LeaderboardTab />;
       case 'plan':
         return <PlanTab />;
       case 'options':

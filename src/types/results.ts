@@ -195,9 +195,46 @@ export type ResultsTab =
   | 'overview'
   | 'front-ratios'
   | 'side-ratios'
+  | 'leaderboard'
   | 'plan'
   | 'options'
   | 'support';
+
+// ============================================
+// LEADERBOARD TYPES
+// ============================================
+
+export interface UserRank {
+  userId: string;
+  score: number;
+  globalRank: number;
+  genderRank: number;
+  percentile: number;
+  totalUsers: number;
+  genderTotal: number;
+  anonymousName: string;
+  updatedAt: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  score: number;
+  anonymousName: string;
+  gender: 'male' | 'female';
+  facePhotoUrl: string | null;
+  isCurrentUser: boolean;
+}
+
+export interface UserProfile extends Omit<LeaderboardEntry, 'isCurrentUser'> {
+  topStrengths: string[];
+  topImprovements: string[];
+}
+
+export interface LeaderboardData {
+  entries: LeaderboardEntry[];
+  totalCount: number;
+  userRank: UserRank | null;
+}
 
 export interface ResultsUIState {
   activeTab: ResultsTab;

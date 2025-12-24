@@ -8,6 +8,7 @@ import { RecommendationPhase, getScoreColor, getQualityColor, getSeverityColor }
 export { AnimatedScore } from './AnimatedScore';
 export { ShareButton } from './ShareButton';
 export { ExportButton } from './ExportButton';
+export { RankBadge } from './RankBadge';
 
 // ============================================
 // QUALITY BADGE
