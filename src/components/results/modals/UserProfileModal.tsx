@@ -47,9 +47,11 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
 
   if (!mounted) return null;
 
+  const isLoading = isOpen && !selectedProfile;
+
   const modalContent = (
     <AnimatePresence>
-      {isOpen && selectedProfile && (
+      {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -69,24 +71,32 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
             className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 flex items-center justify-center">
-                  <Trophy size={18} className="text-yellow-400" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-white">{selectedProfile.anonymousName}</h2>
-                  <p className="text-xs text-neutral-500 capitalize">{selectedProfile.gender}</p>
-                </div>
+            {isLoading ? (
+              /* Loading State */
+              <div className="p-8 flex flex-col items-center justify-center">
+                <div className="w-10 h-10 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-neutral-400">Loading profile...</p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-neutral-400" />
-              </button>
-            </div>
+            ) : selectedProfile ? (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-neutral-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 flex items-center justify-center">
+                      <Trophy size={18} className="text-yellow-400" />
+                    </div>
+                    <div>
+                      <h2 className="font-semibold text-white">{selectedProfile.anonymousName}</h2>
+                      <p className="text-xs text-neutral-500 capitalize">{selectedProfile.gender}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleClose}
+                    className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+                  >
+                    <X size={20} className="text-neutral-400" />
+                  </button>
+                </div>
 
             {/* Profile Content */}
             <div className="p-6 space-y-6">
@@ -164,6 +174,8 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
                 </div>
               )}
             </div>
+              </>
+            ) : null}
           </motion.div>
         </motion.div>
       )}

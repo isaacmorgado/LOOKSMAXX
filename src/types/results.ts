@@ -217,6 +217,7 @@ export interface UserRank {
 }
 
 export interface LeaderboardEntry {
+  userId: string;
   rank: number;
   score: number;
   anonymousName: string;

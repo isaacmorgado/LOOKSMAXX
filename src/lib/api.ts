@@ -22,6 +22,7 @@ interface LeaderboardApiResponse {
 }
 
 interface LeaderboardEntryResponse {
+  user_id: string;
   rank: number;
   score: number;
   anonymous_name: string;
@@ -37,6 +38,7 @@ interface LeaderboardListResponse {
 }
 
 interface UserProfileResponse {
+  user_id: string;
   rank: number;
   score: number;
   anonymous_name: string;
@@ -63,6 +65,7 @@ function transformUserRank(data: LeaderboardApiResponse): UserRank {
 
 function transformLeaderboardEntry(data: LeaderboardEntryResponse): LeaderboardEntry {
   return {
+    userId: data.user_id,
     rank: data.rank,
     score: data.score,
     anonymousName: data.anonymous_name,
@@ -82,6 +85,7 @@ function transformLeaderboardData(data: LeaderboardListResponse): LeaderboardDat
 
 function transformUserProfile(data: UserProfileResponse): UserProfile {
   return {
+    userId: data.user_id,
     rank: data.rank,
     score: data.score,
     anonymousName: data.anonymous_name,
@@ -245,6 +249,35 @@ class ApiClient {
   async getUserProfile(userId: string): Promise<UserProfile> {
     const response = await this.request<UserProfileResponse>(`/leaderboard/user/${userId}`);
     return transformUserProfile(response);
+  }
+
+  // Auth
+  async checkUsername(username: string): Promise<{ available: boolean; reason: string | null }> {
+    return this.request(`/auth/check-username/${encodeURIComponent(username)}`);
+  }
+
+  async register(data: {
+    email: string;
+    password: string;
+    username: string;
+    termsAccepted: boolean;
+  }): Promise<{ access_token: string; token_type: string; user: { id: string; email: string; username: string; plan: string } }> {
+    return this.request('/auth/register', {
+      method: 'POST',
+      body: {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+        terms_accepted: data.termsAccepted,
+      },
+    });
+  }
+
+  async login(data: { email: string; password: string }): Promise<{ access_token: string; token_type: string; user: { id: string; email: string; username: string; plan: string } }> {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: data,
+    });
   }
 }
 

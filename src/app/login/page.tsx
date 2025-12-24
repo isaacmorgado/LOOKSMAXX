@@ -127,6 +127,14 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {/* Create Account Link */}
+          <p className="text-center text-neutral-500 text-sm pt-2">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-[#00f3ff] hover:underline">
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>

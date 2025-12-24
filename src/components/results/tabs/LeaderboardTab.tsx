@@ -6,8 +6,6 @@ import {
   Trophy,
   Medal,
   Crown,
-  Users,
-  ChevronDown,
   User as UserIcon,
 } from 'lucide-react';
 import { TabContent } from '../ResultsLayout';
@@ -47,7 +45,6 @@ export function LeaderboardTab() {
     totalCount,
     isLoading,
     error,
-    genderFilter,
     setGenderFilter,
     fetchLeaderboard,
     hasMore,
@@ -58,37 +55,30 @@ export function LeaderboardTab() {
   const { gender } = useResults();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Auto-set gender filter to user's gender (males see male leaderboard, females see female)
   useEffect(() => {
-    fetchLeaderboard(0);
-  }, [fetchLeaderboard]);
+    setGenderFilter(gender);
+  }, [gender, setGenderFilter]);
 
-  const handleUserClick = (userId: string) => {
-    setSelectedUserId(userId);
+  // Fetch leaderboard if empty (first visit or after gender filter is set)
+  useEffect(() => {
+    if (leaderboard.length === 0 && !isLoading && !error) {
+      fetchLeaderboard(0);
+    }
+  }, [leaderboard.length, isLoading, error, fetchLeaderboard]);
+
+  const handleUserClick = (entry: { userId: string }) => {
+    setSelectedUserId(entry.userId);
     setIsModalOpen(true);
   };
+
+  const genderLabel = gender === 'male' ? 'Males' : 'Females';
 
   return (
     <>
       <TabContent
-        title="Leaderboard"
-        subtitle="See how you compare globally"
-        rightContent={
-          <div className="flex items-center gap-2">
-            {/* Gender Filter */}
-            <div className="relative">
-              <select
-                value={genderFilter}
-                onChange={(e) => setGenderFilter(e.target.value as 'all' | 'male' | 'female')}
-                className="appearance-none bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
-              >
-                <option value="all">All Genders</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-              <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-            </div>
-          </div>
-        }
+        title={`${genderLabel} Leaderboard`}
+        subtitle={`See how you compare among ${genderLabel.toLowerCase()}`}
       >
         <div className="space-y-6">
           {/* Your Rank Card */}
@@ -100,26 +90,16 @@ export function LeaderboardTab() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-neutral-400 mb-1">Your Global Rank</p>
+                  <p className="text-sm text-neutral-400 mb-1">Your Rank ({genderLabel})</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-4xl font-bold text-white">#{userRank.globalRank}</span>
+                    <span className="text-4xl font-bold text-white">#{userRank.genderRank}</span>
                     <div className="text-sm text-neutral-400">
                       <p>Top {userRank.percentile.toFixed(1)}%</p>
-                      <p>of {userRank.totalUsers.toLocaleString()} users</p>
+                      <p>of {userRank.genderTotal.toLocaleString()} {genderLabel.toLowerCase()}</p>
                     </div>
                   </div>
                 </div>
                 <ScoreCircle score={userRank.score} size="lg" animate={false} />
-              </div>
-
-              {/* Gender-specific rank */}
-              <div className="mt-4 pt-4 border-t border-cyan-500/20 flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Users size={16} className="text-neutral-400" />
-                  <span className="text-sm text-neutral-300">
-                    #{userRank.genderRank} among {userRank.genderTotal.toLocaleString()} {gender === 'male' ? 'males' : 'females'}
-                  </span>
-                </div>
               </div>
             </motion.div>
           )}
@@ -129,9 +109,9 @@ export function LeaderboardTab() {
             <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy size={20} className="text-cyan-400" />
-                <h3 className="font-semibold text-white">Top Rankings</h3>
+                <h3 className="font-semibold text-white">Top {genderLabel}</h3>
               </div>
-              <span className="text-sm text-neutral-400">{totalCount.toLocaleString()} participants</span>
+              <span className="text-sm text-neutral-400">{totalCount.toLocaleString()} {genderLabel.toLowerCase()}</span>
             </div>
 
             {isLoading && leaderboard.length === 0 ? (
@@ -154,7 +134,7 @@ export function LeaderboardTab() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    onClick={() => !entry.isCurrentUser && handleUserClick(entry.anonymousName)}
+                    onClick={() => !entry.isCurrentUser && handleUserClick(entry)}
                     className={`w-full flex items-center gap-4 p-4 ${getRankBgClass(entry.rank, entry.isCurrentUser)} border-l-2 ${
                       entry.isCurrentUser ? 'border-l-cyan-500' : 'border-l-transparent'
                     } hover:bg-neutral-800/50 transition-colors text-left`}

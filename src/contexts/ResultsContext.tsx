@@ -125,7 +125,7 @@ function transformToRatio(result: FaceIQScoreResult, landmarks: LandmarkPoint[])
     id: result.metricId,
     name: result.name,
     value: result.value,
-    score: result.score,
+    score: result.standardizedScore,  // Use standardized 0-10 score for UI display
     standardizedScore: result.standardizedScore,
     unit: convertUnitToRatioUnit(result.unit),
     idealMin: result.idealMin,
