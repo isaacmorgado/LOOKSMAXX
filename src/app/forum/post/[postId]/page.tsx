@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
-import { VoteButtons, CommentThread } from '@/components/forum';
+import { VoteButtons, CommentThread, ForumHeader } from '@/components/forum';
 import { formatDistanceToNow } from '@/lib/utils';
 
 export default function PostDetailPage() {
@@ -89,7 +89,9 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
+      <ForumHeader />
+
+      {/* Breadcrumb */}
       <div className="border-b border-neutral-800">
         <div className="max-w-4xl mx-auto px-4 py-4">
           {currentPost ? (

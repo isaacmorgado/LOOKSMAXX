@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
+import { ForumHeader } from '@/components/forum';
 import { ArrowRight, TrendingUp, Users, MessageSquare, Flame, Clock, Star } from 'lucide-react';
 
 export default function ForumPage() {
@@ -25,36 +26,7 @@ export default function ForumPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-neutral-800">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-                <span className="text-[#00f3ff] text-sm font-bold">L</span>
-              </div>
-              <span className="text-lg font-semibold text-white hidden sm:block">LOOKSMAXX</span>
-            </Link>
-            <div className="h-5 w-px bg-neutral-700 hidden sm:block" />
-            <span className="text-neutral-400 text-sm hidden sm:block">Community</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/results"
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
-            >
-              My Results
-            </Link>
-            <Link
-              href="/login"
-              className="h-9 px-4 rounded-lg bg-[#00f3ff] text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <ForumHeader />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-neutral-800">

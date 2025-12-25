@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
-import { PostCard, CreatePostForm } from '@/components/forum';
+import { PostCard, CreatePostForm, ForumHeader } from '@/components/forum';
 import { SortOrder } from '@/types/forum';
 
 export default function CategoryPage() {
@@ -61,6 +61,8 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-[#030303]">
+      <ForumHeader />
+
       {/* Banner */}
       <div className="h-20 bg-gradient-to-r from-[#00f3ff] to-[#0088ff]" />
 
