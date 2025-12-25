@@ -5,49 +5,56 @@ import { Category } from '@/types/forum';
 
 interface CategoryCardProps {
   category: Category;
+  rank?: number;
 }
 
-export function CategoryCard({ category }: CategoryCardProps) {
+export function CategoryCard({ category, rank }: CategoryCardProps) {
   return (
     <Link href={`/forum/${category.slug}`}>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 hover:border-[#00f3ff]/30 transition-colors">
-        <div className="flex items-start gap-3">
-          {category.icon && (
-            <span className="text-2xl">{category.icon}</span>
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-white font-medium truncate">{category.name}</h3>
-            {category.description && (
-              <p className="text-neutral-400 text-sm mt-1 line-clamp-2">
-                {category.description}
-              </p>
-            )}
-            <div className="flex items-center gap-4 mt-2 text-xs text-neutral-500">
-              <span>{category.postCount} posts</span>
-              <span>{category.subForums.length} sub-forums</span>
-            </div>
-          </div>
+      <div className="flex items-center gap-3 p-3 hover:bg-[#1a1a1b] rounded transition-colors group">
+        {/* Rank number */}
+        {rank !== undefined && (
+          <span className="text-sm font-medium text-[#818384] w-5">{rank}</span>
+        )}
+
+        {/* Community icon */}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff4500] to-[#ff6f00] flex items-center justify-center text-white text-lg flex-shrink-0">
+          {category.icon || category.name.charAt(0)}
         </div>
 
-        {category.subForums.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-neutral-800">
-            <div className="flex flex-wrap gap-2">
-              {category.subForums.slice(0, 4).map((sf) => (
-                <span
-                  key={sf.id}
-                  className="inline-flex items-center px-2 py-0.5 text-xs bg-neutral-800 text-neutral-300 rounded"
-                >
-                  {sf.name}
-                </span>
-              ))}
-              {category.subForums.length > 4 && (
-                <span className="text-xs text-neutral-500">
-                  +{category.subForums.length - 4} more
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-medium text-[#d7dadc] group-hover:text-white truncate">
+            r/{category.slug}
+          </h3>
+          <p className="text-xs text-[#818384] truncate">
+            {category.postCount} posts • {category.subForums.length} topics
+          </p>
+        </div>
+
+        {/* Join button placeholder */}
+        <button
+          className="px-4 py-1 text-xs font-bold bg-[#d7dadc] text-[#1a1a1b] rounded-full hover:bg-white transition-colors"
+          onClick={(e) => e.preventDefault()}
+        >
+          View
+        </button>
+      </div>
+    </Link>
+  );
+}
+
+// Compact version for sidebar
+export function CategoryCardCompact({ category }: { category: Category }) {
+  return (
+    <Link href={`/forum/${category.slug}`}>
+      <div className="flex items-center gap-2 py-2 px-2 hover:bg-[#343536] rounded transition-colors group">
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff4500] to-[#ff6f00] flex items-center justify-center text-white text-xs flex-shrink-0">
+          {category.icon || category.name.charAt(0)}
+        </div>
+        <span className="text-sm text-[#d7dadc] group-hover:text-white truncate">
+          r/{category.slug}
+        </span>
       </div>
     </Link>
   );

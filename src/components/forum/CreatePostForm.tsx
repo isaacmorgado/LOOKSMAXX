@@ -37,7 +37,7 @@ export function CreatePostForm({
     }
 
     if (!subForumId) {
-      setError('Please select a sub-forum');
+      setError('Please select a topic');
       return;
     }
 
@@ -53,20 +53,26 @@ export function CreatePostForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Sub-forum selector */}
+      {/* Topic selector */}
       <div>
-        <label className="block text-sm text-neutral-400 mb-1.5">
-          Choose a community
+        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
+          Choose a topic
         </label>
         {subForums.length === 0 ? (
-          <p className="text-yellow-400 text-sm bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-2">
-            No sub-forums available for this category.
+          <p className="text-[#ff4500] text-sm bg-[#ff4500]/10 border border-[#ff4500]/20 rounded px-4 py-2">
+            No topics available for this community.
           </p>
         ) : (
           <select
             value={subForumId}
             onChange={(e) => setSubForumId(e.target.value)}
-            className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-[#00f3ff] focus:outline-none"
+            className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-2.5 text-[#d7dadc] text-sm focus:border-[#d7dadc] focus:outline-none appearance-none cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23818384'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+              backgroundSize: '16px',
+            }}
           >
             {subForums.map((sf) => (
               <option key={sf.id} value={sf.id}>
@@ -79,7 +85,7 @@ export function CreatePostForm({
 
       {/* Title */}
       <div>
-        <label className="block text-sm text-neutral-400 mb-1.5">
+        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
           Title
         </label>
         <input
@@ -88,16 +94,16 @@ export function CreatePostForm({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="An interesting title"
           maxLength={200}
-          className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2.5 text-white text-sm placeholder-neutral-500 focus:border-[#00f3ff] focus:outline-none"
+          className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-2.5 text-[#d7dadc] text-sm placeholder-[#818384] focus:border-[#d7dadc] focus:outline-none"
         />
-        <div className="text-xs text-neutral-500 mt-1 text-right">
+        <div className="text-xs text-[#818384] mt-1 text-right">
           {title.length}/200
         </div>
       </div>
 
       {/* Content */}
       <div>
-        <label className="block text-sm text-neutral-400 mb-1.5">
+        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
           Text
         </label>
         <textarea
@@ -106,33 +112,33 @@ export function CreatePostForm({
           placeholder="Share your experience, ask a question, or start a discussion..."
           rows={8}
           maxLength={10000}
-          className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-white text-sm placeholder-neutral-500 focus:border-[#00f3ff] focus:outline-none resize-none"
+          className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-3 text-[#d7dadc] text-sm placeholder-[#818384] focus:border-[#d7dadc] focus:outline-none resize-y min-h-[120px]"
         />
-        <div className="text-xs text-neutral-500 mt-1 text-right">
+        <div className="text-xs text-[#818384] mt-1 text-right">
           {content.length}/10000
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">
+        <div className="text-[#ff4500] text-sm bg-[#ff4500]/10 border border-[#ff4500]/20 rounded px-4 py-2">
           {error}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex justify-end gap-3 pt-2 border-t border-[#343536]">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-neutral-400 text-sm hover:text-white transition-colors"
+          className="px-4 py-1.5 text-sm font-bold text-[#ff4500] border border-[#ff4500] rounded-full hover:bg-[#ff4500]/10 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isSubmitting || !title.trim() || !content.trim()}
-          className="px-6 py-2 bg-[#00f3ff] text-black text-sm font-medium rounded-lg hover:bg-[#00f3ff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          disabled={isSubmitting || !title.trim() || !content.trim() || !subForumId}
+          className="px-6 py-1.5 bg-[#ff4500] text-white text-sm font-bold rounded-full hover:bg-[#ff5722] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? 'Posting...' : 'Post'}
         </button>
