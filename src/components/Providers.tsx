@@ -5,6 +5,7 @@ import { GenderProvider } from '@/contexts/GenderContext';
 import { EthnicityProvider } from '@/contexts/EthnicityContext';
 import { UploadProvider } from '@/contexts/UploadContext';
 import { LeaderboardProvider } from '@/contexts/LeaderboardContext';
+import { ForumProvider } from '@/contexts/ForumContext';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: ReactNode }) {
       <EthnicityProvider>
         <UploadProvider>
           <LeaderboardProvider>
-            {children}
+            <ForumProvider>
+              {children}
+            </ForumProvider>
           </LeaderboardProvider>
         </UploadProvider>
       </EthnicityProvider>
