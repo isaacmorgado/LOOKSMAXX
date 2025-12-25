@@ -19,12 +19,15 @@ const generateDemoLandmarks = (baseLandmarks: LandmarkPoint[]): LandmarkPoint[] 
   }));
 };
 
+// Placeholder image as data URI (1x1 transparent pixel - actual images come from analysis)
+const PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 // Generate demo data outside component to avoid closure issues
 const createDemoData = () => ({
   frontLandmarks: generateDemoLandmarks(FRONT_PROFILE_LANDMARKS),
   sideLandmarks: generateDemoLandmarks(SIDE_PROFILE_LANDMARKS),
-  frontPhoto: '/demo-front.jpg',
-  sidePhoto: '/demo-side.jpg',
+  frontPhoto: PLACEHOLDER_IMAGE,
+  sidePhoto: PLACEHOLDER_IMAGE,
   gender: 'male' as Gender,
   ethnicity: 'white' as Ethnicity,
 });

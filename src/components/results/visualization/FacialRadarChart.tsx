@@ -53,12 +53,18 @@ export function FacialRadarChart({
   const { frontRatios, sideRatios } = useResults();
 
   const data = useMemo<RadarDataPoint[]>(() => {
-    const allRatios = [...frontRatios, ...sideRatios];
+    // Handle empty or undefined ratios
+    if (!frontRatios?.length && !sideRatios?.length) {
+      return [];
+    }
+
+    const allRatios = [...(frontRatios || []), ...(sideRatios || [])];
 
     // Group ratios by display category and calculate average scores
     const categoryScores: Record<string, { total: number; count: number }> = {};
 
     allRatios.forEach(ratio => {
+      if (!ratio || typeof ratio.score !== 'number' || isNaN(ratio.score)) return;
       const displayCategory = CATEGORY_MAPPING[ratio.category] || ratio.category;
       if (!categoryScores[displayCategory]) {
         categoryScores[displayCategory] = { total: 0, count: 0 };
@@ -71,12 +77,10 @@ export function FacialRadarChart({
     const categories = ['Eyes', 'Nose', 'Lips', 'Jaw', 'Chin', 'Face Shape', 'Forehead', 'Neck'];
 
     return categories
-      .filter(cat => categoryScores[cat])
+      .filter(cat => categoryScores[cat] && categoryScores[cat].count > 0)
       .map(category => ({
         category,
-        score: categoryScores[category]
-          ? Math.round((categoryScores[category].total / categoryScores[category].count) * 10) / 10
-          : 0,
+        score: Math.round((categoryScores[category].total / categoryScores[category].count) * 10) / 10 || 0,
         fullMark: 10,
       }));
   }, [frontRatios, sideRatios]);

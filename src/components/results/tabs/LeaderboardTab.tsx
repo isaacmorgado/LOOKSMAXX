@@ -14,6 +14,7 @@ import { useResults } from '@/contexts/ResultsContext';
 import { ScoreCircle } from '../shared';
 import { getScoreColor } from '@/types/results';
 import { UserProfileModal } from '../modals/UserProfileModal';
+import { api } from '@/lib/api';
 
 // ============================================
 // RANK DISPLAY HELPERS
@@ -54,6 +55,7 @@ export function LeaderboardTab() {
 
   const { gender } = useResults();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isAuthenticated = !!api.getToken();
 
   // Auto-set gender filter to user's gender (males see male leaderboard, females see female)
   useEffect(() => {
@@ -61,8 +63,10 @@ export function LeaderboardTab() {
   }, [gender, setGenderFilter]);
 
   // Fetch leaderboard if empty (first visit or after gender filter is set)
+  // Only fetch if user is authenticated (API requires auth)
   useEffect(() => {
-    if (leaderboard.length === 0 && !isLoading && !error) {
+    const token = api.getToken();
+    if (leaderboard.length === 0 && !isLoading && !error && token) {
       fetchLeaderboard(0);
     }
   }, [leaderboard.length, isLoading, error, fetchLeaderboard]);
@@ -124,7 +128,19 @@ export function LeaderboardTab() {
             ) : leaderboard.length === 0 ? (
               <div className="p-8 text-center">
                 <Trophy size={48} className="mx-auto text-neutral-600 mb-4" />
-                <p className="text-neutral-400">No entries yet. Be the first!</p>
+                {isAuthenticated ? (
+                  <p className="text-neutral-400">No entries yet. Be the first!</p>
+                ) : (
+                  <>
+                    <p className="text-neutral-400 mb-4">Sign in to view the leaderboard and compete with others</p>
+                    <a
+                      href="/login"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-lg transition-colors"
+                    >
+                      Sign In
+                    </a>
+                  </>
+                )}
               </div>
             ) : (
               <div className="divide-y divide-neutral-800">
