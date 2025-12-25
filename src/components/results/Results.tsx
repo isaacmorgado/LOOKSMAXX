@@ -10,6 +10,7 @@ import { PlanTab } from './tabs/PlanTab';
 import { OptionsTab } from './tabs/OptionsTab';
 import { SupportTab } from './tabs/SupportTab';
 import { LeaderboardTab } from './tabs/LeaderboardTab';
+import { CommunityTab } from './tabs/CommunityTab';
 import { api } from '@/lib/api';
 
 export function Results() {
@@ -58,6 +59,8 @@ export function Results() {
         return <LeaderboardTab />;
       case 'plan':
         return <PlanTab />;
+      case 'community':
+        return <CommunityTab />;
       case 'options':
         return <OptionsTab />;
       case 'support':

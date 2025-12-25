@@ -35,7 +35,7 @@ export function PostCard({ post, onVote, showSubForum = false }: PostCardProps) 
             </span>
           )}
           {post.isGuide && (
-            <span className="bg-[#ff4500]/10 text-[#ff4500] px-1.5 py-0.5 rounded text-[10px] font-medium mr-1">
+            <span className="bg-[#00f3ff]/10 text-[#00f3ff] px-1.5 py-0.5 rounded text-[10px] font-medium mr-1">
               GUIDE
             </span>
           )}

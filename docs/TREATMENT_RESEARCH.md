@@ -357,7 +357,6 @@ function prioritizeTreatments(flaws: Flaw[]): Treatment[] {
 - [LOOKSMAXX](https://www.looksmaxx-app.vercel.app/)
 - [Premium Analysis Analysis](https://looksmaxx.gumroad.com/l/full)
 - [How accurate is LOOKSMAXX labs?](https://looksmax.org/threads/how-accurate-is-looksmaxx-labs.1763417/)
-- [LOOKSMAXX Hardmaxxing Tier List](https://looksmax.org/threads/face-iq-hardmaxxing-tier-list.1523475/)
 - [Got my rating from LOOKSMAXX](https://looksmax.org/threads/got-my-rating-from-looksmaxx.1382059/)
 - [A 2-10 Looks Scale Guide](https://looksmax.org/threads/a-2-10-looks-scale-and-a-structured-unbiased-guide-to-facial-analysis-rate-yourself-or-others-with-ease.1723949/)
 - [Surgery ROI Tier Rating](https://looksmax.org/threads/surgery-and-procedure-tier-rating-by-potential-roi-return-on-investment.1698396/)

@@ -92,7 +92,7 @@ async function runTests() {
     const nonSurgical = require('../src/lib/recommendations/nonSurgical');
 
     const allTreatments = [
-      ...(hardmaxxing.SURGERIES || hardmaxxing.default || []),
+      ...(hardmaxxing.SURGICAL_TREATMENTS || hardmaxxing.SURGERIES || hardmaxxing.default || []),
       ...(nonSurgical.NON_SURGICAL_TREATMENTS || nonSurgical.default || [])
     ];
 
@@ -116,18 +116,25 @@ async function runTests() {
       failedTests++;
     }
 
-    // Verify V-line surgery is female-only
+    // Verify V-line surgery (mandible reduction) is female-only
     const vLineSurgery = allTreatments.find((t: any) =>
-      t.id?.includes('v_line') || t.id?.includes('mandibular_contouring') || t.name?.includes('V-line')
+      t.id?.includes('v_line') ||
+      t.id?.includes('mandibular_contouring') ||
+      t.id?.includes('mandible_reduction') ||
+      t.name?.includes('V-line') ||
+      t.name?.includes('Mandible')
     );
     if (vLineSurgery) {
       if (vLineSurgery.genderSpecific === 'female') {
-        console.log(`\n  ${PASS} V-line surgery correctly marked as female-only`);
+        console.log(`  ${PASS} V-line/Mandible Reduction surgery correctly marked as female-only`);
         passedTests++;
       } else {
-        console.log(`\n  ${FAIL} V-line surgery not marked as female-only`);
+        console.log(`  ${FAIL} V-line/Mandible Reduction surgery not marked as female-only`);
         failedTests++;
       }
+    } else {
+      console.log(`  ${FAIL} V-line/Mandible Reduction surgery not found`);
+      failedTests++;
     }
 
     // Verify masseter botox is female-only
@@ -199,25 +206,30 @@ async function runTests() {
     const insightsContent = fs.readFileSync('./src/lib/insights-engine.ts', 'utf8');
 
     // Check for flaw definitions in female overrides
+    // Use actual flaw IDs from INSIGHTS_DEFINITIONS
     const flawPatterns = [
-      'weak_chin',
-      'wide_jaw',
-      'narrow_nose',
-      'flat_cheeks',
+      'recessed_chin',
+      'weak_jaw',
+      'wide_nose',
+      'flat_midface',
       'negative_canthal_tilt',
-      'deep_tear_trough',
+      'thin_lips',
     ];
 
     let foundFlaws = 0;
     for (const flaw of flawPatterns) {
-      if (insightsContent.includes(flaw)) {
+      if (insightsContent.includes(`"${flaw}"`)) {
         foundFlaws++;
       }
     }
 
-    console.log(`  ${PASS} Found ${foundFlaws}/${flawPatterns.length} common flaw definitions`);
-    if (foundFlaws >= 4) passedTests++;
-    else failedTests++;
+    if (foundFlaws >= 4) {
+      console.log(`  ${PASS} Found ${foundFlaws}/${flawPatterns.length} common flaw definitions`);
+      passedTests++;
+    } else {
+      console.log(`  ${FAIL} Found only ${foundFlaws}/${flawPatterns.length} common flaw definitions (need 4+)`);
+      failedTests++;
+    }
 
     // Check for female-specific flaws section
     const femaleWhiteSection = insightsContent.match(/female_white[\s\S]*?female_black/);

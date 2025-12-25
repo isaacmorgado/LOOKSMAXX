@@ -62,7 +62,7 @@ export default function CategoryPage() {
   return (
     <div className="min-h-screen bg-[#030303]">
       {/* Banner */}
-      <div className="h-20 bg-gradient-to-r from-[#ff4500] to-[#ff6f00]" />
+      <div className="h-20 bg-gradient-to-r from-[#00f3ff] to-[#0088ff]" />
 
       {/* Subreddit header */}
       <div className="bg-[#1a1a1b] border-b border-[#343536]">
@@ -166,7 +166,7 @@ export default function CategoryPage() {
                     onClick={() => handleSubForumClick(sf.slug)}
                     className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
                       selectedSubForum === sf.slug
-                        ? 'bg-[#ff4500] text-white'
+                        ? 'bg-[#00f3ff] text-black'
                         : 'bg-[#272729] text-[#d7dadc] hover:bg-[#343536]'
                     }`}
                   >
@@ -217,7 +217,7 @@ export default function CategoryPage() {
                     <button
                       onClick={() => loadMorePosts(categorySlug, selectedSubForum || undefined)}
                       disabled={isLoadingPosts}
-                      className="w-full py-3 text-sm font-medium text-[#ff4500] hover:text-[#ff6f00] disabled:opacity-50"
+                      className="w-full py-3 text-sm font-medium text-[#00f3ff] hover:text-[#00d4e6] disabled:opacity-50"
                     >
                       {isLoadingPosts ? 'Loading...' : 'Load More'}
                     </button>
@@ -237,8 +237,8 @@ export default function CategoryPage() {
           <aside className="hidden lg:block w-80 space-y-4">
             {/* About Community */}
             <div className="bg-[#1a1a1b] border border-[#343536] rounded overflow-hidden">
-              <div className="bg-[#ff4500] px-4 py-2">
-                <h3 className="text-xs font-bold text-white">About Community</h3>
+              <div className="bg-[#00f3ff] px-4 py-2">
+                <h3 className="text-xs font-bold text-black">About Community</h3>
               </div>
               <div className="p-4">
                 <p className="text-sm text-[#d7dadc] mb-4">
@@ -276,7 +276,7 @@ export default function CategoryPage() {
                       onClick={() => handleSubForumClick(sf.slug)}
                       className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex justify-between ${
                         selectedSubForum === sf.slug
-                          ? 'bg-[#ff4500]/10 text-[#ff4500]'
+                          ? 'bg-[#00f3ff]/10 text-[#00f3ff]'
                           : 'text-[#d7dadc] hover:bg-[#272729]'
                       }`}
                     >

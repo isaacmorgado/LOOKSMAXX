@@ -49,7 +49,7 @@ export function VoteButtons({
         onClick={() => handleVote('up')}
         disabled={isVoting}
         className={`${buttonPadding} rounded-sm hover:bg-white/10 transition-colors ${
-          userVote === 'up' ? 'text-[#ff4500]' : 'text-[#818384] hover:text-[#ff4500]'
+          userVote === 'up' ? 'text-[#00f3ff]' : 'text-[#818384] hover:text-[#00f3ff]'
         } disabled:cursor-not-allowed`}
         title="Upvote"
         aria-label="Upvote"
@@ -60,9 +60,9 @@ export function VoteButtons({
       <span
         className={`text-xs font-bold min-w-[2ch] text-center ${
           userVote === 'up'
-            ? 'text-[#ff4500]'
+            ? 'text-[#00f3ff]'
             : userVote === 'down'
-            ? 'text-[#7193ff]'
+            ? 'text-neutral-500'
             : 'text-[#d7dadc]'
         }`}
       >
@@ -73,7 +73,7 @@ export function VoteButtons({
         onClick={() => handleVote('down')}
         disabled={isVoting}
         className={`${buttonPadding} rounded-sm hover:bg-white/10 transition-colors ${
-          userVote === 'down' ? 'text-[#7193ff]' : 'text-[#818384] hover:text-[#7193ff]'
+          userVote === 'down' ? 'text-neutral-500' : 'text-[#818384] hover:text-neutral-500'
         } disabled:cursor-not-allowed`}
         title="Downvote"
         aria-label="Downvote"

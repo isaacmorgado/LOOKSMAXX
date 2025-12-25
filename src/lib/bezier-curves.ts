@@ -1089,6 +1089,22 @@ export const BEZIER_CURVES: Record<string, BezierCurveConfig> = {
     ],
   },
 
+  nasalIndex: {
+    mode: 'custom',
+    points: [
+      { x: 50, y: 0, leftHandleX: 46, leftHandleY: 0, rightHandleX: 54, rightHandleY: 0 },
+      { x: 58, y: 1.5, leftHandleX: 55, leftHandleY: 0.5, rightHandleX: 61, rightHandleY: 2.5 },
+      { x: 64, y: 4.2, leftHandleX: 62, leftHandleY: 3.2, rightHandleX: 66, rightHandleY: 5.5 },
+      { x: 68, y: 7.5, leftHandleX: 66.5, leftHandleY: 6.5, rightHandleX: 69.5, rightHandleY: 8.8 },
+      { x: 70, y: 10, leftHandleX: 69.5, leftHandleY: 10, rightHandleX: 70.5, rightHandleY: 10, fixed: true },
+      { x: 85, y: 10, leftHandleX: 84.5, leftHandleY: 10, rightHandleX: 85.5, rightHandleY: 10 },
+      { x: 87, y: 7.5, leftHandleX: 85.5, leftHandleY: 8.8, rightHandleX: 88.5, rightHandleY: 6.5 },
+      { x: 91, y: 4.2, leftHandleX: 89, leftHandleY: 5.5, rightHandleX: 93, rightHandleY: 3.2 },
+      { x: 97, y: 1.5, leftHandleX: 94, leftHandleY: 2.5, rightHandleX: 100, rightHandleY: 0.5 },
+      { x: 105, y: 0, leftHandleX: 101, leftHandleY: 0, rightHandleX: 109, rightHandleY: 0 },
+    ],
+  },
+
   eLineLowerLip: {
     mode: 'custom',
     points: [

@@ -1033,6 +1033,56 @@ export const ETHNICITY_OVERRIDES: Record<string, Record<string, Partial<MasterMe
     }
   },
 
+  "male_native_american": {
+    "faceWidthToHeight": {
+      ideal: [2.00, 2.20],
+      mean: 2.10,
+      std_dev: 0.10,
+      flaws: {
+        low: ["Narrow face"],
+        high: ["Wide face"]
+      }
+    },
+
+    "nasalIndex": {
+      ideal: [75, 90],
+      mean: 82.5,
+      std_dev: 7.5,
+      flaws: {
+        low: ["Narrow nose"],
+        high: ["Wide nose"]
+      }
+    },
+
+    "cheekbone_height": {
+      ideal: [80.0, 95.0],
+      mean: 87.5,
+      std_dev: 7.5,
+      flaws: {
+        low: ["Flat cheekbones"]
+      }
+    },
+
+    "gonialAngle": {
+      ideal: [115, 125],
+      mean: 120,
+      std_dev: 5,
+      flaws: {
+        low: ["Weak jaw"],
+        high: ["Harsh jaw angle"]
+      }
+    },
+
+    "chinWidth": {
+      ideal: [38.0, 48.0],
+      mean: 43.0,
+      std_dev: 5.0,
+      flaws: {
+        low: ["Narrow chin"]
+      }
+    }
+  },
+
   // ========================================
   // FEMALE ETHNICITIES (The "Missing Link")
   // ========================================

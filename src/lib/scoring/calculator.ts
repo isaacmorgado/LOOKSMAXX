@@ -210,13 +210,23 @@ export function calculateMetricScore(
 
   // Use custom curve if available in config
   if (customCurve && customCurve.mode === 'custom') {
-    return interpolateCustomCurve(value, customCurve.points, maxScore);
+    const bezierScore = interpolateCustomCurve(value, customCurve.points, maxScore);
+    // If Bezier returns -1, it means value is out of range with edge y=0
+    // Fall through to exponential decay instead of returning 0
+    if (bezierScore >= 0) {
+      return bezierScore;
+    }
   }
 
   // Check for pre-defined Bezier curve from harmony curves (66 metrics)
   const bezierCurve = BEZIER_CURVES[id];
   if (bezierCurve && bezierCurve.mode === 'custom') {
-    return interpolateCustomCurve(value, bezierCurve.points, maxScore);
+    const bezierScore = interpolateCustomCurve(value, bezierCurve.points, maxScore);
+    // If Bezier returns -1, it means value is out of range with edge y=0
+    // Fall through to exponential decay instead of returning 0
+    if (bezierScore >= 0) {
+      return bezierScore;
+    }
   }
 
   // Handle directional/dimorphic scoring
@@ -331,6 +341,10 @@ export function isValueAcceptable(
 /**
  * Interpolate custom Bezier curve for scoring
  * Uses cubic Bezier interpolation with control handles for smooth curves
+ *
+ * IMPORTANT: When value is outside the curve range and the edge y-value is 0,
+ * returns -1 to signal the caller should use exponential decay fallback.
+ * This prevents artificially returning 0 for values just outside the curve.
  */
 export function interpolateCustomCurve(
   value: number,
@@ -338,15 +352,22 @@ export function interpolateCustomCurve(
   maxScore: number
 ): number {
   void maxScore; // Reserved for future custom curve implementations
-  if (points.length === 0) return 0;
+  if (points.length === 0) return -1; // Signal to use fallback
 
   // Sort points by x value
   const sortedPoints = [...points].sort((a, b) => a.x - b.x);
 
-  // Clamp to range
-  if (value <= sortedPoints[0].x) return sortedPoints[0].y;
+  // Handle out-of-range values
+  // If edge y-value is 0, return -1 to signal exponential decay fallback should be used
+  if (value <= sortedPoints[0].x) {
+    const edgeY = sortedPoints[0].y;
+    // If edge score is 0, signal to use exponential decay fallback
+    return edgeY <= 0 ? -1 : edgeY;
+  }
   if (value >= sortedPoints[sortedPoints.length - 1].x) {
-    return sortedPoints[sortedPoints.length - 1].y;
+    const edgeY = sortedPoints[sortedPoints.length - 1].y;
+    // If edge score is 0, signal to use exponential decay fallback
+    return edgeY <= 0 ? -1 : edgeY;
   }
 
   // Find bracketing points

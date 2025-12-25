@@ -1,217 +1,317 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
-import { CategoryCard, CategoryCardCompact } from '@/components/forum';
+import { ArrowRight, TrendingUp, Users, MessageSquare, Flame, Clock, Star } from 'lucide-react';
 
 export default function ForumPage() {
   const { categories, isLoadingCategories, fetchCategories, error } = useForum();
+  const [activeFilter, setActiveFilter] = useState<'all' | 'trending' | 'new'>('all');
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Split categories for different sections
-  const topCategories = categories.slice(0, 5);
-  const allCategories = categories;
+  // Sort categories based on filter
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (activeFilter === 'trending') return b.postCount - a.postCount;
+    if (activeFilter === 'new') return 0; // Keep original order
+    return a.displayOrder - b.displayOrder;
+  });
+
+  const totalPosts = categories.reduce((sum, c) => sum + c.postCount, 0);
+  const totalTopics = categories.reduce((sum, c) => sum + c.subForums.length, 0);
 
   return (
-    <div className="min-h-screen bg-[#030303]">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#1a1a1b] border-b border-[#343536]">
-        <div className="max-w-5xl mx-auto px-4 h-12 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-neutral-800">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-[#d7dadc] hover:text-white text-sm">
-              ← LOOKSMAXX
+            <Link href="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
+                <span className="text-[#00f3ff] text-sm font-bold">L</span>
+              </div>
+              <span className="text-lg font-semibold text-white hidden sm:block">LOOKSMAXX</span>
             </Link>
-            <div className="h-5 w-px bg-[#343536]" />
-            <Link href="/forum" className="flex items-center gap-2">
-              <RedditIcon className="w-8 h-8 text-[#ff4500]" />
-              <span className="text-xl font-bold text-[#d7dadc]">Community</span>
-            </Link>
+            <div className="h-5 w-px bg-neutral-700 hidden sm:block" />
+            <span className="text-neutral-400 text-sm hidden sm:block">Community</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/results"
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              My Results
+            </Link>
             <Link
               href="/login"
-              className="px-4 py-1.5 text-sm font-bold text-[#d7dadc] border border-[#d7dadc] rounded-full hover:bg-[#d7dadc]/10 transition-colors"
+              className="h-9 px-4 rounded-lg bg-[#00f3ff] text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
             >
-              Log In
+              Get Started
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        <div className="flex gap-6">
-          {/* Main feed */}
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-neutral-800">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00f3ff]/10 via-transparent to-purple-500/5" />
+        <div className="relative max-w-6xl mx-auto px-4 py-12 md:py-16">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Join the Self-Improvement Community
+            </h1>
+            <p className="text-lg text-neutral-400 mb-6">
+              Connect with thousands of others on their journey. Share experiences, get advice, and discover proven treatments that work.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/signup"
+                className="h-11 px-6 rounded-lg bg-[#00f3ff] text-black font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+              >
+                Join Community
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/results"
+                className="h-11 px-6 rounded-lg border border-neutral-700 text-white font-medium flex items-center gap-2 hover:bg-neutral-900 transition-all"
+              >
+                Get My Analysis First
+              </Link>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex flex-wrap gap-6 mt-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#00f3ff]/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-[#00f3ff]" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-white">{categories.length}</p>
+                <p className="text-sm text-neutral-500">Communities</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-white">{totalPosts}</p>
+                <p className="text-sm text-neutral-500">Discussions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-orange-400" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-white">{totalTopics}</p>
+                <p className="text-sm text-neutral-500">Topics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Communities List */}
           <div className="flex-1">
-            {/* Hero banner */}
-            <div className="bg-gradient-to-r from-[#ff4500] to-[#ff6f00] rounded-lg p-6 mb-6">
-              <h1 className="text-2xl font-bold text-white mb-2">
-                Welcome to the LOOKSMAXX Community
-              </h1>
-              <p className="text-white/80 text-sm">
-                Discuss treatments, share experiences, and get advice from others on their self-improvement journey.
-              </p>
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-sm text-neutral-500 mr-2">Sort by:</span>
+              {[
+                { id: 'all', label: 'All', icon: Star },
+                { id: 'trending', label: 'Trending', icon: Flame },
+                { id: 'new', label: 'Recent', icon: Clock },
+              ].map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id as typeof activeFilter)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    activeFilter === filter.id
+                      ? 'bg-[#00f3ff]/10 text-[#00f3ff]'
+                      : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+                  }`}
+                >
+                  <filter.icon className="w-4 h-4" />
+                  {filter.label}
+                </button>
+              ))}
             </div>
 
-            {/* Error state */}
+            {/* Error State */}
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded p-4 mb-4">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
 
-            {/* Top Communities */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded-lg overflow-hidden mb-6">
-              <div className="bg-gradient-to-r from-[#ff4500]/20 to-transparent px-4 py-3 border-b border-[#343536]">
-                <h2 className="text-sm font-bold text-[#d7dadc]">Top Communities</h2>
-              </div>
-
-              {isLoadingCategories && categories.length === 0 ? (
-                <div className="p-4 space-y-3">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center gap-3 animate-pulse">
-                      <div className="w-8 h-8 rounded-full bg-[#343536]" />
+            {/* Loading State */}
+            {isLoadingCategories && categories.length === 0 && (
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 animate-pulse">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-neutral-800" />
                       <div className="flex-1">
-                        <div className="h-4 bg-[#343536] rounded w-32 mb-1" />
-                        <div className="h-3 bg-[#343536] rounded w-24" />
+                        <div className="h-5 bg-neutral-800 rounded w-1/3 mb-2" />
+                        <div className="h-4 bg-neutral-800 rounded w-2/3 mb-3" />
+                        <div className="flex gap-2">
+                          <div className="h-6 bg-neutral-800 rounded w-16" />
+                          <div className="h-6 bg-neutral-800 rounded w-20" />
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : topCategories.length > 0 ? (
-                <div>
-                  {topCategories.map((category, index) => (
-                    <CategoryCard key={category.id} category={category} rank={index + 1} />
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center">
-                  <p className="text-[#818384]">No communities yet.</p>
-                </div>
-              )}
-
-              {categories.length > 5 && (
-                <Link
-                  href="#all-communities"
-                  className="block px-4 py-3 text-sm font-medium text-[#ff4500] hover:bg-[#1a1a1b] border-t border-[#343536]"
-                >
-                  View All Communities
-                </Link>
-              )}
-            </div>
-
-            {/* All Communities */}
-            <div id="all-communities" className="bg-[#1a1a1b] border border-[#343536] rounded-lg overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#343536]">
-                <h2 className="text-sm font-bold text-[#d7dadc]">All Communities</h2>
+                  </div>
+                ))}
               </div>
+            )}
 
-              {!isLoadingCategories && allCategories.length > 0 && (
-                <div className="grid gap-px bg-[#343536]">
-                  {allCategories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={`/forum/${category.slug}`}
-                      className="bg-[#1a1a1b] p-4 hover:bg-[#272729] transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff4500] to-[#ff6f00] flex items-center justify-center text-white text-xl flex-shrink-0">
-                          {category.icon || category.name.charAt(0)}
+            {/* Communities */}
+            {!isLoadingCategories && sortedCategories.length > 0 && (
+              <div className="space-y-3">
+                {sortedCategories.map((category, index) => (
+                  <Link key={category.id} href={`/forum/${category.slug}`}>
+                    <div className="group bg-neutral-900/50 border border-neutral-800 hover:border-[#00f3ff]/30 rounded-xl p-5 transition-all hover:shadow-[0_0_30px_rgba(0,243,255,0.05)]">
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00f3ff]/20 to-purple-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                          {category.icon || '💬'}
                         </div>
+
+                        {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-[#d7dadc] mb-0.5">
-                            r/{category.slug}
-                          </h3>
-                          <p className="text-sm text-[#818384] mb-2 line-clamp-2">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-white group-hover:text-[#00f3ff] transition-colors">
+                              {category.name}
+                            </h3>
+                            {index < 3 && activeFilter === 'trending' && (
+                              <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-500/20 text-orange-400 rounded">
+                                HOT
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-neutral-400 line-clamp-2 mb-3">
                             {category.description}
                           </p>
+
+                          {/* Sub-forums as pills */}
                           <div className="flex flex-wrap gap-2">
                             {category.subForums.slice(0, 4).map((sf) => (
                               <span
                                 key={sf.id}
-                                className="text-xs bg-[#272729] text-[#818384] px-2 py-0.5 rounded"
+                                className="px-2.5 py-1 text-xs bg-neutral-800 text-neutral-300 rounded-lg"
                               >
                                 {sf.name}
                               </span>
                             ))}
                             {category.subForums.length > 4 && (
-                              <span className="text-xs text-[#818384]">
+                              <span className="px-2.5 py-1 text-xs text-neutral-500">
                                 +{category.subForums.length - 4} more
                               </span>
                             )}
                           </div>
                         </div>
-                        <div className="text-right text-xs text-[#818384]">
-                          <div>{category.postCount} posts</div>
+
+                        {/* Stats */}
+                        <div className="text-right hidden sm:block">
+                          <p className="text-lg font-bold text-white">{category.postCount}</p>
+                          <p className="text-xs text-neutral-500">posts</p>
                         </div>
+
+                        {/* Arrow */}
+                        <ArrowRight className="w-5 h-5 text-neutral-600 group-hover:text-[#00f3ff] transition-colors" />
                       </div>
-                    </Link>
-                  ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoadingCategories && categories.length === 0 && !error && (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 rounded-2xl bg-neutral-900 flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-8 h-8 text-neutral-600" />
                 </div>
-              )}
-            </div>
+                <p className="text-neutral-400 mb-4">No communities available yet.</p>
+                <Link
+                  href="/signup"
+                  className="text-[#00f3ff] hover:underline"
+                >
+                  Be the first to start a discussion
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
-          <aside className="hidden lg:block w-80">
-            {/* About */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded-lg overflow-hidden mb-4">
-              <div className="bg-[#ff4500] h-8" />
-              <div className="p-4 -mt-4">
-                <div className="flex items-end gap-2 mb-3">
-                  <div className="w-14 h-14 rounded-full bg-[#1a1a1b] border-4 border-[#1a1a1b] flex items-center justify-center">
-                    <RedditIcon className="w-10 h-10 text-[#ff4500]" />
+          <aside className="lg:w-80 space-y-6">
+            {/* CTA Card */}
+            <div className="bg-gradient-to-br from-[#00f3ff]/10 to-purple-500/10 border border-[#00f3ff]/20 rounded-xl p-5">
+              <h3 className="font-semibold text-white mb-2">Get Personalized Recommendations</h3>
+              <p className="text-sm text-neutral-400 mb-4">
+                Take our AI face analysis to discover which communities and treatments are most relevant to you.
+              </p>
+              <Link
+                href="/upload"
+                className="block w-full py-2.5 bg-[#00f3ff] text-black text-sm font-medium rounded-lg text-center hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+              >
+                Start Free Analysis
+              </Link>
+            </div>
+
+            {/* Popular Topics */}
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5">
+              <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <Flame className="w-4 h-4 text-orange-400" />
+                Popular Topics
+              </h3>
+              <div className="space-y-3">
+                {categories.slice(0, 5).flatMap(c => c.subForums.slice(0, 1)).slice(0, 5).map((sf, i) => (
+                  <div key={sf.id} className="flex items-center gap-3">
+                    <span className="w-5 h-5 rounded bg-neutral-800 flex items-center justify-center text-xs text-neutral-500">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-neutral-300 hover:text-white cursor-pointer transition-colors">
+                      {sf.name}
+                    </span>
                   </div>
-                  <h2 className="font-bold text-[#d7dadc]">About Community</h2>
-                </div>
-                <p className="text-sm text-[#d7dadc] mb-4">
-                  The LOOKSMAXX community is dedicated to self-improvement through evidence-based treatments and lifestyle changes.
-                </p>
-                <div className="flex gap-4 text-sm mb-4">
-                  <div>
-                    <div className="font-bold text-[#d7dadc]">{categories.length}</div>
-                    <div className="text-xs text-[#818384]">Communities</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-[#d7dadc]">
-                      {categories.reduce((sum, c) => sum + c.postCount, 0)}
-                    </div>
-                    <div className="text-xs text-[#818384]">Posts</div>
-                  </div>
-                </div>
-                <div className="text-xs text-[#818384] border-t border-[#343536] pt-3">
-                  Created Dec 2025
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Quick Links */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded-lg p-4">
-              <h3 className="text-xs font-bold text-[#818384] uppercase tracking-wide mb-3">
-                Quick Links
-              </h3>
-              <div className="space-y-1">
-                {categories.slice(0, 6).map((category) => (
-                  <CategoryCardCompact key={category.id} category={category} />
-                ))}
-              </div>
+            {/* Community Guidelines */}
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5">
+              <h3 className="font-semibold text-white mb-3">Community Guidelines</h3>
+              <ul className="space-y-2 text-sm text-neutral-400">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#00f3ff]">1.</span>
+                  Be respectful and supportive
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#00f3ff]">2.</span>
+                  Share evidence-based information
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#00f3ff]">3.</span>
+                  No medical advice without disclaimers
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#00f3ff]">4.</span>
+                  Respect privacy and consent
+                </li>
+              </ul>
             </div>
           </aside>
         </div>
       </main>
     </div>
-  );
-}
-
-function RedditIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm6.67-10a1.46 1.46 0 00-2.47-1 7.12 7.12 0 00-3.85-1.23l.65-3.06 2.12.45a1 1 0 101.1-.92l-2.38-.5a.56.56 0 00-.65.42l-.73 3.41a7.14 7.14 0 00-3.9 1.23 1.46 1.46 0 10-1.61 2.39 2.87 2.87 0 000 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 000-.44 1.46 1.46 0 00.86-1.19zm-9.78 1.13a1 1 0 111-1 1 1 0 01-1 1zm5.48 2.73c-.67.44-1.71.52-2.37.52s-1.7-.08-2.37-.52a.26.26 0 01.37-.37c.5.34 1.25.4 2 .4s1.5-.06 2-.4a.26.26 0 01.37.37zm-.37-1.73a1 1 0 111-1 1 1 0 01-1 1z" />
-    </svg>
   );
 }

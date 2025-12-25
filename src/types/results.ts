@@ -197,6 +197,7 @@ export type ResultsTab =
   | 'side-ratios'
   | 'leaderboard'
   | 'plan'
+  | 'community'
   | 'options'
   | 'support';
 

@@ -18,7 +18,7 @@ export function CategoryCard({ category, rank }: CategoryCardProps) {
         )}
 
         {/* Community icon */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff4500] to-[#ff6f00] flex items-center justify-center text-white text-lg flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00f3ff] to-[#0088ff] flex items-center justify-center text-black text-lg flex-shrink-0">
           {category.icon || category.name.charAt(0)}
         </div>
 
@@ -49,7 +49,7 @@ export function CategoryCardCompact({ category }: { category: Category }) {
   return (
     <Link href={`/forum/${category.slug}`}>
       <div className="flex items-center gap-2 py-2 px-2 hover:bg-[#343536] rounded transition-colors group">
-        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff4500] to-[#ff6f00] flex items-center justify-center text-white text-xs flex-shrink-0">
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00f3ff] to-[#0088ff] flex items-center justify-center text-black text-xs flex-shrink-0">
           {category.icon || category.name.charAt(0)}
         </div>
         <span className="text-sm text-[#d7dadc] group-hover:text-white truncate">

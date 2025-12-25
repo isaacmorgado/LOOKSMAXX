@@ -275,6 +275,24 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     female: { idealMin: 1.4, idealMax: 2.0 },
   },
 
+  lipRatio: {
+    // Lip ratio overrides matching lowerToUpperLipRatio but calibrated to Bezier curve (1.55-1.85 base)
+    // African/Hispanic: fuller lips natural
+    black_male: { idealMin: 1.6, idealMax: 2.2 },
+    black_female: { idealMin: 1.3, idealMax: 1.6 },
+    hispanic_male: { idealMin: 1.4, idealMax: 2.0 },
+    hispanic_female: { idealMin: 1.1, idealMax: 1.4 },
+    // East Asian: less full lips
+    east_asian_male: { idealMin: 1.2, idealMax: 1.7 },
+    east_asian_female: { idealMin: 1.3, idealMax: 1.8 },
+    // Pacific Islander: full lips preference
+    pacific_islander_male: { idealMin: 1.5, idealMax: 2.0 },
+    pacific_islander_female: { idealMin: 1.25, idealMax: 1.55 },
+    // Default gender overrides
+    male: { idealMin: 1.4, idealMax: 1.9 },
+    female: { idealMin: 1.5, idealMax: 2.0 },
+  },
+
   upperLipRatio: {
     // Fuller upper lip in African phenotypes
     black: { idealMin: 0.38, idealMax: 0.48 },

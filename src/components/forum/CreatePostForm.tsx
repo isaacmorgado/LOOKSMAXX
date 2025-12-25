@@ -59,7 +59,7 @@ export function CreatePostForm({
           Choose a topic
         </label>
         {subForums.length === 0 ? (
-          <p className="text-[#ff4500] text-sm bg-[#ff4500]/10 border border-[#ff4500]/20 rounded px-4 py-2">
+          <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-4 py-2">
             No topics available for this community.
           </p>
         ) : (
@@ -121,7 +121,7 @@ export function CreatePostForm({
 
       {/* Error */}
       {error && (
-        <div className="text-[#ff4500] text-sm bg-[#ff4500]/10 border border-[#ff4500]/20 rounded px-4 py-2">
+        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-4 py-2">
           {error}
         </div>
       )}
@@ -131,14 +131,14 @@ export function CreatePostForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-1.5 text-sm font-bold text-[#ff4500] border border-[#ff4500] rounded-full hover:bg-[#ff4500]/10 transition-colors"
+          className="px-4 py-1.5 text-sm font-bold text-neutral-400 border border-neutral-600 rounded-full hover:bg-neutral-800 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !title.trim() || !content.trim() || !subForumId}
-          className="px-6 py-1.5 bg-[#ff4500] text-white text-sm font-bold rounded-full hover:bg-[#ff5722] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-1.5 bg-[#00f3ff] text-black text-sm font-bold rounded-full hover:bg-[#00d4e6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? 'Posting...' : 'Post'}
         </button>

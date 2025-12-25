@@ -242,11 +242,14 @@ export default function UploadPage() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* File info */}
+            {/* Upload status */}
             <div className="absolute bottom-4 left-4 right-4 px-4 py-3 rounded-lg bg-black/80 border border-neutral-700 z-10">
-              <p className="text-white font-medium truncate text-sm">{currentPhoto.file.name}</p>
+              <p className="text-white font-medium text-sm flex items-center gap-2">
+                <Check className="w-4 h-4 text-[#00f3ff]" />
+                Photo uploaded successfully
+              </p>
               <p className="text-neutral-500 text-xs mt-0.5">
-                {(currentPhoto.file.size / 1024 / 1024).toFixed(2)} MB
+                Ready for analysis
               </p>
             </div>
           </div>
