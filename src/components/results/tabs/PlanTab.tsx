@@ -330,6 +330,28 @@ export function PlanTab() {
               )}
             </div>
           </div>
+
+          {/* Upgrade CTA */}
+          <motion.div
+            className="bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 rounded-xl p-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles size={16} className="text-cyan-400" />
+              <span className="text-sm font-medium text-white">Unlock Full Plan</span>
+            </div>
+            <p className="text-xs text-neutral-400 mb-3">
+              Get detailed treatment guides, cost estimates, and provider recommendations.
+            </p>
+            <a
+              href="/pricing"
+              className="block w-full py-2 bg-cyan-500 text-black text-sm font-medium rounded-lg text-center hover:bg-cyan-400 transition-colors"
+            >
+              Upgrade Now
+            </a>
+          </motion.div>
         </div>
       </div>
     </TabContent>

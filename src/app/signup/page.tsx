@@ -176,9 +176,19 @@ function SignupForm() {
         referralCode: formData.referralCode || undefined,
       });
 
-      // Store token and redirect
+      // Store token
       localStorage.setItem("auth_token", response.access_token);
       api.setToken(response.access_token);
+
+      // Store referral discount if valid code was used (extract from message)
+      if (formData.referralCode && referralStatus.valid && referralStatus.message) {
+        // Extract discount percentage from message like "Code applied! 40% discount from Nick J"
+        const match = referralStatus.message.match(/(\d+)%/);
+        if (match) {
+          localStorage.setItem("referral_discount", match[1]);
+        }
+      }
+
       router.push("/gender");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
