@@ -97,6 +97,15 @@ const SEVERITY_CONFIGS: Record<SeverityLevel, SeverityBadgeConfig> = {
 };
 
 function getSeverityFromImpact(harmonyLost: number): SeverityLevel {
+  // Handle edge cases: NaN, Infinity, undefined, null, negative
+  if (
+    typeof harmonyLost !== 'number' ||
+    !Number.isFinite(harmonyLost) ||
+    Number.isNaN(harmonyLost) ||
+    harmonyLost < 0
+  ) {
+    return 'minor'; // Default to least severe for invalid values
+  }
   if (harmonyLost >= 0.8) return 'extremely_severe';
   if (harmonyLost >= 0.5) return 'severe';
   if (harmonyLost >= 0.3) return 'moderate';
@@ -410,10 +419,15 @@ function AreaOfImprovementCard({
           <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-shrink-0 sm:flex-col sm:items-end sm:gap-1.5">
             <div className="text-right space-y-1">
               <div className="text-lg sm:text-xl font-semibold tracking-tight text-red-500">
-                -{flaw.harmonyPercentageLost.toFixed(2)}
+                -{(typeof flaw.harmonyPercentageLost === 'number' && Number.isFinite(flaw.harmonyPercentageLost)
+                  ? flaw.harmonyPercentageLost
+                  : 0
+                ).toFixed(2)}
               </div>
               <div className="text-[10px] sm:text-xs text-neutral-500 font-medium">points</div>
-              {flaw.rollingHarmonyPercentageLost !== undefined && (
+              {flaw.rollingHarmonyPercentageLost !== undefined &&
+                typeof flaw.rollingHarmonyPercentageLost === 'number' &&
+                Number.isFinite(flaw.rollingHarmonyPercentageLost) && (
                 <div className="text-[10px] text-neutral-600 font-medium pt-0.5 border-t border-neutral-700 mt-1">
                   Rolling: -{flaw.rollingHarmonyPercentageLost.toFixed(2)}
                 </div>
@@ -506,6 +520,16 @@ export function KeyStrengthsSection({
   const displayedStrengths = showAll ? strengths : strengths.slice(0, initialShowCount);
   const remainingCount = Math.max(0, strengths.length - initialShowCount);
 
+  // Calculate average strength contribution (handle invalid values)
+  const avgScore = useMemo(() => {
+    if (!strengths || strengths.length === 0) return 0;
+    const validScores = strengths.filter(
+      (s) => typeof s.avgScore === 'number' && Number.isFinite(s.avgScore)
+    );
+    if (validScores.length === 0) return 0;
+    return validScores.reduce((sum, s) => sum + s.avgScore, 0) / validScores.length;
+  }, [strengths]);
+
   return (
     <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 p-4 sm:p-6">
       {/* Header */}
@@ -518,9 +542,16 @@ export function KeyStrengthsSection({
             Key Strengths
           </h3>
         </div>
-        <span className="text-sm text-neutral-500">
-          {strengths.length} total
-        </span>
+        <div className="text-right">
+          <span className="text-sm text-neutral-500">
+            {strengths.length} total
+          </span>
+          {strengths.length > 0 && (
+            <p className="text-xs text-green-400 font-medium">
+              Avg: {avgScore.toFixed(1)}/10
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Cards */}
@@ -585,6 +616,14 @@ export function AreasOfImprovementSection({
   const displayedFlaws = showAll ? flaws : flaws.slice(0, initialShowCount);
   const remainingCount = Math.max(0, flaws.length - initialShowCount);
 
+  // Calculate total impact from all flaws (handle invalid values)
+  const totalImpact = flaws.reduce((sum, f) => {
+    const impact = typeof f.harmonyPercentageLost === 'number' && Number.isFinite(f.harmonyPercentageLost)
+      ? f.harmonyPercentageLost
+      : 0;
+    return sum + impact;
+  }, 0);
+
   return (
     <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 p-4 sm:p-6">
       {/* Header */}
@@ -597,9 +636,16 @@ export function AreasOfImprovementSection({
             Areas of Improvement
           </h3>
         </div>
-        <span className="text-sm text-neutral-500">
-          {flaws.length} total
-        </span>
+        <div className="text-right">
+          <span className="text-sm text-neutral-500">
+            {flaws.length} total
+          </span>
+          {flaws.length > 0 && (
+            <p className="text-xs text-red-400 font-medium">
+              Impact: -{totalImpact.toFixed(1)} pts
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Cards */}

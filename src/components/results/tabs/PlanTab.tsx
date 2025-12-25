@@ -16,6 +16,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { TabContent } from '../ResultsLayout';
 import { EnhancedRecommendationCard } from '../cards/EnhancedRecommendationCard';
 import { ScoreCircle, PhaseBadge } from '../shared';
+import { BeforeAfterPreview } from '../visualization/BeforeAfterPreview';
+import { TreatmentTimeline } from '../visualization/TreatmentTimeline';
 import { RecommendationPhase } from '@/types/results';
 
 // ============================================
@@ -118,6 +120,34 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
         </button>
       ))}
     </div>
+  );
+}
+
+// ============================================
+// BEFORE/AFTER PREVIEW SECTION
+// ============================================
+
+function BeforeAfterPreviewSection() {
+  const { frontPhoto, overallScore, recommendations } = useResults();
+
+  // Calculate potential improvement
+  const potentialImprovement = useMemo(() => {
+    if (recommendations.length === 0) return 0;
+    const totalImpact = recommendations.slice(0, 5).reduce((sum, r) => sum + r.impact, 0);
+    return Math.min(totalImpact * 1.5, 10 - overallScore);
+  }, [recommendations, overallScore]);
+
+  const potentialScore = Math.min(10, overallScore + potentialImprovement);
+
+  if (!frontPhoto) return null;
+
+  return (
+    <BeforeAfterPreview
+      photo={frontPhoto}
+      currentScore={overallScore}
+      potentialScore={potentialScore}
+      recommendations={recommendations}
+    />
   );
 }
 
@@ -242,6 +272,11 @@ export function PlanTab() {
           {/* Potential Score */}
           <PotentialScoreCard />
 
+          {/* Treatment Timeline */}
+          {recommendations.length > 0 && (
+            <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
+          )}
+
           {/* Phase Filter */}
           <PhaseFilter
             selectedPhase={selectedPhase}
@@ -292,6 +327,9 @@ export function PlanTab() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Before/After Preview */}
+          <BeforeAfterPreviewSection />
+
           {/* Order of Operations */}
           <OrderOfOperations />
 

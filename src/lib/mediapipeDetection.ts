@@ -98,6 +98,19 @@ export const MEDIAPIPE_FRONT_MAPPING: Record<string, number> = {
   right_cervical_lateralis: 397,
 };
 
+// ============================================
+// DEPTH VARIANCE RESULT INTERFACE
+// ============================================
+
+export interface DepthVarianceResult {
+  isValid: boolean;
+  confidence: number;
+  depthSpread: number;        // Horizontal distance from nose to ear (0-1 normalized)
+  nosalProjection: number;    // How much the nose projects forward
+  frankfortDeviation: number; // Degrees deviation from horizontal
+  issues: string[];           // List of validation issues
+}
+
 // Side profile landmark mapping (IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts)
 // Matches FaceIQ's 28 side profile landmarks exactly
 // For side profile photos, uses MediaPipe LEFT indices (appearing on left side of image)
@@ -170,6 +183,7 @@ export interface DetectedLandmarks {
     orbitale: { x: number; y: number };
     porion: { x: number; y: number };
   };
+  depthValidation?: DepthVarianceResult;
 }
 
 /**
@@ -194,11 +208,25 @@ export async function detectFromImageUrl(
       const serverResult = await detectSideProfileServer(imageUrl);
       if (serverResult) {
         console.log('[Detection] Server-side detection succeeded');
+
+        // Validate side profile depth variance
+        const depthValidation = validateSideProfileDepth(
+          serverResult.landmarks,
+          serverResult.frankfortPlane
+        );
+        console.log('[Detection] Depth validation:', {
+          isValid: depthValidation.isValid,
+          confidence: depthValidation.confidence.toFixed(2),
+          depthSpread: (depthValidation.depthSpread * 100).toFixed(1) + '%',
+          issues: depthValidation.issues,
+        });
+
         return {
           landmarks: serverResult.landmarks,
           confidence: serverResult.confidence,
           faceBox: serverResult.faceBox,
           frankfortPlane: serverResult.frankfortPlane,
+          depthValidation,
         };
       }
 
@@ -208,6 +236,15 @@ export async function detectFromImageUrl(
       const sideResult = await detectSideProfile(imageUrl);
       if (sideResult) {
         console.log('[Detection] Edge-based side profile detection succeeded');
+
+        // Validate side profile depth variance
+        const depthValidation = validateSideProfileDepth(sideResult.landmarks);
+        console.log('[Detection] Depth validation (edge-based):', {
+          isValid: depthValidation.isValid,
+          confidence: depthValidation.confidence.toFixed(2),
+          issues: depthValidation.issues,
+        });
+
         return {
           landmarks: sideResult.landmarks,
           confidence: sideResult.confidence,
@@ -217,6 +254,7 @@ export async function detectFromImageUrl(
             width: 1,
             height: 1,
           },
+          depthValidation,
         };
       }
 
@@ -303,6 +341,140 @@ function loadImage(url: string): Promise<HTMLImageElement> {
     img.onerror = (e) => reject(e);
     img.src = url;
   });
+}
+
+// ============================================
+// SIDE PROFILE DEPTH VARIANCE VALIDATION
+// ============================================
+
+/**
+ * Validate 3D depth variance from side profile landmarks
+ *
+ * Checks that the photo shows a true side profile by analyzing:
+ * 1. Depth spread: Horizontal distance from nose tip to ear landmarks
+ * 2. Nasal projection: How far the nose projects forward
+ * 3. Frankfort plane: Should be relatively horizontal in proper side profiles
+ *
+ * @param landmarks Array of detected landmarks with x, y coordinates
+ * @param frankfortPlane Optional Frankfort plane data
+ * @returns Validation result with confidence score and issues
+ */
+export function validateSideProfileDepth(
+  landmarks: Array<{ id: string; x: number; y: number }>,
+  frankfortPlane?: { angle: number; orbitale: { x: number; y: number }; porion: { x: number; y: number } }
+): DepthVarianceResult {
+  const issues: string[] = [];
+  let confidence = 1.0;
+
+  // Get key landmarks for depth validation
+  const getLandmark = (id: string) => landmarks.find(l => l.id === id);
+
+  const pronasale = getLandmark('pronasale');     // Nose tip
+  const nasion = getLandmark('nasion');           // Nasal root
+  const porion = getLandmark('porion');           // Ear opening
+  const tragus = getLandmark('tragus');           // Ear cartilage
+  const orbitale = getLandmark('orbitale');       // Lowest orbital point
+  const pogonion = getLandmark('pogonion');       // Chin point
+  const subnasale = getLandmark('subnasale');     // Nose base
+
+  // Calculate depth spread (nose to ear horizontal distance)
+  let depthSpread = 0;
+  const earLandmark = porion || tragus;
+
+  if (pronasale && earLandmark) {
+    // In a true side profile, nose tip should be significantly forward of ear
+    depthSpread = Math.abs(pronasale.x - earLandmark.x);
+
+    // Minimum depth spread threshold (nose should be at least 15% face width from ear)
+    const MIN_DEPTH_SPREAD = 0.15;
+    if (depthSpread < MIN_DEPTH_SPREAD) {
+      issues.push(`Insufficient depth spread (${(depthSpread * 100).toFixed(1)}%): Photo may not be a true side profile`);
+      confidence -= 0.3;
+    }
+  } else {
+    issues.push('Missing key landmarks for depth calculation (pronasale or ear landmark)');
+    confidence -= 0.4;
+  }
+
+  // Calculate nasal projection
+  let nosalProjection = 0;
+  if (pronasale && subnasale) {
+    // Nasal projection: horizontal distance from nose base to tip
+    nosalProjection = Math.abs(pronasale.x - subnasale.x);
+
+    // Minimum nasal projection (nose tip should project at least 5% forward of base)
+    const MIN_NASAL_PROJECTION = 0.05;
+    if (nosalProjection < MIN_NASAL_PROJECTION) {
+      issues.push(`Low nasal projection (${(nosalProjection * 100).toFixed(1)}%): Profile angle may be too frontal`);
+      confidence -= 0.2;
+    }
+  }
+
+  // Check Frankfort plane deviation
+  let frankfortDeviation = 0;
+  if (frankfortPlane) {
+    frankfortDeviation = Math.abs(frankfortPlane.angle);
+
+    // Frankfort plane should be within ±10 degrees of horizontal in ideal photos
+    const MAX_FRANKFORT_DEVIATION = 15;
+    if (frankfortDeviation > MAX_FRANKFORT_DEVIATION) {
+      issues.push(`Head tilt detected (${frankfortDeviation.toFixed(1)}°): Consider re-taking photo with head level`);
+      confidence -= 0.15;
+    }
+  } else if (orbitale && (porion || tragus)) {
+    // Calculate from landmarks if not provided
+    const ear = porion || tragus;
+    if (ear && orbitale) {
+      const dx = ear.x - orbitale.x;
+      const dy = ear.y - orbitale.y;
+      frankfortDeviation = Math.abs(Math.atan2(dy, dx) * (180 / Math.PI));
+
+      const MAX_FRANKFORT_DEVIATION = 15;
+      if (frankfortDeviation > MAX_FRANKFORT_DEVIATION) {
+        issues.push(`Head tilt detected (${frankfortDeviation.toFixed(1)}°): Consider re-taking photo with head level`);
+        confidence -= 0.15;
+      }
+    }
+  }
+
+  // Additional validation: Check landmark horizontal ordering
+  // In a true side profile facing left, nose should be leftmost, ear rightmost
+  // In a true side profile facing right, the opposite
+  if (pronasale && earLandmark && nasion) {
+    const noseToEar = pronasale.x - earLandmark.x;
+    const nasionToEar = nasion.x - earLandmark.x;
+
+    // Both should have the same sign (nose and nasion on same side relative to ear)
+    if (noseToEar * nasionToEar < 0) {
+      issues.push('Inconsistent landmark positions: May indicate partial profile or rotation');
+      confidence -= 0.2;
+    }
+  }
+
+  // Check chin position relative to profile
+  if (pogonion && pronasale && earLandmark) {
+    const chinDepth = Math.abs(pogonion.x - earLandmark.x);
+    const noseDepth = Math.abs(pronasale.x - earLandmark.x);
+
+    // In a normal profile, chin should be closer to ear than nose tip
+    // A severely recessed chin might have issues, but this is a soft check
+    if (noseDepth > 0 && chinDepth / noseDepth < 0.3) {
+      issues.push('Unusual chin position: Very recessed or photo angle issue');
+      confidence -= 0.1;
+    }
+  }
+
+  // Clamp confidence between 0 and 1
+  confidence = Math.max(0, Math.min(1, confidence));
+
+  return {
+    isValid: confidence >= 0.5 && issues.length < 3,
+    confidence,
+    depthSpread,
+    nosalProjection,
+    frankfortDeviation,
+    issues,
+  };
 }
 
 /**

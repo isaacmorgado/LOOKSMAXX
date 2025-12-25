@@ -561,12 +561,26 @@ export function harmonyToPSL(harmonyPercent: number): {
   percentile: number;
   description: string;
 } {
+  // Handle edge cases: NaN, Infinity, undefined, null
+  // Treat invalid inputs as 0 (minimum harmony)
+  let safeHarmonyPercent = harmonyPercent;
+  if (
+    typeof harmonyPercent !== 'number' ||
+    !Number.isFinite(harmonyPercent) ||
+    Number.isNaN(harmonyPercent)
+  ) {
+    safeHarmonyPercent = 0;
+  }
+
+  // Clamp to valid range 0-100
+  safeHarmonyPercent = Math.max(0, Math.min(100, safeHarmonyPercent));
+
   // Based on FaceIQ formula: Harmony % = ((Score - Min) / (Max - Min)) * 100
   // Where Max = 333.71, Min = -337.71
 
   // Convert harmony percent to approximate PSL
   // Harmony 0% = PSL 3.0, Harmony 100% = PSL 7.5
-  const psl = 3.0 + (harmonyPercent / 100) * 4.5;
+  const psl = 3.0 + (safeHarmonyPercent / 100) * 4.5;
   const clampedPSL = Math.max(3.0, Math.min(7.5, psl));
 
   // Determine tier
@@ -631,8 +645,35 @@ export function estimatePotentialPSL(
   currentPSL: number,
   treatmentImprovements: number[]
 ): { potentialPSL: number; totalImprovement: number } {
+  // Handle edge cases for currentPSL
+  let safePSL = currentPSL;
+  if (typeof currentPSL !== 'number' || !Number.isFinite(currentPSL) || Number.isNaN(currentPSL)) {
+    safePSL = 3.0; // Default to minimum PSL
+  }
+  safePSL = Math.max(3.0, Math.min(7.5, safePSL));
+
+  // Handle edge cases for treatmentImprovements array
+  if (!Array.isArray(treatmentImprovements) || treatmentImprovements.length === 0) {
+    return {
+      potentialPSL: Math.round(safePSL * 10) / 10,
+      totalImprovement: 0,
+    };
+  }
+
+  // Filter out invalid improvement values
+  const validImprovements = treatmentImprovements.filter(
+    (imp) => typeof imp === 'number' && Number.isFinite(imp) && !Number.isNaN(imp) && imp > 0
+  );
+
+  if (validImprovements.length === 0) {
+    return {
+      potentialPSL: Math.round(safePSL * 10) / 10,
+      totalImprovement: 0,
+    };
+  }
+
   // Sum improvements with diminishing returns
-  const sortedImprovements = treatmentImprovements.sort((a, b) => b - a);
+  const sortedImprovements = validImprovements.sort((a, b) => b - a);
 
   let totalImprovement = 0;
   sortedImprovements.forEach((improvement, index) => {
@@ -643,7 +684,7 @@ export function estimatePotentialPSL(
 
   // Cap total improvement at realistic level
   const cappedImprovement = Math.min(totalImprovement, 2.5);
-  const potentialPSL = Math.min(7.5, currentPSL + cappedImprovement);
+  const potentialPSL = Math.min(7.5, safePSL + cappedImprovement);
 
   return {
     potentialPSL: Math.round(potentialPSL * 10) / 10,

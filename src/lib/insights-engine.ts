@@ -9,9 +9,10 @@
  * - Weakness: if avg score < threshold → classify with severity label
  * - Strength: if avg score > threshold → classify with grade label
  *
- * Z-Score Based Severity Logic (NEW):
+ * Z-Score Based 5-Tier Severity Logic:
  * - Ideal (Green): User is inside the ideal range
- * - Good (Blue): Within 1 Standard Deviation of the mean (|z| < 1)
+ * - Good (Blue): Within 0.5 Standard Deviation of the mean (|z| < 0.5)
+ * - Fair (Cyan): Between 0.5 and 1 Standard Deviation (0.5 ≤ |z| < 1)
  * - Moderate (Yellow): Between 1 and 2 Standard Deviations (1 ≤ |z| < 2)
  * - Severe (Red): More than 2 Standard Deviations away (|z| ≥ 2)
  *
@@ -33,7 +34,7 @@ import { FaceIQScoreResult, FACEIQ_METRICS, isValueAcceptable } from '@/lib/face
 // MASTER SCORING DATABASE (Z-Score Based)
 // ============================================
 
-export type SeverityLevel = 'ideal' | 'good' | 'moderate' | 'severe';
+export type SeverityLevel = 'ideal' | 'good' | 'fair' | 'moderate' | 'severe';
 export type Gender = 'male' | 'female';
 export type Ethnicity = 'white' | 'black' | 'east_asian' | 'south_asian' | 'hispanic' | 'middle_eastern' | 'native_american' | 'pacific_islander';
 
@@ -1443,9 +1444,10 @@ export function calculateZScore(value: number, mean: number, stdDev: number): nu
 }
 
 /**
- * Determine severity level based on Z-score and ideal range
+ * Determine severity level based on Z-score and ideal range (5-tier system)
  * - Ideal: Value is within ideal range
- * - Good: |z| < 1 (within 1 standard deviation)
+ * - Good: |z| < 0.5 (within 0.5 standard deviation)
+ * - Fair: 0.5 ≤ |z| < 1 (between 0.5-1 standard deviations)
  * - Moderate: 1 ≤ |z| < 2 (between 1-2 standard deviations)
  * - Severe: |z| ≥ 2 (more than 2 standard deviations away)
  */
@@ -1460,8 +1462,10 @@ export function getSeverityFromZScore(
   let severity: SeverityLevel;
   if (isInIdeal) {
     severity = 'ideal';
-  } else if (zScore < 1) {
+  } else if (zScore < 0.5) {
     severity = 'good';
+  } else if (zScore < 1) {
+    severity = 'fair';
   } else if (zScore < 2) {
     severity = 'moderate';
   } else {
@@ -1488,12 +1492,13 @@ export function getSeverityForMetric(
 }
 
 /**
- * Get badge color for severity level
+ * Get badge color for severity level (5-tier)
  */
 export function getSeverityColor(severity: SeverityLevel): string {
   switch (severity) {
     case 'ideal': return 'green';
     case 'good': return 'blue';
+    case 'fair': return 'cyan';
     case 'moderate': return 'yellow';
     case 'severe': return 'red';
     default: return 'gray';
@@ -1501,12 +1506,13 @@ export function getSeverityColor(severity: SeverityLevel): string {
 }
 
 /**
- * Get severity label for display
+ * Get severity label for display (5-tier)
  */
 export function getSeverityLabel(severity: SeverityLevel): string {
   switch (severity) {
     case 'ideal': return 'Ideal';
     case 'good': return 'Good';
+    case 'fair': return 'Fair';
     case 'moderate': return 'Moderate';
     case 'severe': return 'Severe';
     default: return 'Unknown';

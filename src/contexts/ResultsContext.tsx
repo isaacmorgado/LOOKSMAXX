@@ -20,6 +20,7 @@ import {
   HarmonyScoreResult,
   RankedMetric,
 } from '@/lib/looksmax-scoring';
+import { harmonyToPSL } from '@/lib/recommendations/severity';
 import {
   classifyInsights,
   convertToStrength,
@@ -69,6 +70,14 @@ interface ResultsContextType {
   // Top 3 strengths and bottom 3 areas to improve with advice
   topMetrics: RankedMetric[];
   bottomMetrics: RankedMetric[];
+
+  // PSL Rating (1-10 scale)
+  pslRating: {
+    psl: number;
+    tier: string;
+    percentile: number;
+    description: string;
+  };
 
   // UI state
   activeTab: ResultsTab;
@@ -1956,6 +1965,11 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
   const frontScore = analysisResults?.harmony?.frontScore || 0;
   const sideScore = analysisResults?.harmony?.sideScore || 0;
 
+  // PSL Rating (1-10 scale with tier/percentile)
+  const pslRating = useMemo(() => {
+    return harmonyToPSL(harmonyPercentage);
+  }, [harmonyPercentage]);
+
   // Action to set all results data
   const setResultsData = useCallback((data: ResultsInputData) => {
     setFrontLandmarks(data.frontLandmarks);
@@ -1966,7 +1980,8 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     setEthnicity(data.ethnicity || 'other');
   }, []);
 
-  const value: ResultsContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo<ResultsContextType>(() => ({
     frontLandmarks,
     sideLandmarks,
     gender,
@@ -1987,6 +2002,8 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     harmonyPercentage,
     topMetrics,
     bottomMetrics,
+    // PSL Rating
+    pslRating,
     // UI state
     activeTab,
     setActiveTab,
@@ -1999,7 +2016,15 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     showLandmarkOverlay,
     setShowLandmarkOverlay,
     setResultsData,
-  };
+  }), [
+    frontLandmarks, sideLandmarks, gender, ethnicity, frontPhoto, sidePhoto,
+    harmonyAnalysis, frontRatios, sideRatios, strengths, flaws, recommendations,
+    overallScore, frontScore, sideScore, harmonyScoreResult, harmonyPercentage,
+    topMetrics, bottomMetrics, pslRating, activeTab, setActiveTab,
+    expandedMeasurementId, setExpandedMeasurementId, selectedVisualizationMetric,
+    setSelectedVisualizationMetric, categoryFilter, setCategoryFilter,
+    showLandmarkOverlay, setShowLandmarkOverlay, setResultsData,
+  ]);
 
   return (
     <ResultsContext.Provider value={value}>

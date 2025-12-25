@@ -204,8 +204,37 @@ function QuickInsightsSection({ topMetrics, bottomMetrics }: QuickInsightsSectio
 // ============================================
 
 function HarmonyScoreDisplay() {
-  const { overallScore, frontScore, sideScore, harmonyPercentage, harmonyScoreResult } = useResults();
+  const { overallScore, frontScore, sideScore, harmonyPercentage, harmonyScoreResult, pslRating } = useResults();
   const [showRadar, setShowRadar] = useState(true);
+
+  // Get tier color based on PSL
+  const getTierColor = (psl: number) => {
+    // Handle invalid PSL values
+    if (typeof psl !== 'number' || !Number.isFinite(psl)) {
+      return 'text-orange-400';
+    }
+    if (psl >= 7.0) return 'text-purple-400';
+    if (psl >= 6.0) return 'text-cyan-400';
+    if (psl >= 5.0) return 'text-green-400';
+    if (psl >= 4.0) return 'text-yellow-400';
+    return 'text-orange-400';
+  };
+
+  // Safe values for display with fallbacks
+  const safePslRating = useMemo(() => ({
+    psl: typeof pslRating?.psl === 'number' && Number.isFinite(pslRating.psl) ? pslRating.psl : 3.0,
+    tier: pslRating?.tier || 'Unknown',
+    percentile: typeof pslRating?.percentile === 'number' && Number.isFinite(pslRating.percentile) ? pslRating.percentile : 50,
+    description: pslRating?.description || 'Analysis pending',
+  }), [pslRating]);
+
+  const safeHarmonyPercentage = typeof harmonyPercentage === 'number' && Number.isFinite(harmonyPercentage)
+    ? harmonyPercentage
+    : 0;
+
+  const safeFrontScore = typeof frontScore === 'number' && Number.isFinite(frontScore) ? frontScore : 0;
+  const safeSideScore = typeof sideScore === 'number' && Number.isFinite(sideScore) ? sideScore : 0;
+  const safeOverallScore = typeof overallScore === 'number' && Number.isFinite(overallScore) ? overallScore : 0;
 
   return (
     <motion.div
@@ -219,6 +248,34 @@ function HarmonyScoreDisplay() {
         <div className="text-center flex flex-col justify-center">
           <h2 className="text-lg font-medium text-neutral-400 mb-2">Weighted Harmony Score</h2>
 
+          {/* PSL Rating Badge */}
+          <motion.div
+            className="flex justify-center mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring' }}
+          >
+            <div className="px-5 py-2 bg-gradient-to-r from-neutral-800 to-neutral-900 border border-neutral-700 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="text-center">
+                  <span className={`text-3xl font-bold ${getTierColor(safePslRating.psl)}`}>
+                    {safePslRating.psl.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-neutral-500 ml-1">PSL</span>
+                </div>
+                <div className="h-8 w-px bg-neutral-700" />
+                <div className="text-left">
+                  <p className={`text-sm font-semibold ${getTierColor(safePslRating.psl)}`}>
+                    {safePslRating.tier}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Top {(100 - safePslRating.percentile).toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Harmony Percentage Badge */}
           <motion.div
             className="flex justify-center mb-4"
@@ -228,15 +285,16 @@ function HarmonyScoreDisplay() {
           >
             <div className="px-4 py-1 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 rounded-full">
               <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-                {harmonyPercentage.toFixed(1)}%
+                {safeHarmonyPercentage.toFixed(1)}%
               </span>
+              <span className="text-xs text-neutral-500 ml-2">Harmony</span>
             </div>
           </motion.div>
 
           {/* Animated Score */}
           <div className="flex justify-center mb-4">
             <AnimatedScore
-              score={overallScore}
+              score={safeOverallScore}
               duration={2.5}
               delay={0.5}
               showConfetti={true}
@@ -248,15 +306,15 @@ function HarmonyScoreDisplay() {
           <div className="flex justify-center gap-8 mb-4">
             <div className="text-center">
               <p className="text-xs text-neutral-500 mb-1">Front Profile</p>
-              <p className="text-xl font-bold" style={{ color: getScoreColor(frontScore) }}>
-                {frontScore.toFixed(2)}
+              <p className="text-xl font-bold" style={{ color: getScoreColor(safeFrontScore) }}>
+                {safeFrontScore.toFixed(2)}
               </p>
             </div>
             <div className="w-px bg-neutral-800" />
             <div className="text-center">
               <p className="text-xs text-neutral-500 mb-1">Side Profile</p>
-              <p className="text-xl font-bold" style={{ color: getScoreColor(sideScore) }}>
-                {sideScore.toFixed(2)}
+              <p className="text-xl font-bold" style={{ color: getScoreColor(safeSideScore) }}>
+                {safeSideScore.toFixed(2)}
               </p>
             </div>
           </div>
@@ -277,9 +335,9 @@ function HarmonyScoreDisplay() {
           )}
 
           <p className="text-sm text-neutral-400 max-w-md mx-auto">
-            {harmonyPercentage >= 80 ? 'Exceptional facial harmony. Your features are well-balanced and proportioned.' :
-              harmonyPercentage >= 60 ? 'Good facial harmony with some areas that could be optimized.' :
-                harmonyPercentage >= 40 ? 'Average facial harmony. Several areas have room for improvement.' :
+            {safeHarmonyPercentage >= 80 ? 'Exceptional facial harmony. Your features are well-balanced and proportioned.' :
+              safeHarmonyPercentage >= 60 ? 'Good facial harmony with some areas that could be optimized.' :
+                safeHarmonyPercentage >= 40 ? 'Average facial harmony. Several areas have room for improvement.' :
                   'Below average facial harmony. Multiple areas could benefit from attention.'}
           </p>
         </div>
@@ -424,19 +482,17 @@ export function OverviewTab() {
     return sideMetricIds.includes(selectedRatio.metricId);
   }, [selectedRatio, sideRatios]);
 
-  // Get appropriate face photo for modal
-  const getModalPhoto = useCallback(() => {
+  // Memoized modal values (useMemo instead of useCallback for computed values)
+  const modalPhoto = useMemo(() => {
     if (!selectedRatio) return frontPhoto;
     return isSideRatio ? (sidePhoto || frontPhoto) : frontPhoto;
   }, [selectedRatio, isSideRatio, frontPhoto, sidePhoto]);
 
-  // Get appropriate landmarks for modal
-  const getModalLandmarks = useCallback(() => {
+  const modalLandmarks = useMemo(() => {
     return isSideRatio ? (sideLandmarks || []) : (frontLandmarks || []);
   }, [isSideRatio, frontLandmarks, sideLandmarks]);
 
-  // Get profile type for modal
-  const getModalProfileType = useCallback((): 'front' | 'side' => {
+  const modalProfileType = useMemo((): 'front' | 'side' => {
     return isSideRatio ? 'side' : 'front';
   }, [isSideRatio]);
 
@@ -535,10 +591,10 @@ export function OverviewTab() {
         onNext={handleNextRatio}
         hasPrevious={currentRatioIndex > 0}
         hasNext={currentRatioIndex < allRatios.length - 1}
-        facePhoto={getModalPhoto()}
-        landmarks={getModalLandmarks()}
+        facePhoto={modalPhoto}
+        landmarks={modalLandmarks}
         allRatios={allRatios}
-        profileType={getModalProfileType()}
+        profileType={modalProfileType}
         gender={gender}
         ethnicity={ethnicity}
       />
