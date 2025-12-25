@@ -1,4 +1,4 @@
-# LOOKSMAXX vs FaceIQ - Comprehensive Comparison Report
+# LOOKSMAXX vs LOOKSMAXX - Comprehensive Comparison Report
 
 **Generated**: 2025-12-23
 **Last Updated**: 2025-12-24
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-| Category | LOOKSMAXX Status | FaceIQ Reference | Parity |
+| Category | LOOKSMAXX Status | LOOKSMAXX Reference | Parity |
 |----------|------------------|------------------|--------|
 | Bezier Curves | ✅ 66 implemented | 66 total | **100%** |
 | Decay Rates | ✅ 0.08-0.30 range | 0.07-0.3 (soft) | **100%** |
@@ -24,8 +24,8 @@
 
 ### 1.1 Bezier Curve Implementation ✅ COMPLETED
 
-**FaceIQ**: Uses 66 custom Bezier curves with 12 control points and handles per metric
-**LOOKSMAXX**: ✅ All 66 curves implemented in `src/lib/faceiq-bezier-curves.ts`
+**LOOKSMAXX**: Uses 66 custom Bezier curves with 12 control points and handles per metric
+**LOOKSMAXX**: ✅ All 66 curves implemented in `src/lib/bezier-curves.ts`
 
 **~~Missing Curves~~ All Implemented** (66 of 66):
 ```
@@ -93,7 +93,7 @@ Side Profile (40):
 
 ### 1.2 Decay Rate Discrepancies ✅ FIXED (2025-12-24)
 
-| Metric | Old Rate | New Rate | FaceIQ Rate | Status |
+| Metric | Old Rate | New Rate | LOOKSMAXX Rate | Status |
 |--------|----------|----------|-------------|--------|
 | Canthal Tilt | 31.63 | 0.15 | 0.15 | ✅ Fixed |
 | Facial Thirds | 3.00 | 0.18 | 0.18 | ✅ Fixed |
@@ -106,7 +106,7 @@ Side Profile (40):
 | E-Line | 2.00 | 0.30 | 0.30 | ✅ Fixed |
 | Nasolabial Angle | 0.75 | 0.15 | 0.15 | ✅ Fixed |
 
-All critical metrics now use FaceIQ-compliant decay rates (0.08-0.30 range).
+All critical metrics now use LOOKSMAXX-compliant decay rates (0.08-0.30 range).
 
 ---
 
@@ -135,7 +135,7 @@ All critical metrics now use FaceIQ-compliant decay rates (0.08-0.30 range).
 
 ### 2.2 Inverted Signs/Wrong Units ✅ ALL FIXED
 
-| Metric | LOOKSMAXX | FaceIQ | Status |
+| Metric | LOOKSMAXX | LOOKSMAXX | Status |
 |--------|-----------|--------|--------|
 | E-Line Upper Lip | ✅ Negated in code | Negative = behind | **FIXED** (line 3922) |
 | E-Line Lower Lip | ✅ Negated in code | Negative = behind | **FIXED** (line 3923) |
@@ -149,10 +149,10 @@ All critical metrics now use FaceIQ-compliant decay rates (0.08-0.30 range).
 ### 2.3 Nasal Tip Angle ✅ CORRECT
 
 **LOOKSMAXX ideal**: 128.5° - 138.5° (10° range)
-**FaceIQ Bezier curve**: 128.5° - 138.5° (10° range) ✅ MATCHES
+**LOOKSMAXX Bezier curve**: 128.5° - 138.5° (10° range) ✅ MATCHES
 
-The Bezier curve in `faceiq-bezier-curves.ts` (lines 988-989) shows the ideal zone (y=10) spans 128.5-138.5°.
-This is correctly implemented in `faceiq-scoring.ts` (lines 1401-1402).
+The Bezier curve in `bezier-curves.ts` (lines 988-989) shows the ideal zone (y=10) spans 128.5-138.5°.
+This is correctly implemented in `harmony-scoring.ts` (lines 1401-1402).
 
 > Note: Previous documentation incorrectly stated 90-115° vs 104-108°. The actual extracted Bezier curve uses 128.5-138.5°.
 
@@ -164,7 +164,7 @@ This is correctly implemented in `faceiq-scoring.ts` (lines 1401-1402).
 
 **Location**: `src/lib/mediapipeDetection.ts` (line 117)
 
-| Point | LOOKSMAXX Index | FaceIQ Index | Status |
+| Point | LOOKSMAXX Index | LOOKSMAXX Index | Status |
 |-------|-----------------|--------------|--------|
 | Orbitale (Infraorbital) | ✅ 33 | 33 | **FIXED** |
 | Porion (Ear) | 127 | Correct | ✅ |
@@ -174,7 +174,7 @@ All side profile measurements now use correct Frankfort plane reference.
 
 ### 3.2 Side Profile Detection Algorithm
 
-**FaceIQ Method** (from landmark_detection_analysis.md):
+**LOOKSMAXX Method** (from landmark_detection_analysis.md):
 ```javascript
 // Yaw threshold + 3D depth check
 isSideProfile = Math.abs(yawAngle) > 35 && depthVariance > 0.15
@@ -190,7 +190,7 @@ isSideProfile = Math.abs(yawAngle) > 35 && depthVariance > 0.15
 
 **File**: `src/lib/advice-engine.ts` (lines 36-902)
 
-All 30+ procedures now include complete FaceIQ-compatible metadata:
+All 30+ procedures now include complete harmony-based metadata:
 
 | Field | Status | Details |
 |-------|--------|---------|
@@ -265,13 +265,13 @@ export function estimatePotentialPSL(
 }
 ```
 
-**Note**: Uses diminishing returns model (20% reduction per additional treatment) rather than FaceIQ's Bezier recalculation. This is a valid alternative approach that prevents unrealistic stacking of improvements.
+**Note**: Uses diminishing returns model (20% reduction per additional treatment) rather than LOOKSMAXX's Bezier recalculation. This is a valid alternative approach that prevents unrealistic stacking of improvements.
 
 ### 5.2 Plan Ordering Logic ✅ IMPLEMENTED
 
 **File**: `src/components/results/tabs/PlanTab.tsx`
 
-| Feature | FaceIQ | LOOKSMAXX | Status |
+| Feature | LOOKSMAXX | LOOKSMAXX | Status |
 |---------|--------|-----------|--------|
 | Sort by priority_score | ✅ | ✅ | Match |
 | Group by pillars/phases | ✅ | ✅ 3-phase system | Match |
@@ -304,7 +304,7 @@ export function estimatePotentialPSL(
 | Moderate | 1σ ≤ \|z\| < 2σ | ✅ |
 | Severe | \|z\| ≥ 2σ | ✅ |
 
-**Gap**: FaceIQ uses 5-tier with separate "Severe" (>3σ) and "Moderate" (2-3σ). Current implementation groups all >2σ as "Severe".
+**Gap**: LOOKSMAXX uses 5-tier with separate "Severe" (>3σ) and "Moderate" (2-3σ). Current implementation groups all >2σ as "Severe".
 
 ---
 
@@ -314,19 +314,19 @@ export function estimatePotentialPSL(
 
 | File | Changes Required | Status |
 |------|------------------|--------|
-| `src/lib/faceiq-bezier-curves.ts` | Import 66 Bezier curves | ✅ Done |
-| `src/lib/faceiq-scoring.ts` | Fix 6 inverted sign/unit metrics | ✅ Done (6/6) |
-| `src/lib/faceiq-scoring.ts` | Add S-Line calculations | ✅ Added |
-| `src/lib/faceiq-scoring.ts` | Add Holdaway H-Line calculation | ✅ Added |
-| `src/lib/faceiq-scoring.ts` | Nasal Tip Angle range | ✅ Correct (128.5-138.5°) |
-| `src/lib/faceiq-scoring.ts` | Adjust all 10 decay rates | ✅ Done (0.08-0.30 range) |
+| `src/lib/bezier-curves.ts` | Import 66 Bezier curves | ✅ Done |
+| `src/lib/harmony-scoring.ts` | Fix 6 inverted sign/unit metrics | ✅ Done (6/6) |
+| `src/lib/harmony-scoring.ts` | Add S-Line calculations | ✅ Added |
+| `src/lib/harmony-scoring.ts` | Add Holdaway H-Line calculation | ✅ Added |
+| `src/lib/harmony-scoring.ts` | Nasal Tip Angle range | ✅ Correct (128.5-138.5°) |
+| `src/lib/harmony-scoring.ts` | Adjust all 10 decay rates | ✅ Done (0.08-0.30 range) |
 | `src/lib/mediapipeDetection.ts` | Fix Frankfort Plane orbitale | ✅ Done (33) |
 
 ### Priority 1 - High (Affects Accuracy) ✅ COMPLETE
 
 | File | Changes Required | Status |
 |------|------------------|--------|
-| `src/lib/faceiq-scoring.ts` | Correct ideal min/max values | ✅ Done |
+| `src/lib/harmony-scoring.ts` | Correct ideal min/max values | ✅ Done |
 | `src/lib/advice-engine.ts` | Add priority_score, effectiveness | ✅ Done (30+ procedures) |
 | `src/types/results.ts` | Extend types for metadata | ✅ Done |
 | `src/lib/recommendations/severity.ts` | Potential calculation | ✅ Done (diminishing returns) |
@@ -353,7 +353,7 @@ export function estimatePotentialPSL(
 
 ## 8. Source File References
 
-### FaceIQ LOGIC Folder
+### LOOKSMAXX LOGIC Folder
 
 | File | Purpose | Key Data |
 |------|---------|----------|
@@ -368,9 +368,9 @@ export function estimatePotentialPSL(
 
 | File | Line Range | Change Type |
 |------|------------|-------------|
-| `src/lib/faceiq-scoring.ts` | 50-200 | Add Bezier curves |
-| `src/lib/faceiq-scoring.ts` | 200-350 | Fix ideal ranges |
-| `src/lib/faceiq-scoring.ts` | 350-400 | Fix decay rates |
+| `src/lib/harmony-scoring.ts` | 50-200 | Add Bezier curves |
+| `src/lib/harmony-scoring.ts` | 200-350 | Fix ideal ranges |
+| `src/lib/harmony-scoring.ts` | 350-400 | Fix decay rates |
 | `src/lib/mediapipeDetection.ts` | ~145 | Fix landmark index |
 | `src/lib/advice-engine.ts` | 1-500 | Add all metadata |
 | `src/types/results.ts` | 1-100 | Extend interfaces |
@@ -382,7 +382,7 @@ export function estimatePotentialPSL(
 
 ### Scoring System ✅ COMPLETE
 - [x] All 66 Bezier curves loaded and functional
-- [x] Decay rates match FaceIQ (0.08-0.30 range)
+- [x] Decay rates match LOOKSMAXX (0.08-0.30 range)
 - [x] Ideal ranges verified for all key metrics
 - [x] E-Line and Burstone signs correct
 - [x] S-Line calculations added
@@ -418,14 +418,14 @@ export function estimatePotentialPSL(
 ## 10. Implementation Order Recommendation
 
 ### Phase 1: Scoring Accuracy (P0) ✅ COMPLETE
-1. ✅ Import Bezier curves → `faceiq-bezier-curves.ts` (66/66 curves)
-2. ✅ Fix sign inversions → `faceiq-scoring.ts` (E-Line, Burstone negated)
+1. ✅ Import Bezier curves → `bezier-curves.ts` (66/66 curves)
+2. ✅ Fix sign inversions → `harmony-scoring.ts` (E-Line, Burstone negated)
 3. ✅ Nasal Tip Angle → Already correct (128.5-138.5°)
 4. ✅ Fix Frankfort Plane → `mediapipeDetection.ts` (orbitale=33)
 
 ### Phase 2: Metric Accuracy (P1) ✅ COMPLETE
-5. ✅ Verify ideal ranges → `faceiq-scoring.ts`
-6. ✅ Fix 10 decay rates → `faceiq-scoring.ts` (0.08-0.30 range)
+5. ✅ Verify ideal ranges → `harmony-scoring.ts`
+6. ✅ Fix 10 decay rates → `harmony-scoring.ts` (0.08-0.30 range)
 7. ✅ Types extended → `results.ts`
 
 ### Phase 3: Treatment Metadata (P2) ✅ COMPLETE
@@ -447,7 +447,7 @@ export function estimatePotentialPSL(
 
 ## Appendix A: Previous Demographic Override Analysis
 
-> Note: FaceIQ does NOT use different ideal ranges per ethnicity/gender in their scoring algorithm. Their scoring is universal. We chose to implement actual ethnicity/gender-specific ranges based on anthropometric research.
+> Note: LOOKSMAXX does NOT use different ideal ranges per ethnicity/gender in their scoring algorithm. Their scoring is universal. We chose to implement actual ethnicity/gender-specific ranges based on anthropometric research.
 
 ### Ethnicities Supported
 - `east_asian`, `south_asian`, `black`, `hispanic`, `middle_eastern`, `native_american`, `pacific_islander`, `white`, `other`

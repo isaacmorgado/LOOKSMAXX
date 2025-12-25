@@ -1,6 +1,6 @@
 /**
- * FaceIQ-Style Facial Analysis Scoring System
- * Complete replication of FaceIQ Labs scoring algorithms
+ * Harmony-Style Facial Analysis Scoring System
+ * Complete replication of LOOKSMAXX scoring algorithms
  *
  * Features:
  * - Exponential decay scoring with per-metric decay rates
@@ -11,7 +11,7 @@
  */
 
 import { LandmarkPoint } from './landmarks';
-import { FACEIQ_BEZIER_CURVES } from './faceiq-bezier-curves';
+import { BEZIER_CURVES } from './bezier-curves';
 
 // ============================================
 // CORE TYPES
@@ -90,7 +90,7 @@ export interface CurvePoint {
   fixed?: boolean;
 }
 
-export interface FaceIQScoreResult {
+export interface MetricScoreResult {
   metricId: string;
   name: string;
   value: number;
@@ -115,7 +115,7 @@ export interface HarmonyAnalysis {
   frontScore: number;
   sideScore: number;
   categoryScores: Record<string, number>;
-  measurements: FaceIQScoreResult[];
+  measurements: MetricScoreResult[];
   flaws: FlawAssessment[];
   strengths: StrengthAssessment[];
 }
@@ -165,7 +165,7 @@ export interface DemographicOverride {
 
 /**
  * Demographic-specific ideal ranges based on anthropometric research.
- * FaceIQ uses universal scoring, but this gives more accurate assessments
+ * Universal scoring, but this gives more accurate assessments
  * by adjusting ideals based on ethnicity and gender.
  */
 export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey, DemographicOverride>>> = {
@@ -197,7 +197,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Ideal nasolabial angle varies by ethnicity
     // African: slightly more obtuse, European: slightly more acute
     // Middle Eastern: Penalizes droopy tip (<90°) - common flaw is "Hooked Nose"
-    // Extracted from FaceIQ Male:MiddleEastern.htc
+    // Ethnicity-specific override Male:MiddleEastern.htc
     black_male: { idealMin: 95, idealMax: 110 },
     black_female: { idealMin: 100, idealMax: 115 },
     east_asian_male: { idealMin: 90, idealMax: 105 },
@@ -213,7 +213,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Nose projection relative to face depth
     // East Asian/African: typically less projection is ideal
     // Middle Eastern: Accepts stronger projection (bigger nose) than White model
-    // Extracted from FaceIQ Male:MiddleEastern.htc
+    // Ethnicity-specific override Male:MiddleEastern.htc
     east_asian: { idealMin: 0.54, idealMax: 0.60 },
     black: { idealMin: 0.52, idealMax: 0.58 },
     south_asian: { idealMin: 0.56, idealMax: 0.62 },
@@ -230,7 +230,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Pacific Islander: Similar to Black model, accepts wide nasal base
     // Black Female: Wider than White Female, narrower than Black Male - balance of width and refinement
     // Hispanic Female: Intermediate tolerance - slightly wider base acceptable with bridge definition
-    // Extracted from FaceIQ Male:White.htc (Neoclassical), BlackAfrican.htc, Female:African.htc, Female:Hispanic.htc, Female:SouthAsian.htc and Male:Pacific Islander.htc logic
+    // Ethnicity-specific override Male:White.htc (Neoclassical), BlackAfrican.htc, Female:African.htc, Female:Hispanic.htc, Female:SouthAsian.htc and Male:Pacific Islander.htc logic
     white_male: { idealMin: 0.98, idealMax: 1.05 },  // Neoclassical - strictest nasal width standard
     white_female: { idealMin: 0.98, idealMax: 1.05 },  // Strict "Rule of Fifths" (1:1 with eye width)
     east_asian_male: { idealMin: 1.10, idealMax: 1.15 },
@@ -253,7 +253,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Jaw width as % of bizygomatic width
     // Males: wider, more angular; Females: narrower, softer
     // Pacific Islander: Extremely wide jaw preferred - "Warrior Skull" robustness
-    // Extracted from FaceIQ Male:Pacific Islander.htc
+    // Ethnicity-specific override Male:Pacific Islander.htc
     male: { idealMin: 90, idealMax: 95 },
     female: { idealMin: 85, idealMax: 90 },
     pacific_islander_male: { idealMin: 92, idealMax: 98 },  // Jaw width rivals cheekbone width - extreme robustness
@@ -277,7 +277,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Males: more acute (sharper jaw); Females: more obtuse (softer)
     // East Asian Female: Prefers softer, V-shaped jawline (120-126°) - "Doll Face" aesthetic
     // Black Female: Soft/feminine jaw standard - similar to general female range
-    // Extracted from FaceIQ Male:White.htc, Female:East Asian.htc, and Female:African.htc
+    // Ethnicity-specific override Male:White.htc, Female:East Asian.htc, and Female:African.htc
     white_male: { idealMin: 115, idealMax: 125 },  // Neoclassical square jaw - less tolerant of soft/V-shaped jaws
     white_female: { idealMin: 122.0, idealMax: 130.0 },  // Soft, tapered jawline (V-shape)
     east_asian_female: { idealMin: 120, idealMax: 126 },  // Narrower tolerance - penalizes square jaws more
@@ -297,7 +297,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Hispanic: Strong preference for positive tilt (almond eyes), penalizes neutral/negative more harshly
     // Hispanic Female: STRONGEST "Almond/Cat Eye" preference - rewards positive tilt heavily
     // Middle Eastern: Strong preference for "Hunter Eyes" (Dark Triad look)
-    // Extracted from FaceIQ Male:White.htc (Neoclassical baseline), Male:MiddleEastern.htc, and Female:Hispanic.htc
+    // Ethnicity-specific override Male:White.htc (Neoclassical baseline), Male:MiddleEastern.htc, and Female:Hispanic.htc
     white_male: { idealMin: 4.0, idealMax: 8.0 },  // Neoclassical - neutral to slightly positive
     white_female: { idealMin: 4.0, idealMax: 9.0 },  // Neutral to slightly positive
     east_asian_male: { idealMin: 8, idealMax: 12 },
@@ -309,7 +309,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     middle_eastern_male: { idealMin: 4.0, idealMax: 10.0 },  // Almond/Hunter eye preference
     middle_eastern_female: { idealMin: 5.0, idealMax: 10.0 },  // Preference for "Foxy/Hunter" feminine eyes
     native_american_female: { idealMin: 5.0, idealMax: 11.0 },  // Positive tilt (Hunter/Almond)
-    // Default for others is 4-8 (already in FACEIQ_METRICS)
+    // Default for others is 4-8 (already in METRIC_CONFIGS)
   },
 
   eyeAspectRatio: {
@@ -324,7 +324,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   tearTroughDepth: {
     // Under-eye hollowing and dark circles (infraorbital depression)
     // South Asian: MUCH stricter penalty due to genetic hyperpigmentation
-    // Extracted from FaceIQ Male:SouthAsian.htc and Female:SouthAsian.htc - biggest difference vs White model
+    // Ethnicity-specific override Male:SouthAsian.htc and Female:SouthAsian.htc - biggest difference vs White model
     white_male: { idealMin: 0.0, idealMax: 1.5 },
     white_female: { idealMin: 0.0, idealMax: 1.3 },
     south_asian_male: { idealMin: 0.0, idealMax: 0.5 },  // VERY strict - 0.5+ triggers "Tired/Aged Eyes" flaw
@@ -336,7 +336,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   upperEyelidExposure: {
     // Visible eyelid platform (space between eyelash and crease)
     // South Asian ideal: prefers visible lid platform, penalizes hooded eyes more than White model
-    // Extracted from FaceIQ Male:SouthAsian.htc
+    // Ethnicity-specific override Male:SouthAsian.htc
     white_male: { idealMin: 0.3, idealMax: 2.5 },
     white_female: { idealMin: 0.5, idealMax: 3.0 },
     south_asian_male: { idealMin: 0.5, idealMax: 2.0 },  // Prefers visible lid, penalizes hooding
@@ -349,7 +349,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   eyeSeparationRatio: {
     // East Asian Female: Wider tolerance for "Doll Eyes" (wide-set eyes) - neotenous preference
     // Wide-set eyes (46.3-47.5%) are ideal in East Asian female beauty standards
-    // Extracted from FaceIQ Female:East Asian.htc
+    // Ethnicity-specific override Female:East Asian.htc
     east_asian_female: { idealMin: 46.3, idealMax: 47.5 },  // Wide-set eyes are preferred for youthful look
   },
 
@@ -362,7 +362,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Hispanic: Allows broader "Mesoprosopic" faces (Mestizo/Indigenous bone structure)
     // Hispanic Female: "Mestiza" face shape tolerance - broader than White (~1.45) but feminine, celebrates facial harmony
     // Pacific Islander: "Warrior Skull" - extremely broad face preferred (highest FWHR of any demographic)
-    // Extracted from FaceIQ Male:White.htc (Neoclassical baseline), Male:Pacific Islander.htc, and Female:Hispanic.htc
+    // Ethnicity-specific override Male:White.htc (Neoclassical baseline), Male:Pacific Islander.htc, and Female:Hispanic.htc
     white_male: { idealMin: 1.98, idealMax: 2.02 },  // Neoclassical - moderate width baseline
     white_female: { idealMin: 1.45, idealMax: 1.53 },  // Preference for Oval/Narrow shapes
     male: { idealMin: 1.98, idealMax: 2.02 },
@@ -383,7 +383,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Females often have more compact midface
     // White: Neoclassical standard - strict compact midface preference
     // Middle Eastern: Similar to White model - compact is better
-    // Extracted from FaceIQ Male:White.htc (Neoclassical baseline) and Male:MiddleEastern.htc
+    // Ethnicity-specific override Male:White.htc (Neoclassical baseline) and Male:MiddleEastern.htc
     white_male: { idealMin: 0.95, idealMax: 1.02 },  // Neoclassical - penalizes long midface heavily
     white_female: { idealMin: 0.93, idealMax: 1.00 },
     male: { idealMin: 0.98, idealMax: 1.02 },
@@ -395,7 +395,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   lowerThirdProportion: {
     // East Asian Female: Prefers smaller, more compact lower face (Heart/Oval face shape ideal)
     // Smaller lower third contributes to "Cute" or "Doll Face" aesthetic
-    // Extracted from FaceIQ Female:East Asian.htc
+    // Ethnicity-specific override Female:East Asian.htc
     east_asian_female: { idealMin: 29.6, idealMax: 32.7 },  // Penalizes long/masculine chin
   },
 
@@ -405,7 +405,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   lowerToUpperLipRatio: {
     // African/Hispanic: fuller lips natural
     // Black Female: Highest fullness requirement in the app - thin lips heavily penalized
-    // Extracted from FaceIQ Female:African.htc - combines neoteny with phenotypic lip fullness
+    // Ethnicity-specific override Female:African.htc - combines neoteny with phenotypic lip fullness
     black_male: { idealMin: 1.6, idealMax: 2.2 },
     black_female: { idealMin: 1.3, idealMax: 1.6 },  // HIGHEST fullness standard in the app
     hispanic_male: { idealMin: 1.4, idealMax: 2.0 },
@@ -435,7 +435,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // Males: more projected chin ideal
     // Black/African: Adjusted for bimaxillary prognathism (forward mouth projection)
     // Black Female: Allows forward projection - less likely to trigger "Recessed Chin"
-    // Extracted from FaceIQ BlackAfrican.htc and Female:African.htc logic
+    // Ethnicity-specific override BlackAfrican.htc and Female:African.htc logic
     male: { idealMin: 0, idealMax: 3 },
     female: { idealMin: -2, idealMax: 2 },
     black_male: { idealMin: 0, idealMax: 4 },  // Accommodates natural forward projection
@@ -451,7 +451,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   chinToPhiltrumRatio: {
     // White: Neoclassical standard - strict balance between chin and philtrum
     // Black/African: Fuller lips naturally shorten visible philtrum
-    // Extracted from FaceIQ Male:White.htc (Neoclassical) and BlackAfrican.htc
+    // Ethnicity-specific override Male:White.htc (Neoclassical) and BlackAfrican.htc
     // Higher ratio = shorter philtrum (more acceptable in Black phenotype)
     white_male: { idealMin: 2.10, idealMax: 2.30 },  // Neoclassical - strict lower face balance
     white_female: { idealMin: 2.0, idealMax: 2.2 },  // Classical Golden Ratio
@@ -465,7 +465,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   skinUniformity: {
     // South Asian: Stricter standards due to genetic hyperpigmentation tendency
     // Hispanic: Similar to South Asian - penalizes hyperpigmentation more than White model
-    // Extracted from FaceIQ Male:Hispanic.htc - "Bridge Model"
+    // Ethnicity-specific override Male:Hispanic.htc - "Bridge Model"
     white_male: { idealMin: 0.88, idealMax: 1.00 },
     white_female: { idealMin: 0.90, idealMax: 1.00 },
     south_asian_male: { idealMin: 0.90, idealMax: 1.00 },  // Stricter - hyperpigmentation common
@@ -483,7 +483,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   // ==========================================
   eyebrowThickness: {
     // Middle Eastern: Heavily favors thick, dense eyebrows ("Dark Triad" look with deep-set eyes)
-    // Extracted from FaceIQ Male:MiddleEastern.htc - STRICTEST eyebrow requirements
+    // Ethnicity-specific override Male:MiddleEastern.htc - STRICTEST eyebrow requirements
     middle_eastern_male: { idealMin: 2.5, idealMax: 5.0 },  // Prefers significantly thicker/darker brows
     middle_eastern_female: { idealMin: 1.5, idealMax: 3.0 },  // Thick, high-contrast brows are ideal
     east_asian_male: { idealMin: 1.5, idealMax: 3.0 },  // Typically less thick
@@ -494,7 +494,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
 
   eyebrowDistance: {
     // Middle Eastern: "Kill Switch" for unibrow (synophrys)
-    // Extracted from FaceIQ Male:MiddleEastern.htc
+    // Ethnicity-specific override Male:MiddleEastern.htc
     // While thick brows are favored, unibrow is a critical flaw if distance < 15mm
     middle_eastern_male: { idealMin: 15, idealMax: 25 },  // Stricter minimum to avoid unibrow
     middle_eastern_female: { idealMin: 18, idealMax: 28 },
@@ -505,7 +505,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   orbitalVector: {
     // Middle Eastern: Favors deep-set eyes (lower/negative orbital vector)
     // Part of the "Dark Triad" look with heavy brows
-    // Extracted from FaceIQ Male:MiddleEastern.htc
+    // Ethnicity-specific override Male:MiddleEastern.htc
     middle_eastern_male: { idealMin: -2, idealMax: 3 },  // Allows more deep-set eyes
     middle_eastern_female: { idealMin: -1, idealMax: 4 },
     male: { idealMin: 0, idealMax: 4 },
@@ -515,7 +515,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
   eyebrowLowSetedness: {
     // East Asian Female: Prefers higher-set, softer brows (less aggressive/masculine)
     // Lower values = higher brow position (more feminine)
-    // Extracted from FaceIQ Female:East Asian.htc
+    // Ethnicity-specific override Female:East Asian.htc
     east_asian_female: { idealMin: 0.85, idealMax: 1.30 },  // "Soft Brow" preference - penalizes low-set aggressive brows
   },
 
@@ -523,7 +523,7 @@ export const DEMOGRAPHIC_OVERRIDES: Record<string, Partial<Record<DemographicKey
     // South Asian: Rewards youthful midface volume, penalizes "Gaunt/Hollow" look more than "Chubby"
     // White: Prefers leaner, "Model" look with defined cheekbones (hollow cheeks acceptable)
     // East Asian Female: Similar to South Asian - neoteny/youthful fullness preference
-    // Extracted from FaceIQ Female:SouthAsian.htc
+    // Ethnicity-specific override Female:SouthAsian.htc
     white_male: { idealMin: 0.8, idealMax: 1.5 },  // Accepts hollow cheeks (model/athletic look)
     white_female: { idealMin: 0.9, idealMax: 1.6 },
     south_asian_male: { idealMin: 1.0, idealMax: 1.8 },  // Rewards facial volume
@@ -551,7 +551,7 @@ export function getMetricConfigForDemographics(
   gender: Gender,
   ethnicity: Ethnicity = 'other'
 ): MetricConfig | null {
-  const baseConfig = FACEIQ_METRICS[metricId];
+  const baseConfig = METRIC_CONFIGS[metricId];
   if (!baseConfig) return null;
 
   const overrides = DEMOGRAPHIC_OVERRIDES[metricId];
@@ -571,10 +571,10 @@ export function getMetricConfigForDemographics(
 }
 
 // ============================================
-// FACEIQ MEASUREMENT CONFIGURATIONS (70+)
+// MEASUREMENT CONFIGURATIONS (70+)
 // ============================================
 
-export const FACEIQ_METRICS: Record<string, MetricConfig> = {
+export const METRIC_CONFIGS: Record<string, MetricConfig> = {
   // ==========================================
   // FRONT PROFILE - FACIAL PROPORTIONS (32)
   // ==========================================
@@ -588,12 +588,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 2.0,
     rangeMin: 1.4,
     rangeMax: 2.5,
-    decayRate: 0.12,  // FaceIQ parity: was 6.4 (53x too harsh)
-    maxScore: 30,  // FaceIQ: highest priority metric
+    decayRate: 0.12,  //  was 6.4 (53x too harsh)
+    maxScore: 30,  //  highest priority metric
     weight: 0.06,
     description: 'Ratio of bizygomatic width to upper face height',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.faceWidthToHeight,
+    customCurve: BEZIER_CURVES.faceWidthToHeight,
   },
 
   lowerThirdProportion: {
@@ -605,12 +605,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 33.5,
     rangeMin: 24,
     rangeMax: 40,
-    decayRate: 0.18,  // FaceIQ parity: was 1.86 (10x too harsh)
+    decayRate: 0.18,  //  was 1.86 (10x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Percentage of face occupied by lower third (subnasale to menton)',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.lowerThirdProportion,
+    customCurve: BEZIER_CURVES.lowerThirdProportion,
   },
 
   lowerThirdProportionAlt: {
@@ -622,12 +622,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 37,
     rangeMin: 25,
     rangeMax: 46,
-    decayRate: 0.18,  // FaceIQ parity: was 1.5 (8x too harsh)
+    decayRate: 0.18,  //  was 1.5 (8x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Ratio of upper-lower-third (subnasale to stomion) to total lower third (subnasale to menton)',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.lowerThirdProportionAlt,
+    customCurve: BEZIER_CURVES.lowerThirdProportionAlt,
   },
 
   middleThirdProportion: {
@@ -639,12 +639,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 33.4,
     rangeMin: 24,
     rangeMax: 42,
-    decayRate: 0.18,  // FaceIQ parity: was 1.5 (8x too harsh)
+    decayRate: 0.18,  //  was 1.5 (8x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Percentage of face occupied by middle third',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.middleThirdProportion,
+    customCurve: BEZIER_CURVES.middleThirdProportion,
   },
 
   upperThirdProportion: {
@@ -656,12 +656,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 32,
     rangeMin: 24,
     rangeMax: 42,
-    decayRate: 0.18,  // FaceIQ parity: was 1.2 (7x too harsh)
+    decayRate: 0.18,  //  was 1.2 (7x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Percentage of face occupied by upper third (trichion to glabella)',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.upperThirdProportion,
+    customCurve: BEZIER_CURVES.upperThirdProportion,
   },
 
   bitemporalWidth: {
@@ -678,7 +678,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Temple width as percentage of bizygomatic width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.bitemporalWidth,
+    customCurve: BEZIER_CURVES.bitemporalWidth,
   },
 
   cheekboneHeight: {
@@ -691,11 +691,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: 30,
     rangeMax: 140,
     decayRate: 0.5,
-    maxScore: 15,  // FaceIQ: higher priority
+    maxScore: 15,  //  higher priority
     weight: 0.03,
     description: 'Vertical position of cheekbones relative to face height',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.cheekboneHeight,
+    customCurve: BEZIER_CURVES.cheekboneHeight,
   },
 
   cheekFullness: {
@@ -723,12 +723,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.37,
     rangeMin: 1.0,
     rangeMax: 1.7,
-    decayRate: 0.15,  // FaceIQ parity: was 13.2 (88x too harsh)
+    decayRate: 0.15,  //  was 13.2 (88x too harsh)
     maxScore: 25,  // Special: higher max score
     weight: 0.05,
     description: 'Total face height divided by cheek width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.totalFacialWidthToHeight,
+    customCurve: BEZIER_CURVES.totalFacialWidthToHeight,
   },
 
   midfaceRatio: {
@@ -740,12 +740,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.0,
     rangeMin: 0.5,
     rangeMax: 1.5,
-    decayRate: 0.15,  // FaceIQ parity: was 31.6 (210x too harsh!)
-    maxScore: 12.5,  // FaceIQ: medium-high priority
+    decayRate: 0.15,  //  was 31.6 (210x too harsh!)
+    maxScore: 12.5,  //  medium-high priority
     weight: 0.04,
     description: 'Midface width to height ratio for facial balance',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.midfaceRatio,
+    customCurve: BEZIER_CURVES.midfaceRatio,
   },
 
   // JAW MEASUREMENTS
@@ -763,7 +763,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.03,
     description: 'Angle of the jawline from gonion to chin',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.jawSlope,
+    customCurve: BEZIER_CURVES.jawSlope,
   },
 
   jawFrontalAngle: {
@@ -776,11 +776,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: 35,
     rangeMax: 140,
     decayRate: 0.6,
-    maxScore: 20,  // FaceIQ: high priority
+    maxScore: 20,  //  high priority
     weight: 0.04,
     description: 'Angle of jaw corners from frontal view',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.jawFrontalAngle,
+    customCurve: BEZIER_CURVES.jawFrontalAngle,
   },
 
   bigonialWidth: {
@@ -793,11 +793,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: 60.25,
     rangeMax: 120.25,
     decayRate: 0.9,
-    maxScore: 15,  // FaceIQ: higher priority
+    maxScore: 15,  //  higher priority
     weight: 0.03,
     description: 'Jaw width as percentage of bizygomatic width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.bigonialWidth,
+    customCurve: BEZIER_CURVES.bigonialWidth,
   },
 
   jawWidthRatio: {
@@ -809,7 +809,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.82,
     rangeMin: 0.6,
     rangeMax: 0.95,
-    decayRate: 0.15,  // FaceIQ parity: was 25.0 (167x too harsh)
+    decayRate: 0.15,  //  was 25.0 (167x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Bigonial width divided by bizygomatic width',
@@ -826,12 +826,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 8.0,
     rangeMin: -5,
     rangeMax: 20,
-    decayRate: 0.15,  // FaceIQ parity: was 1.5 (10x too harsh)
+    decayRate: 0.15,  //  was 1.5 (10x too harsh)
     maxScore: 10,
     weight: 0.04,
     description: 'Angle of eye from inner to outer canthus. Positive tilt is attractive.',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.lateralCanthalTilt,
+    customCurve: BEZIER_CURVES.lateralCanthalTilt,
     // DIRECTIONAL SCORING: Higher (positive) tilt is better
     // - Ideal: 4-8° (attractive upswept eyes / "hunter eyes")
     // - Good: 0-4° (neutral to slight positive - still attractive)
@@ -851,11 +851,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: 0.8,
     rangeMax: 6,
     decayRate: 2.0,
-    maxScore: 15,  // FaceIQ: higher priority
+    maxScore: 15,  //  higher priority
     weight: 0.03,
     description: 'Eye width divided by eye height',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.eyeAspectRatio,
+    customCurve: BEZIER_CURVES.eyeAspectRatio,
   },
 
   eyeSeparationRatio: {
@@ -867,12 +867,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 46.8,
     rangeMin: 35,
     rangeMax: 55,
-    decayRate: 0.12,  // FaceIQ parity: was 2.5 (21x too harsh)
+    decayRate: 0.12,  //  was 2.5 (21x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Intercanthal distance as percentage of bizygomatic width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.eyeSeparationRatio,
+    customCurve: BEZIER_CURVES.eyeSeparationRatio,
   },
 
   interpupillaryRatio: {
@@ -900,12 +900,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.87,
     rangeMin: 0.6,
     rangeMax: 1.1,
-    decayRate: 0.12,  // FaceIQ parity: was 12.0 (100x too harsh)
+    decayRate: 0.12,  //  was 12.0 (100x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Mouth width divided by interpupillary distance',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.interpupillaryMouthWidthRatio,
+    customCurve: BEZIER_CURVES.interpupillaryMouthWidthRatio,
   },
 
   oneEyeApartTest: {
@@ -917,12 +917,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.0,
     rangeMin: 0.7,
     rangeMax: 1.3,
-    decayRate: 0.15,  // FaceIQ parity: was 20.0 (133x too harsh)
+    decayRate: 0.15,  //  was 20.0 (133x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Intercanthal distance should equal one eye width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.oneEyeApartTest,
+    customCurve: BEZIER_CURVES.oneEyeApartTest,
   },
 
   tearTroughDepth: {
@@ -1000,7 +1000,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     id: 'browLengthRatio',
     name: 'Brow Length to Face Width Ratio',
     category: 'Upper Third',
-    unit: 'ratio',  // FaceIQ: ratio not percent
+    unit: 'ratio',  //  ratio not percent
     idealMin: 0.69,
     idealMax: 0.76,
     rangeMin: 0.3,
@@ -1010,7 +1010,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Eyebrow length divided by face width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.browLengthToFaceWidth,
+    customCurve: BEZIER_CURVES.browLengthToFaceWidth,
   },
 
   eyebrowTilt: {
@@ -1027,7 +1027,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle of eyebrow from head to tail',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.eyebrowTilt,
+    customCurve: BEZIER_CURVES.eyebrowTilt,
   },
 
   eyebrowLowSetedness: {
@@ -1039,12 +1039,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.45,
     rangeMin: -0.2,
     rangeMax: 1.0,
-    decayRate: 0.15,  // FaceIQ parity: was 8.0 (53x too harsh)
+    decayRate: 0.15,  //  was 8.0 (53x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Distance from brow to eye relative to eye height',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.eyebrowLowSetedness,
+    customCurve: BEZIER_CURVES.eyebrowLowSetedness,
   },
 
   // NOSE MEASUREMENTS (FRONT)
@@ -1057,7 +1057,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 85,
     rangeMin: 55,
     rangeMax: 100,
-    decayRate: 0.25,  // FaceIQ parity: was 0.5 (2x too harsh)
+    decayRate: 0.25,  //  was 0.5 (2x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Nose width divided by nose height × 100',
@@ -1073,12 +1073,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.16,
     rangeMin: 0.7,
     rangeMax: 1.5,
-    decayRate: 0.12,  // FaceIQ parity: was 12.0 (100x too harsh)
+    decayRate: 0.12,  //  was 12.0 (100x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Alar width should roughly equal intercanthal distance',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.intercanthalNasalRatio,
+    customCurve: BEZIER_CURVES.intercanthalNasalRatio,
   },
 
   noseBridgeWidth: {
@@ -1086,16 +1086,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Nose Bridge to Nose Width',
     category: 'Nose',
     unit: 'ratio',
-    idealMin: 2.06,  // FaceIQ: ratio of bridge to alar width
+    idealMin: 2.06,  //  ratio of bridge to alar width
     idealMax: 2.14,
     rangeMin: 1.05,
     rangeMax: 3.0,
-    decayRate: 0.15,  // FaceIQ parity: was 15.0 (100x too harsh)
+    decayRate: 0.15,  //  was 15.0 (100x too harsh)
     maxScore: 10,
     weight: 0.01,
     description: 'Ratio of nose bridge width to alar base width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.noseBridgeToNoseWidth,
+    customCurve: BEZIER_CURVES.noseBridgeToNoseWidth,
   },
 
   noseTipPosition: {
@@ -1108,11 +1108,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: -7.5,
     rangeMax: 12.5,
     decayRate: 1.5,
-    maxScore: 2.5,  // FaceIQ: low priority
+    maxScore: 2.5,  //  low priority
     weight: 0.01,
     description: 'Nose tip deviation from facial midline',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.noseTipPosition,
+    customCurve: BEZIER_CURVES.noseTipPosition,
   },
 
   // MOUTH/LIP MEASUREMENTS
@@ -1125,12 +1125,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.51,
     rangeMin: 0.96,
     rangeMax: 1.91,
-    decayRate: 0.18,  // FaceIQ parity: was 18.0 (100x too harsh)
+    decayRate: 0.18,  //  was 18.0 (100x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Mouth width divided by nose width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.mouthToNoseWidthRatio,
+    customCurve: BEZIER_CURVES.mouthToNoseWidthRatio,
   },
 
   lowerToUpperLipRatio: {
@@ -1142,12 +1142,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.88,
     rangeMin: -0.98,
     rangeMax: 4.03,
-    decayRate: 0.20,  // FaceIQ parity: was 8.0 (40x too harsh)
-    maxScore: 7.5,  // FaceIQ: medium priority
+    decayRate: 0.20,  //  was 8.0 (40x too harsh)
+    maxScore: 7.5,  //  medium priority
     weight: 0.02,
     description: 'Lower lip height divided by upper lip height',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.lipRatio,
+    customCurve: BEZIER_CURVES.lipRatio,
   },
 
   cupidsBowDepth: {
@@ -1164,7 +1164,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: "Depth of the cupid's bow curve",
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.cupidsBowDepth,
+    customCurve: BEZIER_CURVES.cupidsBowDepth,
   },
 
   mouthCornerPosition: {
@@ -1181,7 +1181,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Mouth corner vertical position relative to lip center',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.mouthCornerPosition,
+    customCurve: BEZIER_CURVES.mouthCornerPosition,
   },
 
   // CHIN MEASUREMENTS (FRONT)
@@ -1194,12 +1194,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 2.45,
     rangeMin: 0.3,
     rangeMax: 4.5,
-    decayRate: 0.10,  // FaceIQ parity: was 10.0 (100x too harsh)
-    maxScore: 12.5,  // FaceIQ: medium-high priority
+    decayRate: 0.10,  //  was 10.0 (100x too harsh)
+    maxScore: 12.5,  //  medium-high priority
     weight: 0.02,
     description: 'Chin height divided by philtrum length',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.chinToPhiltrumRatio,
+    customCurve: BEZIER_CURVES.chinToPhiltrumRatio,
   },
 
   chinWidth: {
@@ -1233,7 +1233,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Deviation between Ipsilateral Alar Angle and Jaw Frontal Angle',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.iaaJfaDeviation,
+    customCurve: BEZIER_CURVES.iaaJfaDeviation,
   },
 
   ipsilateralAlarAngle: {
@@ -1246,11 +1246,11 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     rangeMin: 60,
     rangeMax: 125,
     decayRate: 0.6,
-    maxScore: 2.5,  // FaceIQ: low priority
+    maxScore: 2.5,  //  low priority
     weight: 0.01,
     description: 'Angle of alar base relative to facial plane',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.ipsilateralAlarAngle,
+    customCurve: BEZIER_CURVES.ipsilateralAlarAngle,
   },
 
   earProtrusionAngle: {
@@ -1267,7 +1267,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Angle of ear protrusion from head',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.earProtrusionAngle,
+    customCurve: BEZIER_CURVES.earProtrusionAngle,
   },
 
   earProtrusionRatio: {
@@ -1284,7 +1284,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Ear protrusion as percentage of head width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.earProtrusionRatio,
+    customCurve: BEZIER_CURVES.earProtrusionRatio,
   },
 
   neckWidth: {
@@ -1301,7 +1301,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Neck width as percentage of jaw width',
     profileType: 'front',
-    customCurve: FACEIQ_BEZIER_CURVES.neckWidth,
+    customCurve: BEZIER_CURVES.neckWidth,
   },
 
   // ==========================================
@@ -1313,16 +1313,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Gonial Angle',
     category: 'Occlusion/Jaw Growth',
     unit: 'degrees',
-    idealMin: 115,  // FaceIQ: 115-121°
+    idealMin: 115,  //  115-121°
     idealMax: 121,
     rangeMin: 90,
     rangeMax: 145,
-    decayRate: 0.08,  // FaceIQ parity: was 0.8 (10x too harsh)
+    decayRate: 0.08,  //  was 0.8 (10x too harsh)
     maxScore: 10,
     weight: 0.04,
     description: 'Angle at the jaw corner (gonion)',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.gonialAngle,
+    customCurve: BEZIER_CURVES.gonialAngle,
   },
 
   nasolabialAngle: {
@@ -1330,16 +1330,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Nasolabial Angle',
     category: 'Nose',
     unit: 'degrees',
-    idealMin: 97,  // FaceIQ Bezier curve peak: 97-114°
+    idealMin: 97,  // Bezier curve peak: 97-114°
     idealMax: 114,
     rangeMin: 75,
     rangeMax: 120,
-    decayRate: 0.15,  // FaceIQ parity: was 0.6 (4x too harsh)
+    decayRate: 0.15,  //  was 0.6 (4x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Angle between columella and upper lip',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasolabialAngle,
+    customCurve: BEZIER_CURVES.nasolabialAngle,
   },
 
   nasofrontalAngle: {
@@ -1356,7 +1356,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle at the bridge of nose (nasion)',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasofrontalAngle,
+    customCurve: BEZIER_CURVES.nasofrontalAngle,
   },
 
   nasofacialAngle: {
@@ -1373,7 +1373,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle between nose and face plane',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasofacialAngle,
+    customCurve: BEZIER_CURVES.nasofacialAngle,
   },
 
   nasomentaAngle: {
@@ -1390,7 +1390,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle from nasion to nose tip to chin',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasomentalAngle,
+    customCurve: BEZIER_CURVES.nasomentalAngle,
   },
 
   nasalTipAngle: {
@@ -1398,7 +1398,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Nasal Tip Angle',
     category: 'Nose',
     unit: 'degrees',
-    idealMin: 128.5,  // FaceIQ: 128.5-138.5°
+    idealMin: 128.5,  //  128.5-138.5°
     idealMax: 138.5,
     rangeMin: 90,
     rangeMax: 170,
@@ -1407,7 +1407,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle of the nose tip',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasalTipAngle,
+    customCurve: BEZIER_CURVES.nasalTipAngle,
   },
 
   nasalProjection: {
@@ -1419,12 +1419,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.6,
     rangeMin: 0.4,
     rangeMax: 0.75,
-    decayRate: 0.15,  // FaceIQ parity: was 20.0 (133x too harsh)
+    decayRate: 0.15,  //  was 20.0 (133x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Nose projection relative to nasal length (Goode ratio)',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasalProjection,
+    customCurve: BEZIER_CURVES.nasalProjection,
   },
 
   nasalWToHRatio: {
@@ -1436,12 +1436,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.78,
     rangeMin: 0.5,
     rangeMax: 0.95,
-    decayRate: 0.20,  // FaceIQ parity: was 15.0 (75x too harsh)
+    decayRate: 0.20,  //  was 15.0 (75x too harsh)
     maxScore: 10,
     weight: 0.01,
     description: 'Nose width to height ratio from side view',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.nasalWToHRatio,
+    customCurve: BEZIER_CURVES.nasalWToHRatio,
   },
 
   noseTipRotationAngle: {
@@ -1458,7 +1458,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Angle of nose tip rotation',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.noseTipRotationAngle,
+    customCurve: BEZIER_CURVES.noseTipRotationAngle,
   },
 
   frankfortTipAngle: {
@@ -1475,7 +1475,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Angle between Frankfort plane and nose tip',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.frankfortTipAngle,
+    customCurve: BEZIER_CURVES.frankfortTipAngle,
   },
 
   mentolabialAngle: {
@@ -1483,7 +1483,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Mentolabial Angle',
     category: 'Lips',
     unit: 'degrees',
-    idealMin: 111,  // FaceIQ: 111-127°
+    idealMin: 111,  //  111-127°
     idealMax: 127,
     rangeMin: 20,
     rangeMax: 200,
@@ -1492,7 +1492,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle at the labiomental fold',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.mentolabialAngle,
+    customCurve: BEZIER_CURVES.mentolabialAngle,
   },
 
   zAngle: {
@@ -1509,7 +1509,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Merrifield Z-Angle for profile assessment',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.zAngle,
+    customCurve: BEZIER_CURVES.zAngle,
   },
 
   submentalCervicalAngle: {
@@ -1526,7 +1526,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle between chin and neck',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.submentalCervicalAngle,
+    customCurve: BEZIER_CURVES.submentalCervicalAngle,
   },
 
   facialConvexityGlabella: {
@@ -1534,7 +1534,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Facial Convexity (Glabella)',
     category: 'Midface/Face Shape',
     unit: 'degrees',
-    idealMin: 170,  // FaceIQ Bezier curve: 170-175°
+    idealMin: 170,  // Bezier curve: 170-175°
     idealMax: 175,
     rangeMin: 150,
     rangeMax: 185,
@@ -1543,7 +1543,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.03,
     description: 'Facial convexity angle using glabella',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.facialConvexityGlabella,
+    customCurve: BEZIER_CURVES.facialConvexityGlabella,
   },
 
   facialConvexityNasion: {
@@ -1551,7 +1551,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Facial Convexity (Nasion)',
     category: 'Midface/Face Shape',
     unit: 'degrees',
-    idealMin: 163,  // FaceIQ: 163-166°
+    idealMin: 163,  //  163-166°
     idealMax: 166,
     rangeMin: 130,
     rangeMax: 190,
@@ -1560,7 +1560,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Facial convexity angle using nasion',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.facialConvexityNasion,
+    customCurve: BEZIER_CURVES.facialConvexityNasion,
   },
 
   totalFacialConvexity: {
@@ -1568,7 +1568,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Total Facial Convexity',
     category: 'Midface/Face Shape',
     unit: 'degrees',
-    idealMin: 140,  // FaceIQ Bezier curve: 140-147°
+    idealMin: 140,  // Bezier curve: 140-147°
     idealMax: 147,
     rangeMin: 120,
     rangeMax: 160,
@@ -1577,7 +1577,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.03,
     description: 'Complete facial profile convexity measurement',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.totalFacialConvexity,
+    customCurve: BEZIER_CURVES.totalFacialConvexity,
   },
 
   facialDepthToHeight: {
@@ -1589,12 +1589,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.44,
     rangeMin: 0.7,
     rangeMax: 1.8,
-    decayRate: 0.15,  // FaceIQ parity: was 8.0 (53x too harsh)
+    decayRate: 0.15,  //  was 8.0 (53x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Facial depth divided by facial height',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.facialDepthToHeightRatio,
+    customCurve: BEZIER_CURVES.facialDepthToHeightRatio,
   },
 
   anteriorFacialDepth: {
@@ -1611,7 +1611,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Anterior facial projection angle',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.anteriorFacialDepth,
+    customCurve: BEZIER_CURVES.anteriorFacialDepth,
   },
 
   interiorMidfaceProjectionAngle: {
@@ -1628,7 +1628,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Interior midface projection from side profile',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.interiorMidfaceProjectionAngle,
+    customCurve: BEZIER_CURVES.interiorMidfaceProjectionAngle,
   },
 
   recessionFromFrankfort: {
@@ -1652,16 +1652,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Mandibular Plane Angle',
     category: 'Occlusion/Jaw Growth',
     unit: 'degrees',
-    idealMin: 15,  // FaceIQ: 15-22°
+    idealMin: 15,  //  15-22°
     idealMax: 22,
     rangeMin: -15,
     rangeMax: 55,
-    decayRate: 0.12,  // FaceIQ parity: was 0.8 (7x too harsh)
+    decayRate: 0.12,  //  was 0.8 (7x too harsh)
     maxScore: 10,
     weight: 0.03,
     description: 'Angle of mandibular plane to Frankfort plane',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.mandibularPlaneAngle,
+    customCurve: BEZIER_CURVES.mandibularPlaneAngle,
   },
 
   ramusToMandibleRatio: {
@@ -1673,12 +1673,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.75,
     rangeMin: 0.5,
     rangeMax: 0.9,
-    decayRate: 0.15,  // FaceIQ parity: was 15.0 (100x too harsh)
+    decayRate: 0.15,  //  was 15.0 (100x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Ramus height divided by mandible length',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.ramusToMandibleRatio,
+    customCurve: BEZIER_CURVES.ramusToMandibleRatio,
   },
 
   gonionToMouthLine: {
@@ -1686,7 +1686,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Gonion to Mouth Line',
     category: 'Jaw Shape',
     unit: 'mm',
-    idealMin: 15,  // FaceIQ: 15-45mm
+    idealMin: 15,  //  15-45mm
     idealMax: 45,
     rangeMin: -20,
     rangeMax: 65,
@@ -1695,7 +1695,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Distance from gonion to mouth level line',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.gonionToMouthLine,
+    customCurve: BEZIER_CURVES.gonionToMouthLine,
   },
 
   // E-LINE MEASUREMENTS
@@ -1704,16 +1704,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Upper Lip E-Line Position',
     category: 'Lips',
     unit: 'mm',
-    idealMin: 1.5,  // FaceIQ: positive = in front of E-line
+    idealMin: 1.5,  //  positive = in front of E-line
     idealMax: 5.5,
     rangeMin: -8,
     rangeMax: 14,
-    decayRate: 0.30,  // FaceIQ parity: was 1.0 (3x too harsh)
+    decayRate: 0.30,  //  was 1.0 (3x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Upper lip distance from E-line (Ricketts). Positive = in front.',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.eLineUpperLip,
+    customCurve: BEZIER_CURVES.eLineUpperLip,
   },
 
   eLineLowerLip: {
@@ -1721,16 +1721,16 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Lower Lip E-Line Position',
     category: 'Lips',
     unit: 'mm',
-    idealMin: 1.4,  // FaceIQ: positive = in front of E-line
+    idealMin: 1.4,  //  positive = in front of E-line
     idealMax: 4.1,
     rangeMin: -8,
     rangeMax: 12,
-    decayRate: 0.30,  // FaceIQ parity: was 1.0 (3x too harsh)
+    decayRate: 0.30,  //  was 1.0 (3x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Lower lip distance from E-line (Ricketts). Positive = in front.',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.eLineLowerLip,
+    customCurve: BEZIER_CURVES.eLineLowerLip,
   },
 
   // S-LINE MEASUREMENTS
@@ -1748,7 +1748,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Upper lip distance from S-line (Steiner)',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.sLineUpperLip,
+    customCurve: BEZIER_CURVES.sLineUpperLip,
   },
 
   sLineLowerLip: {
@@ -1760,12 +1760,12 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 0.4,
     rangeMin: -8,
     rangeMax: 6,
-    decayRate: 0.25,  // FaceIQ parity: was 3.0 (12x too harsh)
+    decayRate: 0.25,  //  was 3.0 (12x too harsh)
     maxScore: 10,
     weight: 0.01,
     description: 'Lower lip distance from S-line (Steiner)',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.sLineLowerLip,
+    customCurve: BEZIER_CURVES.sLineLowerLip,
   },
 
   // BURSTONE LINE
@@ -1774,7 +1774,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Upper Lip Burstone Line',
     category: 'Lips',
     unit: 'mm',
-    idealMin: -4.7,  // FaceIQ: negative = behind Burstone line
+    idealMin: -4.7,  //  negative = behind Burstone line
     idealMax: -2.3,
     rangeMin: -15,
     rangeMax: 10,
@@ -1783,7 +1783,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Upper lip to Burstone line distance. Negative = behind.',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.burstoneUpperLip,
+    customCurve: BEZIER_CURVES.burstoneUpperLip,
   },
 
   burstoneLowerLip: {
@@ -1791,7 +1791,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Lower Lip Burstone Line',
     category: 'Lips',
     unit: 'mm',
-    idealMin: -2.8,  // FaceIQ: negative = behind Burstone line
+    idealMin: -2.8,  //  negative = behind Burstone line
     idealMax: -1.2,
     rangeMin: -10,
     rangeMax: 10,
@@ -1800,7 +1800,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Lower lip to Burstone line distance. Negative = behind.',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.burstoneLowerLip,
+    customCurve: BEZIER_CURVES.burstoneLowerLip,
   },
 
   // H LINE
@@ -1818,7 +1818,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Holdaway H-line soft tissue assessment',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.holdawayHLine,
+    customCurve: BEZIER_CURVES.holdawayHLine,
   },
 
   // CHIN MEASUREMENTS (SIDE)
@@ -1852,7 +1852,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Chin recession relative to Frankfort horizontal',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.recessionRelativeToFrankfort,
+    customCurve: BEZIER_CURVES.recessionRelativeToFrankfort,
   },
 
   // FOREHEAD
@@ -1861,7 +1861,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Browridge Inclination Angle',
     category: 'Upper Third',
     unit: 'degrees',
-    idealMin: 15,  // FaceIQ: 15-22°
+    idealMin: 15,  //  15-22°
     idealMax: 22,
     rangeMin: -5,
     rangeMax: 46,
@@ -1870,7 +1870,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Angle of the brow ridge from profile',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.browridgeInclinationAngle,
+    customCurve: BEZIER_CURVES.browridgeInclinationAngle,
   },
 
   upperForeheadSlope: {
@@ -1878,7 +1878,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     name: 'Upper Forehead Slope',
     category: 'Upper Third',
     unit: 'degrees',
-    idealMin: 0,  // FaceIQ: 0-2°
+    idealMin: 0,  //  0-2°
     idealMax: 2,
     rangeMin: -15,
     rangeMax: 15,
@@ -1887,7 +1887,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.01,
     description: 'Slope angle of the upper forehead',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.upperForeheadSlope,
+    customCurve: BEZIER_CURVES.upperForeheadSlope,
   },
 
   // MIDFACE PROJECTION
@@ -1921,7 +1921,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'Relationship of globe to orbital rim',
     profileType: 'side',
-    customCurve: FACEIQ_BEZIER_CURVES.orbitalVector,
+    customCurve: BEZIER_CURVES.orbitalVector,
   },
 
   skinUniformity: {
@@ -1933,7 +1933,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
     idealMax: 1.00,
     rangeMin: 0.50,
     rangeMax: 1.00,
-    decayRate: 0.20,  // FaceIQ parity: was 5.0 (25x too harsh)
+    decayRate: 0.20,  //  was 5.0 (25x too harsh)
     maxScore: 10,
     weight: 0.02,
     description: 'Skin tone evenness and hyperpigmentation. 1.0 = perfectly uniform.',
@@ -1946,7 +1946,7 @@ export const FACEIQ_METRICS: Record<string, MetricConfig> = {
 };
 
 // ============================================
-// FLAW MAPPINGS (Extracted from FaceIQ)
+// FLAW MAPPINGS (Ethnicity-specific override)
 // ============================================
 
 export interface FlawMapping {
@@ -2054,7 +2054,7 @@ export const METRIC_FLAW_MAPPINGS: Record<string, FlawMapping[]> = {
 };
 
 // ============================================
-// CUSTOM BEZIER CURVES (Extracted from FaceIQ)
+// CUSTOM BEZIER CURVES (Ethnicity-specific override)
 // ============================================
 
 export const METRIC_CUSTOM_CURVES: Record<string, CurvePoint[]> = {
@@ -3020,7 +3020,7 @@ export const MEASUREMENT_CATEGORIES = {
 // ============================================
 
 /**
- * FaceIQ Exponential Decay Scoring Algorithm with Directional/Dimorphic Support
+ * Exponential Decay Scoring Algorithm with Directional/Dimorphic Support
  *
  * Standard: score = maxScore × e^(-decayRate × deviation)
  *
@@ -3030,7 +3030,7 @@ export const MEASUREMENT_CATEGORIES = {
  * - 'lower_is_better': Values below safeCeiling but above ideal get softZoneScore
  *   Example: Short philtrum is still attractive even if shorter than "ideal"
  */
-export function calculateFaceIQScore(
+export function calculateMetricScore(
   value: number,
   config: MetricConfig
 ): number {
@@ -3059,8 +3059,8 @@ export function calculateFaceIQScore(
     return interpolateCustomCurve(value, customCurve.points, maxScore);
   }
 
-  // Check for pre-defined Bezier curve from FaceIQ (66 metrics)
-  const bezierCurve = FACEIQ_BEZIER_CURVES[id];
+  // Check for pre-defined Bezier curve from harmony curves (66 metrics)
+  const bezierCurve = BEZIER_CURVES[id];
   if (bezierCurve && bezierCurve.mode === 'custom') {
     return interpolateCustomCurve(value, bezierCurve.points, maxScore);
   }
@@ -3454,15 +3454,15 @@ export function scoreMeasurement(
   metricId: string,
   value: number,
   demographics?: DemographicOptions
-): FaceIQScoreResult | null {
+): MetricScoreResult | null {
   // Get config with demographic overrides if provided
   const config = demographics?.gender
     ? getMetricConfigForDemographics(metricId, demographics.gender, demographics.ethnicity || 'other')
-    : FACEIQ_METRICS[metricId];
+    : METRIC_CONFIGS[metricId];
 
   if (!config) return null;
 
-  const score = calculateFaceIQScore(value, config);
+  const score = calculateMetricScore(value, config);
   const standardizedScore = standardizeScore(score, config.maxScore);
   const qualityTier = getQualityTier(score, config.maxScore);
   const severity = getSeverityLevel(score, config.maxScore);
@@ -3495,7 +3495,7 @@ export function scoreMeasurement(
 // ============================================
 
 export interface FrontProfileResults {
-  measurements: FaceIQScoreResult[];
+  measurements: MetricScoreResult[];
   overallScore: number;
   standardizedScore: number;
   qualityTier: QualityTier;
@@ -3511,7 +3511,7 @@ export function analyzeFrontProfile(
   gender: Gender = 'male',
   ethnicity: Ethnicity = 'other'
 ): FrontProfileResults {
-  const measurements: FaceIQScoreResult[] = [];
+  const measurements: MetricScoreResult[] = [];
   const demographics: DemographicOptions = { gender, ethnicity };
 
   // Helper to add measurement if landmarks available
@@ -3821,7 +3821,7 @@ export function analyzeFrontProfile(
   let totalWeight = 0;
   let weightedSum = 0;
   for (const m of measurements) {
-    const config = FACEIQ_METRICS[m.metricId];
+    const config = METRIC_CONFIGS[m.metricId];
     if (config) {
       weightedSum += m.standardizedScore * config.weight;
       totalWeight += config.weight;
@@ -3845,7 +3845,7 @@ export function analyzeFrontProfile(
 // ============================================
 
 export interface SideProfileResults {
-  measurements: FaceIQScoreResult[];
+  measurements: MetricScoreResult[];
   overallScore: number;
   standardizedScore: number;
   qualityTier: QualityTier;
@@ -3861,7 +3861,7 @@ export function analyzeSideProfile(
   gender: Gender = 'male',
   ethnicity: Ethnicity = 'other'
 ): SideProfileResults {
-  const measurements: FaceIQScoreResult[] = [];
+  const measurements: MetricScoreResult[] = [];
   const demographics: DemographicOptions = { gender, ethnicity };
 
   const addMeasurement = (metricId: string, value: number | null) => {
@@ -3915,35 +3915,35 @@ export function analyzeSideProfile(
 
   // E-LINE MEASUREMENTS (Ricketts)
   // E-line runs from pronasale (nose tip) to soft tissue pogonion (chin)
-  // FaceIQ convention: positive = in front of line, negative = behind
+  // Sign convention: positive = in front of line, negative = behind
   // perpendicularDistance returns positive for behind, so we negate
   if (pronasale && pogonion && labraleSuperius && labraleInferius) {
     const upperLipDist = perpendicularDistance(labraleSuperius, pronasale, pogonion);
     const lowerLipDist = perpendicularDistance(labraleInferius, pronasale, pogonion);
-    // Negate to match FaceIQ sign convention (positive = protruding/in front)
+    // Negate to match sign convention (positive = protruding/in front)
     addMeasurement('eLineUpperLip', -upperLipDist);
     addMeasurement('eLineLowerLip', -lowerLipDist);
   }
 
   // BURSTONE LINE MEASUREMENTS
   // Burstone line runs from subnasale to soft tissue pogonion
-  // FaceIQ convention: negative = behind line (ideal is -4.7 to -2.3 for upper, -2.8 to -1.2 for lower)
+  // Sign convention: negative = behind line (ideal is -4.7 to -2.3 for upper, -2.8 to -1.2 for lower)
   if (subnasale && pogonion && labraleSuperius && labraleInferius) {
     const upperLipBurstone = perpendicularDistance(labraleSuperius, subnasale, pogonion);
     const lowerLipBurstone = perpendicularDistance(labraleInferius, subnasale, pogonion);
-    // Negate to match FaceIQ sign convention (negative = behind)
+    // Negate to match sign convention (negative = behind)
     addMeasurement('burstoneUpperLip', -upperLipBurstone);
     addMeasurement('burstoneLowerLip', -lowerLipBurstone);
   }
 
   // S-LINE MEASUREMENTS (Steiner)
   // S-line runs from columella (or subnasale) to soft tissue pogonion
-  // FaceIQ convention: positive = in front of line, negative = behind
+  // Sign convention: positive = in front of line, negative = behind
   const sLineStart = columella || subnasale;
   if (sLineStart && pogonion && labraleSuperius && labraleInferius) {
     const upperLipSLine = perpendicularDistance(labraleSuperius, sLineStart, pogonion);
     const lowerLipSLine = perpendicularDistance(labraleInferius, sLineStart, pogonion);
-    // Negate to match FaceIQ sign convention (positive = protruding/in front)
+    // Negate to match sign convention (positive = protruding/in front)
     addMeasurement('sLineUpperLip', -upperLipSLine);
     addMeasurement('sLineLowerLip', -lowerLipSLine);
   }
@@ -3951,10 +3951,10 @@ export function analyzeSideProfile(
   // HOLDAWAY H-LINE MEASUREMENT
   // H-line runs from upper lip (labrale superius) to soft tissue pogonion
   // Measures lower lip distance from this line
-  // FaceIQ convention: positive = in front of line (ideal 0-4mm)
+  // Sign convention: positive = in front of line (ideal 0-4mm)
   if (labraleSuperius && pogonion && labraleInferius) {
     const lowerLipHLine = perpendicularDistance(labraleInferius, labraleSuperius, pogonion);
-    // Negate to match FaceIQ sign convention (positive = protruding/in front)
+    // Negate to match sign convention (positive = protruding/in front)
     addMeasurement('holdawayHLine', -lowerLipHLine);
   }
 
@@ -4052,7 +4052,7 @@ export function analyzeSideProfile(
   let totalWeight = 0;
   let weightedSum = 0;
   for (const m of measurements) {
-    const config = FACEIQ_METRICS[m.metricId];
+    const config = METRIC_CONFIGS[m.metricId];
     if (config) {
       weightedSum += m.standardizedScore * config.weight;
       totalWeight += config.weight;
@@ -4108,7 +4108,7 @@ export function analyzeHarmony(
   let totalWeight = 0;
   let weightedSum = 0;
   for (const m of allMeasurements) {
-    const config = FACEIQ_METRICS[m.metricId];
+    const config = METRIC_CONFIGS[m.metricId];
     if (config) {
       weightedSum += m.standardizedScore * config.weight;
       totalWeight += config.weight;

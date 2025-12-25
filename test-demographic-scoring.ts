@@ -13,14 +13,14 @@ import {
   Ethnicity,
   Gender,
   DEMOGRAPHIC_OVERRIDES,
-  FACEIQ_METRICS,
+  METRIC_CONFIGS,
   getMetricConfigForDemographics,
   scoreMeasurement,
   analyzeFrontProfile,
   analyzeSideProfile,
   analyzeHarmony,
-  calculateFaceIQScore,
-} from './src/lib/faceiq-scoring';
+  calculateMetricScore,
+} from './src/lib/harmony-scoring';
 import { LandmarkPoint, FRONT_PROFILE_LANDMARKS, SIDE_PROFILE_LANDMARKS } from './src/lib/landmarks';
 
 // ============================================
@@ -84,7 +84,7 @@ function testGetMetricConfig(): void {
   console.log('Testing nasalIndex (high ethnicity variation):');
   console.log('-'.repeat(60));
 
-  const baseConfig = FACEIQ_METRICS['nasalIndex'];
+  const baseConfig = METRIC_CONFIGS['nasalIndex'];
   console.log(`Base ideal range: ${baseConfig.idealMin}-${baseConfig.idealMax}`);
   console.log('');
 
@@ -103,7 +103,7 @@ function testGetMetricConfig(): void {
   console.log('\nTesting bigonialWidth (gender variation):');
   console.log('-'.repeat(60));
 
-  const jawBase = FACEIQ_METRICS['bigonialWidth'];
+  const jawBase = METRIC_CONFIGS['bigonialWidth'];
   console.log(`Base ideal range: ${jawBase.idealMin}-${jawBase.idealMax}`);
   console.log('');
 
@@ -230,7 +230,7 @@ function testMetricCalculations(): void {
   console.log('========================================\n');
 
   // Verify exponential decay formula
-  const config = FACEIQ_METRICS['faceWidthToHeight'];
+  const config = METRIC_CONFIGS['faceWidthToHeight'];
   const testValue = 2.1; // Above ideal max of 2.0
 
   console.log('Testing faceWidthToHeight exponential decay:');
@@ -241,7 +241,7 @@ function testMetricCalculations(): void {
 
   const deviation = testValue - config.idealMax;
   const expectedScore = config.maxScore * Math.exp(-config.decayRate * deviation);
-  const actualScore = calculateFaceIQScore(testValue, config);
+  const actualScore = calculateMetricScore(testValue, config);
 
   console.log(`  Expected deviation: ${deviation}`);
   console.log(`  Expected score: ${expectedScore.toFixed(4)}`);
@@ -250,15 +250,15 @@ function testMetricCalculations(): void {
 }
 
 // ============================================
-// TEST 6: Verify FaceIQ parity + improvements
+// TEST 6: Verify Feature parity + improvements
 // ============================================
 
-function testFaceIQComparison(): void {
+function testLOOKSMAXXComparison(): void {
   console.log('\n========================================');
-  console.log('TEST 6: FaceIQ Parity + Our Improvements');
+  console.log('TEST 6: LOOKSMAXX Parity + Our Improvements');
   console.log('========================================\n');
 
-  console.log('FaceIQ (Original):');
+  console.log('LOOKSMAXX (Original):');
   console.log('  - Uses universal ideal ranges for everyone');
   console.log('  - Gender collected but unused in scoring');
   console.log('  - Ethnicity collected but unused in scoring');
@@ -278,8 +278,8 @@ function testFaceIQComparison(): void {
     console.log(`  - ${metric}: ${numVariations} variations`);
   });
 
-  console.log('\n✓ We match FaceIQ scoring when demographics are not specified');
-  console.log('✓ We IMPROVE upon FaceIQ by adding ethnicity/gender-specific ideals');
+  console.log('\n✓ We match LOOKSMAXX scoring when demographics are not specified');
+  console.log('✓ We IMPROVE upon LOOKSMAXX by adding ethnicity/gender-specific ideals');
 }
 
 // ============================================
@@ -297,7 +297,7 @@ async function runAllTests() {
   testScoringWithDemographics();
   testFullProfileAnalysis();
   testMetricCalculations();
-  testFaceIQComparison();
+  testLOOKSMAXXComparison();
 
   console.log('\n========================================');
   console.log('ALL TESTS COMPLETE');

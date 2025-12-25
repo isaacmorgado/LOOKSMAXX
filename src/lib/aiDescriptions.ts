@@ -3,7 +3,7 @@
  * Generates personalized explanations based on actual values vs ideal ranges
  */
 
-import { SeverityLevel } from '@/lib/faceiq-scoring';
+import { SeverityLevel } from '@/lib/harmony-scoring';
 
 // ============================================
 // TYPES

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, AlertTriangle, Info } from 'lucide-react';
-import { FaceIQScoreResult } from '@/lib/faceiq-scoring';
+import { MetricScoreResult } from '@/lib/harmony-scoring';
 import { generateAIDescription, getSeverityFromScore } from '@/lib/aiDescriptions';
 import { getScoreColor } from '@/types/results';
 import { GradientRangeBar } from '../visualization/GradientRangeBar';
@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 interface MetricDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  ratio: FaceIQScoreResult | null;
+  ratio: MetricScoreResult | null;
   onPrevious?: () => void;
   onNext?: () => void;
   hasPrevious?: boolean;

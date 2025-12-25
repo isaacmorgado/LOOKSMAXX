@@ -10,7 +10,7 @@ import { KeyStrengthsSection, AreasOfImprovementSection } from '../cards/KeyStre
 import { FacialRadarChart } from '../visualization/FacialRadarChart';
 import { RatioDetailModal } from '../modals/RatioDetailModal';
 import { getScoreColor, ResponsibleRatio, Ratio } from '@/types/results';
-import { FaceIQScoreResult } from '@/lib/faceiq-scoring';
+import { MetricScoreResult } from '@/lib/harmony-scoring';
 import { RankedMetric, getWeightTierColor } from '@/lib/looksmax-scoring';
 import { useState, useCallback, useMemo } from 'react';
 
@@ -394,7 +394,7 @@ export function OverviewTab() {
     setSelectedVisualizationMetric,
   } = useResults();
 
-  const [selectedRatio, setSelectedRatio] = useState<FaceIQScoreResult | null>(null);
+  const [selectedRatio, setSelectedRatio] = useState<MetricScoreResult | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // All ratios combined for modal navigation
@@ -406,8 +406,8 @@ export function OverviewTab() {
     return allRatios.findIndex(r => r.id === selectedRatio.metricId);
   }, [selectedRatio, allRatios]);
 
-  // Convert Ratio to FaceIQScoreResult for modal
-  const ratioToFaceIQResult = useCallback((ratio: Ratio): FaceIQScoreResult => {
+  // Convert Ratio to MetricScoreResult for modal
+  const ratioToMetricResult = useCallback((ratio: Ratio): MetricScoreResult => {
     return {
       metricId: ratio.id,
       name: ratio.name,
@@ -422,7 +422,7 @@ export function OverviewTab() {
       category: ratio.category,
       qualityTier: ratio.qualityLevel,
       severity: ratio.severity,
-    } as FaceIQScoreResult;
+    } as MetricScoreResult;
   }, []);
 
   // Handle ratio click from strengths/flaws sections
@@ -435,9 +435,9 @@ export function OverviewTab() {
     // Update the visualization first (shows on face image)
     if (fullRatio) {
       setSelectedVisualizationMetric(fullRatio.id);
-      setSelectedRatio(ratioToFaceIQResult(fullRatio));
+      setSelectedRatio(ratioToMetricResult(fullRatio));
     } else {
-      // Create a minimal FaceIQScoreResult from ResponsibleRatio
+      // Create a minimal MetricScoreResult from ResponsibleRatio
       setSelectedVisualizationMetric(ratio.ratioId);
       setSelectedRatio({
         metricId: ratio.ratioId,
@@ -453,27 +453,27 @@ export function OverviewTab() {
         category: ratio.category || categoryName,
         qualityTier: ratio.score >= 8 ? 'ideal' : ratio.score >= 6 ? 'excellent' : ratio.score >= 4 ? 'good' : 'below_average',
         severity: 'optimal',
-      } as FaceIQScoreResult);
+      } as MetricScoreResult);
     }
     setIsModalOpen(true);
-  }, [allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
+  }, [allRatios, ratioToMetricResult, setSelectedVisualizationMetric]);
 
   // Navigate to previous/next ratio in modal
   const handlePreviousRatio = useCallback(() => {
     if (currentRatioIndex > 0) {
       const prevRatio = allRatios[currentRatioIndex - 1];
-      setSelectedRatio(ratioToFaceIQResult(prevRatio));
+      setSelectedRatio(ratioToMetricResult(prevRatio));
       setSelectedVisualizationMetric(prevRatio.id);
     }
-  }, [currentRatioIndex, allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
+  }, [currentRatioIndex, allRatios, ratioToMetricResult, setSelectedVisualizationMetric]);
 
   const handleNextRatio = useCallback(() => {
     if (currentRatioIndex < allRatios.length - 1) {
       const nextRatio = allRatios[currentRatioIndex + 1];
-      setSelectedRatio(ratioToFaceIQResult(nextRatio));
+      setSelectedRatio(ratioToMetricResult(nextRatio));
       setSelectedVisualizationMetric(nextRatio.id);
     }
-  }, [currentRatioIndex, allRatios, ratioToFaceIQResult, setSelectedVisualizationMetric]);
+  }, [currentRatioIndex, allRatios, ratioToMetricResult, setSelectedVisualizationMetric]);
 
   // Determine if selected ratio is from side profile
   const isSideRatio = useMemo(() => {
@@ -537,7 +537,7 @@ export function OverviewTab() {
         {/* Quick Insights - Top/Bottom Metrics with Advice (from looksmax_engine.py) */}
         <QuickInsightsSection topMetrics={topMetrics} bottomMetrics={bottomMetrics} />
 
-        {/* Strengths & Flaws Grid - FaceIQ Style */}
+        {/* Strengths & Flaws Grid - Harmony Style */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Key Strengths */}
           <KeyStrengthsSection

@@ -736,7 +736,7 @@ export function LandmarkAnalysisTool({
                       transformOrigin: 'center center',
                     }}
                   >
-                    {/* Small persistent dot - matches FaceIQ style */}
+                    {/* Small persistent dot - matches Harmony style */}
                     <div
                       className="absolute rounded-full"
                       style={{

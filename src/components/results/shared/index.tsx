@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { QualityTier, SeverityLevel } from '@/lib/faceiq-scoring';
+import { QualityTier, SeverityLevel } from '@/lib/harmony-scoring';
 import { RecommendationPhase, getScoreColor, getQualityColor, getSeverityColor } from '@/types/results';
 
 // Re-export new components

@@ -575,7 +575,7 @@ export function harmonyToPSL(harmonyPercent: number): {
   // Clamp to valid range 0-100
   safeHarmonyPercent = Math.max(0, Math.min(100, safeHarmonyPercent));
 
-  // Based on FaceIQ formula: Harmony % = ((Score - Min) / (Max - Min)) * 100
+  // Based on harmony formula: Harmony % = ((Score - Min) / (Max - Min)) * 100
   // Where Max = 333.71, Min = -337.71
 
   // Convert harmony percent to approximate PSL

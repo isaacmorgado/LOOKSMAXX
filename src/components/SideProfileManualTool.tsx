@@ -75,7 +75,7 @@ export function SideProfileManualTool({
           // Map our landmark IDs to face-api indices
           let detectedPoint = null;
 
-          // FaceIQ landmark IDs: vertex, occiput, pronasale, neckPoint, porion, orbitale,
+          // cephalometric landmark IDs: vertex, occiput, pronasale, neckPoint, porion, orbitale,
           // tragus, intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion,
           // rhinion, supratip, infratip, columella, subnasale, subalare, labraleSuperius,
           // cheilion, labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom

@@ -17,7 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Recommendation } from '@/types/results';
-import { Gender, Ethnicity } from '@/lib/faceiq-scoring';
+import { Gender, Ethnicity } from '@/lib/harmony-scoring';
 
 // ============================================
 // TYPES

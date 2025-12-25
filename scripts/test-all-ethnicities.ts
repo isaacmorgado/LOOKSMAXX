@@ -4,7 +4,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { analyzeHarmony } = require('../src/lib/faceiq-scoring');
+const { analyzeHarmony } = require('../src/lib/harmony-scoring');
 
 const MOCK_FRONT = [
   { id: 'trichion', x: 509, y: 180 },

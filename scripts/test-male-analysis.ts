@@ -9,9 +9,9 @@ const {
   analyzeFrontProfile,
   analyzeSideProfile,
   analyzeHarmony,
-  calculateFaceIQScore,
+  calculateMetricScore,
   getMetricConfigForDemographics,
-} = require('../src/lib/faceiq-scoring');
+} = require('../src/lib/harmony-scoring');
 
 type Gender = 'male' | 'female';
 type Ethnicity = 'white' | 'black' | 'east_asian' | 'south_asian' | 'hispanic' | 'middle_eastern' | 'native_american' | 'pacific_islander';
@@ -136,7 +136,7 @@ async function runTests() {
       continue;
     }
 
-    const score = calculateFaceIQScore(test.idealValue, config);
+    const score = calculateMetricScore(test.idealValue, config);
     // Pass if score equals maxScore (perfect) or >= 80% of maxScore (good)
     const threshold = config.maxScore * 0.8;
     const isPerfect = Math.abs(score - config.maxScore) < 0.01;

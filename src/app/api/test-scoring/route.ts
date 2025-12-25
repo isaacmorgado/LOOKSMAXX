@@ -1,6 +1,6 @@
 /**
  * Scoring Accuracy Test API Route
- * Tests the FaceIQ-compatible scoring system with mock landmark data
+ * Tests the Harmony-compatible scoring system with mock landmark data
  *
  * GET /api/test-scoring
  */
@@ -11,11 +11,11 @@ import {
   analyzeFrontProfile,
   analyzeSideProfile,
   analyzeHarmony,
-  calculateFaceIQScore,
+  calculateMetricScore,
   getMetricConfigForDemographics,
   Gender,
   Ethnicity,
-} from '@/lib/faceiq-scoring';
+} from '@/lib/harmony-scoring';
 
 // ============================================
 // MOCK LANDMARK DATA (from landmarks-3d-2.json 2D coords)
@@ -260,7 +260,7 @@ export async function GET() {
         continue;
       }
 
-      const score = calculateFaceIQScore(test.testValue, config);
+      const score = calculateMetricScore(test.testValue, config);
       const passed = score >= test.expectedScoreMin;
 
       results.push({
@@ -356,9 +356,9 @@ export async function GET() {
 
       const hasBezier = config.customCurve?.mode === 'custom';
       const idealMid = (config.idealMin + config.idealMax) / 2;
-      const scoreAtIdeal = calculateFaceIQScore(idealMid, config);
-      const scoreAtMin = calculateFaceIQScore(config.rangeMin, config);
-      const scoreAtMax = calculateFaceIQScore(config.rangeMax, config);
+      const scoreAtIdeal = calculateMetricScore(idealMid, config);
+      const scoreAtMin = calculateMetricScore(config.rangeMin, config);
+      const scoreAtMax = calculateMetricScore(config.rangeMax, config);
 
       // Verify curve makes sense: ideal should score highest
       const passed = scoreAtIdeal >= 9 && scoreAtMin < scoreAtIdeal && scoreAtMax < scoreAtIdeal;

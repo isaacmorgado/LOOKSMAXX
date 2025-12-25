@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ResultsProvider } from '@/contexts/ResultsContext';
 import { Results } from '@/components/results/Results';
 import { LandmarkPoint, FRONT_PROFILE_LANDMARKS, SIDE_PROFILE_LANDMARKS } from '@/lib/landmarks';
-import { Ethnicity, Gender } from '@/lib/faceiq-scoring';
+import { Ethnicity, Gender } from '@/lib/harmony-scoring';
 
 // Note: Metadata cannot be exported from client components
 // The page title is set in the root layout

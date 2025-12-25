@@ -101,7 +101,7 @@ function mapFaceApiToSideLandmarks(
     let x = landmark.x;
     let y = landmark.y;
 
-    // FaceIQ landmark order: vertex, occiput, pronasale, neckPoint, porion, orbitale,
+    // cephalometric landmark order: vertex, occiput, pronasale, neckPoint, porion, orbitale,
     // tragus, intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion,
     // rhinion, supratip, infratip, columella, subnasale, subalare, labraleSuperius,
     // cheilion, labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom

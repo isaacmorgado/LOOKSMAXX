@@ -1,19 +1,19 @@
-# FaceIQ Treatment Recommendations & Potential Score Research
+# LOOKSMAXX Treatment Recommendations & Potential Score Research
 
 ## Overview
 
-This document summarizes research on FaceIQ's treatment recommendation system, "Your Potential" score calculations, and the broader looksmaxxing community's approach to improvement estimates.
+This document summarizes research on LOOKSMAXX's treatment recommendation system, "Your Potential" score calculations, and the broader looksmaxxing community's approach to improvement estimates.
 
 ---
 
-## 1. FaceIQ Products & Services
+## 1. LOOKSMAXX Products & Services
 
-### FaceIQ Labs (faceiqlabs.com)
+### LOOKSMAXX (looksmaxx-app.vercel.app)
 - **Free tier**: Basic facial harmony analysis with 60+ measurements
 - **Features**: Interactive landmark mapping, harmony scores, front/side profile analysis
-- **Scoring System**: FaceIQ Harmony System (adaptive scoring engine benchmarks ratios against idealized datasets by ethnicity, gender, and age cohort)
+- **Scoring System**: LOOKSMAXX Harmony System (adaptive scoring engine benchmarks ratios against idealized datasets by ethnicity, gender, and age cohort)
 
-### FaceIQ Premium Analysis ($100 on Gumroad)
+### Premium Analysis Analysis ($100 on Gumroad)
 - Score out of 10
 - Percentile of attractiveness (e.g., "Top 1% Looks")
 - Best and worst features identification
@@ -24,7 +24,7 @@ This document summarizes research on FaceIQ's treatment recommendation system, "
 - **Estimated score of potential after changes**
 - Delivery: 7-28 days
 
-### FaceIQ Basic Rating ($10-25)
+### Basic Rating Rating ($10-25)
 - Score out of 10
 - Percentile ranking
 - Description of rating
@@ -33,11 +33,11 @@ This document summarizes research on FaceIQ's treatment recommendation system, "
 
 ---
 
-## 2. How FaceIQ Calculates "Your Potential" Scores
+## 2. How LOOKSMAXX Calculates "Your Potential" Scores
 
 ### Scoring Formula Components
 
-Based on community-documented formulas, FaceIQ uses four main scoring categories:
+Based on community-documented formulas, LOOKSMAXX uses four main scoring categories:
 
 | Category | Weight | Description |
 |----------|--------|-------------|
@@ -65,7 +65,7 @@ Based on community-documented formulas, FaceIQ uses four main scoring categories
 
 ### Weight Loss / Leanmaxxing Impact
 
-From user reports with FaceIQ ratings:
+From user reports with LOOKSMAXX ratings:
 
 | Change | Impact |
 |--------|--------|
@@ -83,7 +83,7 @@ From user reports with FaceIQ ratings:
 
 ### Morph Improvement Examples
 
-From user-shared FaceIQ analyses:
+From user-shared LOOKSMAXX analyses:
 
 | Original Score | Morphed Score | Change | Modifications |
 |---------------|---------------|--------|---------------|
@@ -96,7 +96,7 @@ From user-shared FaceIQ analyses:
 
 ## 4. Treatment Recommendations System
 
-### FaceIQ's "Your Plan" Features
+### LOOKSMAXX's "Your Plan" Features
 
 According to official documentation:
 - Personalized treatment options based on facial analysis data
@@ -248,7 +248,7 @@ Example: While geniplasty/bimax is top-tier for impact, rhinoplasty for a bulbou
 
 ## 9. Accuracy & Reliability Concerns
 
-### User-Reported Issues with FaceIQ
+### User-Reported Issues with LOOKSMAXX
 
 | Concern | Details |
 |---------|---------|
@@ -271,7 +271,7 @@ Example: While geniplasty/bimax is top-tier for impact, rhinoplasty for a bulbou
 
 ## 10. Morphing/Simulation Methodology
 
-### What FaceIQ Provides
+### What LOOKSMAXX Provides
 
 - Custom morph showing potential changes
 - Before/after comparison
@@ -354,11 +354,11 @@ function prioritizeTreatments(flaws: Flaw[]): Treatment[] {
 
 ## 12. Sources
 
-- [FaceIQ Labs](https://www.faceiqlabs.com/)
-- [FaceIQ Premium Analysis](https://faceiq.gumroad.com/l/full)
-- [How accurate is FaceIQ labs?](https://looksmax.org/threads/how-accurate-is-faceiq-labs.1763417/)
-- [FaceIQ Hardmaxxing Tier List](https://looksmax.org/threads/face-iq-hardmaxxing-tier-list.1523475/)
-- [Got my rating from FaceIQ](https://looksmax.org/threads/got-my-rating-from-faceiq.1382059/)
+- [LOOKSMAXX](https://www.looksmaxx-app.vercel.app/)
+- [Premium Analysis Analysis](https://looksmaxx.gumroad.com/l/full)
+- [How accurate is LOOKSMAXX labs?](https://looksmax.org/threads/how-accurate-is-looksmaxx-labs.1763417/)
+- [LOOKSMAXX Hardmaxxing Tier List](https://looksmax.org/threads/face-iq-hardmaxxing-tier-list.1523475/)
+- [Got my rating from LOOKSMAXX](https://looksmax.org/threads/got-my-rating-from-looksmaxx.1382059/)
 - [A 2-10 Looks Scale Guide](https://looksmax.org/threads/a-2-10-looks-scale-and-a-structured-unbiased-guide-to-facial-analysis-rate-yourself-or-others-with-ease.1723949/)
 - [Surgery ROI Tier Rating](https://looksmax.org/threads/surgery-and-procedure-tier-rating-by-potential-roi-return-on-investment.1698396/)
 - [Full Hardmaxxing Guide](https://looksmax.org/threads/full-hardmaxxing-guide-hardmaxxing-is-law.1764387/)
@@ -370,7 +370,7 @@ function prioritizeTreatments(flaws: Flaw[]): Treatment[] {
 
 ## 13. Disclaimers
 
-All information in this document is for research and educational purposes only. FaceIQ and similar services explicitly state:
+All information in this document is for research and educational purposes only. LOOKSMAXX and similar services explicitly state:
 
 - Results are generated by algorithms and do NOT constitute medical advice
 - Scores and projections are estimates only

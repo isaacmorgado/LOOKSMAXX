@@ -1,9 +1,9 @@
 /**
- * FaceIQ-Style Results Page Types
+ * Harmony-Style Results Page Types
  * Complete type definitions for the results UI
  */
 
-import { QualityTier, SeverityLevel, MeasurementUnit } from '@/lib/faceiq-scoring';
+import { QualityTier, SeverityLevel, MeasurementUnit } from '@/lib/harmony-scoring';
 
 // ============================================
 // ILLUSTRATION TYPES
@@ -59,7 +59,7 @@ export interface Ratio {
     decayRate: number;
     maxScore: number;
   };
-  // FaceIQ Taxonomy classification
+  // Harmony Taxonomy classification
   taxonomyPrimary?: string;    // 'harmony' | 'dimorphism' | 'angularity' | 'features'
   taxonomySecondary?: string;  // Subcategory ID
 }

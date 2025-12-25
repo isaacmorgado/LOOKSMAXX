@@ -392,7 +392,7 @@ function mapToLandmarks(
   });
 
   // Map each of our 28 landmarks
-  // FaceIQ order: vertex, occiput, pronasale, neckPoint, porion, orbitale,
+  // Standard cephalometric order: vertex, occiput, pronasale, neckPoint, porion, orbitale,
   // tragus, intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion,
   // rhinion, supratip, infratip, columella, subnasale, subalare, labraleSuperius,
   // cheilion, labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom

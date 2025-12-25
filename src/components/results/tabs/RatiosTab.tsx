@@ -9,7 +9,7 @@ import { MeasurementCard } from '../cards/MeasurementCard';
 import { ScoreCircle } from '../shared';
 import { FaceOverlay } from '../visualization/FaceOverlay';
 import { Ratio } from '@/types/results';
-import { FACEIQ_PRIMARY_CATEGORIES, getPrimaryCategory } from '@/lib/taxonomy';
+import { PRIMARY_CATEGORIES, getPrimaryCategory } from '@/lib/taxonomy';
 
 // ============================================
 // HIERARCHICAL CATEGORY FILTER
@@ -33,7 +33,7 @@ function HierarchicalCategoryFilter({
   // Count ratios per primary category
   const primaryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    FACEIQ_PRIMARY_CATEGORIES.forEach(cat => {
+    PRIMARY_CATEGORIES.forEach(cat => {
       counts[cat.id] = ratios.filter(r => r.taxonomyPrimary === cat.id).length;
     });
     return counts;
@@ -81,7 +81,7 @@ function HierarchicalCategoryFilter({
         >
           All ({ratios.length})
         </button>
-        {FACEIQ_PRIMARY_CATEGORIES.map(cat => {
+        {PRIMARY_CATEGORIES.map(cat => {
           const count = primaryCounts[cat.id] || 0;
           const isSelected = selectedPrimary === cat.id;
           return (

@@ -1,13 +1,13 @@
-# FaceIQ Complete Taxonomy of Facial Measurements
+# LOOKSMAXX Complete Taxonomy of Facial Measurements
 
-This document provides a comprehensive reference of all facial measurements, ratios, and scoring categories used by FaceIQ and similar facial analysis systems.
+This document provides a comprehensive reference of all facial measurements, ratios, and scoring categories used by LOOKSMAXX and similar facial analysis systems.
 
 ## Overview
 
-There are two main FaceIQ services:
+There are two main LOOKSMAXX services:
 
-1. **FaceIQ Labs** (faceiqlabs.com / beta.faceiqlabs.com) - 60+ facial ratios with percentile rankings
-2. **FaceIQ Premium** (Gumroad) - 47 cephalometric measurements with detailed reports
+1. **LOOKSMAXX** (looksmaxx-app.vercel.app / beta.looksmaxx-app.vercel.app) - 60+ facial ratios with percentile rankings
+2. **Premium Analysis** (Gumroad) - 47 cephalometric measurements with detailed reports
 
 Both use similar underlying measurement principles but differ in implementation.
 
@@ -358,9 +358,9 @@ This penalty prevents artificially high scores when one category is strong but o
 
 ---
 
-## 8. FACEIQ LABS vs FACEIQ PREMIUM COMPARISON
+## 8. LOOKSMAXX LABS vs LOOKSMAXX PREMIUM COMPARISON
 
-| Feature | FaceIQ Labs | FaceIQ Premium (Gumroad) |
+| Feature | LOOKSMAXX | Premium Analysis (Gumroad) |
 |---------|-------------|-------------------------|
 | Measurements | 60+ ratios | 47 cephalometric |
 | Scoring | Percentile rankings | Score out of 10 |
@@ -374,10 +374,10 @@ This penalty prevents artificially high scores when one category is strong but o
 
 ## 9. REFERENCE SOURCES
 
-### FaceIQ Official
-- [FaceIQ Labs](https://www.faceiqlabs.com/)
-- [FaceIQ Premium Analysis](https://faceiq.gumroad.com/l/full)
-- [FaceIQ Beta](https://beta.faceiqlabs.com/)
+### LOOKSMAXX Official
+- [LOOKSMAXX](https://www.looksmaxx-app.vercel.app/)
+- [Premium Analysis Analysis](https://looksmaxx.gumroad.com/l/full)
+- [LOOKSMAXX Beta](https://beta.looksmaxx-app.vercel.app/)
 
 ### Community Research
 - [38 Most Important Facial Ratios](https://looksmax.org/threads/38-most-important-facial-ratios-and-the-ideal-measurements-high-effort.956143/)
@@ -405,4 +405,4 @@ This penalty prevents artificially high scores when one category is strong but o
 | Feature Assessments | ~25 | ~5 | ~30 |
 | **Total Unique Measurements** | ~70 | ~33 | **~60-100** |
 
-This accounts for the "60+ measurements" claim from FaceIQ Labs and the "47 cephalometric measurements" from FaceIQ Premium, with the difference coming from how features vs. ratios are counted.
+This accounts for the "60+ measurements" claim from LOOKSMAXX and the "47 cephalometric measurements" from Premium Analysis, with the difference coming from how features vs. ratios are counted.

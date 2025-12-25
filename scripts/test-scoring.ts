@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node
 /**
  * Scoring Accuracy Test Script
- * Tests the FaceIQ-compatible scoring system with mock landmark data
+ * Tests the LOOKSMAXX-compatible scoring system with mock landmark data
  *
  * Run with: npx ts-node scripts/test-scoring.ts
  */
@@ -11,9 +11,9 @@ const {
   analyzeFrontProfile,
   analyzeSideProfile,
   analyzeHarmony,
-  calculateFaceIQScore,
+  calculateMetricScore,
   getMetricConfigForDemographics,
-} = require('../src/lib/faceiq-scoring');
+} = require('../src/lib/harmony-scoring');
 
 type Gender = 'male' | 'female';
 type Ethnicity = 'white' | 'black' | 'east_asian' | 'south_asian' | 'hispanic' | 'middle_eastern' | 'native_american' | 'pacific_islander' | 'other';
@@ -290,7 +290,7 @@ async function runTests() {
   // ========================================
   // TEST 3: Individual Metric Scoring
   // ========================================
-  console.log('\n\n📋 TEST 3: Individual Metric Scoring (calculateFaceIQScore)\n');
+  console.log('\n\n📋 TEST 3: Individual Metric Scoring (calculateMetricScore)\n');
   console.log('-'.repeat(50));
 
   for (const test of METRIC_TESTS) {
@@ -302,7 +302,7 @@ async function runTests() {
       continue;
     }
 
-    const score = calculateFaceIQScore(test.testValue, config);
+    const score = calculateMetricScore(test.testValue, config);
     const passed = score >= test.expectedScoreMin;
 
     console.log(`  ${passed ? PASS : FAIL} ${test.description}`);
@@ -377,9 +377,9 @@ async function runTests() {
 
     const hasBezier = config.customCurve?.mode === 'custom';
     const idealMid = (config.idealMin + config.idealMax) / 2;
-    const scoreAtIdeal = calculateFaceIQScore(idealMid, config);
-    const scoreAtMin = calculateFaceIQScore(config.rangeMin, config);
-    const scoreAtMax = calculateFaceIQScore(config.rangeMax, config);
+    const scoreAtIdeal = calculateMetricScore(idealMid, config);
+    const scoreAtMin = calculateMetricScore(config.rangeMin, config);
+    const scoreAtMax = calculateMetricScore(config.rangeMax, config);
 
     console.log(`\n  ${metricId}:`);
     console.log(`    Bezier curve: ${hasBezier ? PASS + ' Yes' : WARN + ' No (using exponential)'}`);

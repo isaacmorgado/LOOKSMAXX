@@ -1,6 +1,6 @@
 /**
- * FaceIQ Taxonomy - Hierarchical Classification System
- * Based on FACEIQ_TAXONOMY.md
+ * Harmony Taxonomy - Hierarchical Classification System
+ * Based on TAXONOMY.md
  */
 
 export interface TaxonomyCategory {
@@ -19,9 +19,9 @@ export interface TaxonomySubcategory {
 }
 
 /**
- * Primary FaceIQ Categories
+ * Primary Categories
  */
-export const FACEIQ_PRIMARY_CATEGORIES: TaxonomyCategory[] = [
+export const PRIMARY_CATEGORIES: TaxonomyCategory[] = [
   {
     id: 'harmony',
     name: 'Harmony',
@@ -209,7 +209,7 @@ export function classifyMetric(
 ): { primary: string; secondary: string } | null {
   const searchText = `${metricName} ${metricCategory || ''}`.toLowerCase();
 
-  for (const primaryCat of FACEIQ_PRIMARY_CATEGORIES) {
+  for (const primaryCat of PRIMARY_CATEGORIES) {
     if (primaryCat.subcategories) {
       for (const subCat of primaryCat.subcategories) {
         // Check if any pattern matches
@@ -239,7 +239,7 @@ export function classifyMetric(
  * Get primary category by ID
  */
 export function getPrimaryCategory(id: string): TaxonomyCategory | undefined {
-  return FACEIQ_PRIMARY_CATEGORIES.find(cat => cat.id === id);
+  return PRIMARY_CATEGORIES.find(cat => cat.id === id);
 }
 
 /**

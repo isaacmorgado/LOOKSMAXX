@@ -1,16 +1,16 @@
 /**
- * FaceIQ Bezier Scoring Curves - Extracted from harmony_data.json
+ * Bezier Scoring Curves - Extracted from harmony_data.json
  * These curves provide non-linear scoring that's more accurate than exponential decay.
  * Total: 66 metrics with custom Bezier curves
  */
 
-import { BezierCurveConfig } from './faceiq-scoring';
+import { BezierCurveConfig } from './harmony-scoring';
 
 /**
  * Pre-defined Bezier curves for each metric.
- * Used by calculateFaceIQScore when customCurve.mode === 'custom'
+ * Used by calculateMetricScore when customCurve.mode === 'custom'
  */
-export const FACEIQ_BEZIER_CURVES: Record<string, BezierCurveConfig> = {
+export const BEZIER_CURVES: Record<string, BezierCurveConfig> = {
   faceWidthToHeight: {
     mode: 'custom',
     points: [

@@ -1,6 +1,6 @@
 # LOOKSMAXX Frontend
 
-Next.js 14 facial metrics analysis app with FaceIQ-compatible scoring.
+Next.js 14 facial metrics analysis app with harmony-based scoring.
 
 ## Live URL
 https://looksmaxx-app.vercel.app
@@ -11,12 +11,12 @@ https://looksmaxx-app.vercel.app
 npm run lint && npx tsc --noEmit
 ```
 
-## FaceIQ Parity Status ✅ (Phase 1-5 Complete)
+## Feature Parity Status ✅ (Phase 1-5 Complete)
 
 | Feature | File | Details |
 |---------|------|---------|
-| **All 66 Bezier Curves** | `src/lib/faceiq-bezier-curves.ts` | Complete cubic Bezier interpolation |
-| **Decay Rates Fixed** | `src/lib/faceiq-scoring.ts` | 0.08-0.30 range (was 0.5-31.6) |
+| **All 66 Bezier Curves** | `src/lib/bezier-curves.ts` | Complete cubic Bezier interpolation |
+| **Decay Rates Fixed** | `src/lib/harmony-scoring.ts` | 0.08-0.30 range (was 0.5-31.6) |
 | **30 Procedure Impact Tables** | `src/lib/advice-engine.ts` | Quantitative % changes per metric |
 | **Treatment Metadata** | `src/lib/advice-engine.ts` | priority_score, effectiveness, ratios_impacted, pillars |
 | **Potential Score Prediction** | `src/lib/recommendations/severity.ts:627-652` | `estimatePotentialPSL()` with diminishing returns |

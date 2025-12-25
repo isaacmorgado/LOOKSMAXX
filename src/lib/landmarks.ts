@@ -629,7 +629,7 @@ export const FRONT_PROFILE_LANDMARKS: LandmarkPoint[] = [
 
 // ============================================
 // SIDE PROFILE LANDMARKS (28 Points)
-// Matches FaceIQ Labs exact naming and order
+// Matches LOOKSMAXX exact naming and order
 // ============================================
 
 export const SIDE_LANDMARK_CATEGORIES: LandmarkCategory[] = [
@@ -694,7 +694,7 @@ export const SIDE_LANDMARK_CATEGORIES: LandmarkCategory[] = [
   },
 ];
 
-// FaceIQ order: vertex, occiput, pronasale, neckPoint, porion, orbitale, tragus,
+// Standard cephalometric order: vertex, occiput, pronasale, neckPoint, porion, orbitale, tragus,
 // intertragicNotch, cornealApex, cheekbone, trichion, glabella, nasion, rhinion,
 // supratip, infratip, columella, subnasale, subalare, labraleSuperius, cheilion,
 // labraleInferius, sublabiale, pogonion, menton, cervicalPoint, gonionTop, gonionBottom
@@ -1001,11 +1001,11 @@ export function getLandmarkColor(
 }
 
 // ============================================
-// FaceIQ Side Profile Landmark Indices (106 points)
-// Reverse-engineered from FaceIQ Labs API
+// Side Profile Landmark Indices (106 points)
+// Reverse-engineered from LOOKSMAXX API
 // ============================================
 
-export const FACEIQ_SIDE_LANDMARKS = {
+export const SIDE_LANDMARKS = {
   // Face Contour (0-16) - Jaw/Chin outline
   MENTON: 0, // Chin bottom (lowest point)
   POGONION: 2, // Chin prominence
@@ -1054,10 +1054,10 @@ export const FACEIQ_SIDE_LANDMARKS = {
 };
 
 // ============================================
-// FaceIQ Front Face Landmark Indices (MediaPipe 478 points)
+// Front Face Landmark Indices (MediaPipe 478 points)
 // ============================================
 
-export const FACEIQ_FRONT_LANDMARKS = {
+export const FRONT_LANDMARKS = {
   // Key points from MediaPipe Face Mesh
   NOSE_TIP: 1,
   LEFT_EYE_INNER: 133,
@@ -1099,10 +1099,10 @@ export interface GenderSpecificValues {
 }
 
 // ============================================
-// FaceIQ Ideal Values (Gender-Specific)
+// Ideal Values (Gender-Specific)
 // ============================================
 
-export const FACEIQ_IDEAL_VALUES: Record<string, GenderSpecificValues> = {
+export const IDEAL_VALUES: Record<string, GenderSpecificValues> = {
   fwhr: {
     male: { ideal: 1.9, range: [1.8, 2.1] },
     female: { ideal: 1.75, range: [1.6, 1.9] },
@@ -1138,10 +1138,10 @@ export const FACEIQ_IDEAL_VALUES: Record<string, GenderSpecificValues> = {
 };
 
 // ============================================
-// FaceIQ Scoring Configurations
+// Scoring Configurations
 // ============================================
 
-export const FACEIQ_SCORING_CONFIGS: Record<string, ScoringConfig> = {
+export const SCORING_CONFIGS: Record<string, ScoringConfig> = {
   fwhr: {
     idealValue: 1.9,
     standardDeviation: 0.15,

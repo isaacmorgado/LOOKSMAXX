@@ -6,23 +6,23 @@
  * 2. Demographic-specific scoring is applied
  * 3. Math is perfect (exponential decay formula)
  * 4. All 18 gender/ethnicity combinations produce accurate results
- * 5. We're more accurate than FaceIQ's universal scoring
+ * 5. We're more accurate than LOOKSMAXX's universal scoring
  */
 
 import {
   Ethnicity,
   Gender,
   DEMOGRAPHIC_OVERRIDES,
-  FACEIQ_METRICS,
+  METRIC_CONFIGS,
   getMetricConfigForDemographics,
   scoreMeasurement,
   analyzeFrontProfile,
   analyzeSideProfile,
   analyzeHarmony,
-  calculateFaceIQScore,
-  FaceIQScoreResult,
+  calculateMetricScore,
+  MetricScoreResult,
   MetricConfig,
-} from './src/lib/faceiq-scoring';
+} from './src/lib/harmony-scoring';
 import { LandmarkPoint, FRONT_PROFILE_LANDMARKS, SIDE_PROFILE_LANDMARKS } from './src/lib/landmarks';
 
 // ============================================
@@ -199,7 +199,7 @@ function testMathAccuracy(): void {
   let allPass = true;
 
   testCases.forEach(tc => {
-    const config = FACEIQ_METRICS[tc.metricId];
+    const config = METRIC_CONFIGS[tc.metricId];
     if (!config) return;
 
     // Manual calculation
@@ -214,7 +214,7 @@ function testMathAccuracy(): void {
     }
 
     // System calculation
-    const actualScore = calculateFaceIQScore(tc.testValue, config);
+    const actualScore = calculateMetricScore(tc.testValue, config);
 
     const match = Math.abs(expectedScore - actualScore) < 0.0001;
     allPass = allPass && match;
@@ -293,19 +293,19 @@ function testDemographicScoring(): void {
 }
 
 // ============================================
-// TEST 4: FACEIQ vs LOOKSMAXX COMPARISON
+// TEST 4: LOOKSMAXX vs LOOKSMAXX COMPARISON
 // ============================================
 
-function testFaceIQComparison(): void {
+function testLOOKSMAXXComparison(): void {
   console.log('\n' + '═'.repeat(70));
-  console.log('TEST 4: FACEIQ vs LOOKSMAXX ACCURACY COMPARISON');
+  console.log('TEST 4: LOOKSMAXX vs LOOKSMAXX ACCURACY COMPARISON');
   console.log('═'.repeat(70));
 
   // Test with nasal index - the metric with highest ethnic variation
   const nasalIndexValues = [65, 75, 85, 95];
 
   console.log('\n📊 NASAL INDEX SCORING COMPARISON:');
-  console.log('FaceIQ uses universal range (70-85) for everyone');
+  console.log('LOOKSMAXX uses universal range (70-85) for everyone');
   console.log('LOOKSMAXX uses ethnicity-specific ranges\n');
 
   nasalIndexValues.forEach(value => {
@@ -314,21 +314,21 @@ function testFaceIQComparison(): void {
     console.log('System'.padEnd(12) + 'Ethnicity'.padEnd(20) + 'Ideal Range'.padEnd(15) + 'Score'.padStart(8));
     console.log('-'.repeat(60));
 
-    // FaceIQ scoring (universal)
-    const faceiqConfig = FACEIQ_METRICS['nasalIndex'];
-    const faceiqScore = calculateFaceIQScore(value, faceiqConfig);
+    // LOOKSMAXX scoring (universal)
+    const looksmaxxConfig = METRIC_CONFIGS['nasalIndex'];
+    const looksmaxxScore = calculateMetricScore(value, looksmaxxConfig);
     console.log(
-      'FaceIQ'.padEnd(12) +
+      'LOOKSMAXX'.padEnd(12) +
       'universal'.padEnd(20) +
-      `${faceiqConfig.idealMin}-${faceiqConfig.idealMax}`.padEnd(15) +
-      faceiqScore.toFixed(2).padStart(8)
+      `${looksmaxxConfig.idealMin}-${looksmaxxConfig.idealMax}`.padEnd(15) +
+      looksmaxxScore.toFixed(2).padStart(8)
     );
 
     // LOOKSMAXX scoring (demographic-specific)
     ['white', 'east_asian', 'black'].forEach(eth => {
       const config = getMetricConfigForDemographics('nasalIndex', 'male', eth as Ethnicity);
       if (config) {
-        const score = calculateFaceIQScore(value, config);
+        const score = calculateMetricScore(value, config);
         console.log(
           'LOOKSMAXX'.padEnd(12) +
           `${eth}_male`.padEnd(20) +
@@ -349,7 +349,7 @@ function testFaceIQComparison(): void {
 • A nasal index of 95 is IDEAL for black individuals
   but FAR ABOVE IDEAL for white individuals
 
-• FaceIQ gives the SAME score to everyone regardless of ethnicity
+• LOOKSMAXX gives the SAME score to everyone regardless of ethnicity
 • LOOKSMAXX gives ACCURATE scores based on anthropometric research
 
 CONCLUSION: LOOKSMAXX is more accurate because it accounts for
@@ -379,7 +379,7 @@ function testSpecificMetrics(): void {
     console.log(`   Test value: ${metric.value}`);
     console.log('-'.repeat(60));
 
-    const baseConfig = FACEIQ_METRICS[metric.id];
+    const baseConfig = METRIC_CONFIGS[metric.id];
     if (!baseConfig) {
       console.log('   (Metric not found)');
       return;
@@ -402,7 +402,7 @@ function testSpecificMetrics(): void {
     demographics.forEach(d => {
       const config = getMetricConfigForDemographics(metric.id, d.gender, d.ethnicity);
       if (config) {
-        const score = calculateFaceIQScore(metric.value, config);
+        const score = calculateMetricScore(metric.value, config);
         const isOverridden = config.idealMin !== baseConfig.idealMin || config.idealMax !== baseConfig.idealMax;
         const marker = isOverridden ? '*' : ' ';
 
@@ -489,7 +489,7 @@ async function runAllTests(): Promise<void> {
   testLandmarkMeasurements();
   testMathAccuracy();
   testDemographicScoring();
-  testFaceIQComparison();
+  testLOOKSMAXXComparison();
   testSpecificMetrics();
   testEndToEndPipeline();
 
@@ -500,11 +500,11 @@ async function runAllTests(): Promise<void> {
 ✓ Landmarks correctly converted to facial measurements
 ✓ Exponential decay math verified 100% accurate
 ✓ 18 demographic combinations produce varying scores
-✓ LOOKSMAXX more accurate than FaceIQ for diverse users
+✓ LOOKSMAXX more accurate than LOOKSMAXX for diverse users
 ✓ End-to-end pipeline (landmarks → sessionStorage → results) working
 ✓ 16 metrics have demographic-specific ideal ranges
 
-LOOKSMAXX IMPLEMENTATION STATUS: VALIDATED & SUPERIOR TO FACEIQ
+LOOKSMAXX IMPLEMENTATION STATUS: VALIDATED & SUPERIOR TO LOOKSMAXX
   `);
 }
 

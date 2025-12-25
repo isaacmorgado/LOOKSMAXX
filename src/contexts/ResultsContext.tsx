@@ -7,12 +7,12 @@ import {
   analyzeSideProfile,
   analyzeHarmony,
   HarmonyAnalysis,
-  FaceIQScoreResult,
-  FACEIQ_METRICS,
+  MetricScoreResult,
+  METRIC_CONFIGS,
   Ethnicity,
   Gender,
   scoreMeasurement,
-} from '@/lib/faceiq-scoring';
+} from '@/lib/harmony-scoring';
 import {
   calculateHarmonyScore,
   getTopMetrics,
@@ -118,8 +118,8 @@ function convertUnitToRatioUnit(unit: string): 'x' | 'mm' | '%' | '°' {
   }
 }
 
-function transformToRatio(result: FaceIQScoreResult, landmarks: LandmarkPoint[]): Ratio {
-  const metricConfig = FACEIQ_METRICS[result.metricId];
+function transformToRatio(result: MetricScoreResult, landmarks: LandmarkPoint[]): Ratio {
+  const metricConfig = METRIC_CONFIGS[result.metricId];
 
   // Generate illustration based on metric
   const illustration = generateIllustration(result.metricId, landmarks);
@@ -127,7 +127,7 @@ function transformToRatio(result: FaceIQScoreResult, landmarks: LandmarkPoint[])
   // Get flaw/strength mappings
   const { mayIndicateFlaws, mayIndicateStrengths } = getFlawStrengthMappings(result);
 
-  // Classify metric using FaceIQ taxonomy
+  // Classify metric using Harmony taxonomy
   const taxonomyClassification = classifyMetric(result.name, result.category);
 
   return {
@@ -769,7 +769,7 @@ function getUsedLandmarks(metricId: string): string[] {
   return landmarkMappings[metricId] || [];
 }
 
-function getFlawStrengthMappings(result: FaceIQScoreResult): { mayIndicateFlaws: string[]; mayIndicateStrengths: string[] } {
+function getFlawStrengthMappings(result: MetricScoreResult): { mayIndicateFlaws: string[]; mayIndicateStrengths: string[] } {
   const flawMappings: Record<string, { low: string[]; high: string[] }> = {
     faceWidthToHeight: {
       low: ['Narrow face', 'Vertically elongated face'],
@@ -1543,7 +1543,7 @@ function calculateRelevanceScore(
   return Math.min(score, 100);
 }
 
-// Calculate expected score improvement using FaceIQ Bezier recalculation
+// Calculate expected score improvement using Bezier recalculation
 // Instead of simple addition, we recalculate the score at the ideal value
 function calculateExpectedImprovement(
   proc: ProcedureConfig,
@@ -1562,14 +1562,14 @@ function calculateExpectedImprovement(
     };
   }
 
-  // FaceIQ-style Bezier recalculation:
+  // Harmony-style Bezier recalculation:
   // For each ratio, calculate what the score would be at the ideal value
   let totalCurrentWeighted = 0;
   let totalIdealWeighted = 0;
   let totalWeight = 0;
 
   matchedRatios.forEach(ratio => {
-    const config = FACEIQ_METRICS[ratio.id];
+    const config = METRIC_CONFIGS[ratio.id];
     if (!config) return;
 
     // Current score from the ratio
@@ -1680,7 +1680,7 @@ function generateRecommendations(
       match.flaws.some(f => f.toLowerCase().includes(r.category.toLowerCase()))
     );
 
-    // Calculate expected improvement with FaceIQ Bezier recalculation
+    // Calculate expected improvement with Bezier recalculation
     const avgFlawImpact = match.totalFlawImpact / match.flaws.length;
     const improvement = calculateExpectedImprovement(proc, affectedRatios, avgFlawImpact, gender, ethnicity);
 

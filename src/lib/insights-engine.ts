@@ -28,7 +28,7 @@
  */
 
 import { Strength, Flaw } from '@/types/results';
-import { FaceIQScoreResult, FACEIQ_METRICS, isValueAcceptable } from '@/lib/faceiq-scoring';
+import { MetricScoreResult, METRIC_CONFIGS, isValueAcceptable } from '@/lib/harmony-scoring';
 
 // ============================================
 // MASTER SCORING DATABASE (Z-Score Based)
@@ -1954,7 +1954,7 @@ export const INSIGHTS_DEFINITIONS: InsightDefinition[] = [
     }
   },
   // ============================================
-  // SCRAPED FROM FACEIQ (element.html / element1.html)
+  // INSIGHT DEFINITIONS (element.html / element1.html)
   // ============================================
   // --- WEAKNESSES ---
   {
@@ -2366,8 +2366,8 @@ function getStrengthGrade(avgScore: number): StrengthGrade {
  */
 function findMetricByName(
   metricName: string,
-  measurements: FaceIQScoreResult[]
-): FaceIQScoreResult | undefined {
+  measurements: MetricScoreResult[]
+): MetricScoreResult | undefined {
   // First try direct ID mapping
   const metricId = METRIC_NAME_TO_ID[metricName];
   if (metricId) {
@@ -2391,7 +2391,7 @@ function findMetricByName(
  * but is still a POSITIVE trait, not a weakness.
  */
 function isFalsePositiveWeakness(metric: MatchedMetric): boolean {
-  const config = FACEIQ_METRICS[metric.metricId];
+  const config = METRIC_CONFIGS[metric.metricId];
   if (!config) return false;
 
   // Check if the value is actually acceptable based on polarity
@@ -2403,7 +2403,7 @@ function isFalsePositiveWeakness(metric: MatchedMetric): boolean {
  * Process all insight definitions against user's measurements
  */
 export function classifyInsights(
-  measurements: FaceIQScoreResult[],
+  measurements: MetricScoreResult[],
   insightDefinitions: InsightDefinition[] = INSIGHTS_DEFINITIONS
 ): InsightClassificationResult {
   const strengths: ClassifiedStrength[] = [];
@@ -2574,7 +2574,7 @@ export function convertToFlaw(classified: ClassifiedWeakness, index: number, rol
  * Main function: Generate strengths and flaws from measurements using insights
  */
 export function generateInsightBasedResults(
-  measurements: FaceIQScoreResult[]
+  measurements: MetricScoreResult[]
 ): { strengths: Strength[]; flaws: Flaw[] } {
   const { strengths: classifiedStrengths, weaknesses: classifiedWeaknesses } = classifyInsights(measurements);
 

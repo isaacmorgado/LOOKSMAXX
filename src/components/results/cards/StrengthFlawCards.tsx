@@ -6,7 +6,7 @@ import { ChevronDown, AlertTriangle, CheckCircle, Sparkles } from 'lucide-react'
 import { Strength, Flaw, Recommendation, getScoreColor } from '@/types/results';
 
 // ============================================
-// QUALITY TIER BADGES (FaceIQ Style) - Strengths
+// QUALITY TIER BADGES (Harmony Style) - Strengths
 // ============================================
 
 type QualityTier = 'ideal' | 'excellent' | 'good' | 'below_average';
@@ -57,7 +57,7 @@ function QualityBadge({ quality }: { quality: QualityTier }) {
 }
 
 // ============================================
-// SEVERITY BADGES (FaceIQ Style) - Flaws
+// SEVERITY BADGES (Harmony Style) - Flaws
 // ============================================
 
 type SeverityLevel = 'extremely_severe' | 'severe' | 'moderate' | 'minor';
@@ -241,7 +241,7 @@ function PlanItem({ name, phase, inPlan = true, animationDelay = 0 }: PlanItemPr
 }
 
 // ============================================
-// STRENGTH CARD (FaceIQ Style)
+// STRENGTH CARD (Harmony Style)
 // ============================================
 
 interface StrengthCardProps {
@@ -341,7 +341,7 @@ export function StrengthCard({
 }
 
 // ============================================
-// FLAW CARD (FaceIQ Style - Areas of Improvement)
+// FLAW CARD (Harmony Style - Areas of Improvement)
 // ============================================
 
 interface FlawCardProps {

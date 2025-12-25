@@ -7,7 +7,7 @@ import { Strength, Flaw, ResponsibleRatio, Recommendation, getScoreColor } from 
 import { useResults } from '@/contexts/ResultsContext';
 
 // ============================================
-// QUALITY BADGE COMPONENT (FaceIQ Light Theme Style)
+// QUALITY BADGE COMPONENT (Light Theme)
 // ============================================
 
 type QualityLevel = 'ideal' | 'excellent' | 'good' | 'below_average';
@@ -58,7 +58,7 @@ function QualityBadge({ quality }: { quality: QualityLevel }) {
 }
 
 // ============================================
-// SEVERITY BADGE COMPONENT (FaceIQ Style)
+// SEVERITY BADGE COMPONENT (Harmony Style)
 // ============================================
 
 type SeverityLevel = 'extremely_severe' | 'severe' | 'moderate' | 'minor';
@@ -176,7 +176,7 @@ function PhaseBadge({ phase }: { phase: ProcedurePhase }) {
 }
 
 // ============================================
-// CONTRIBUTING RATIO BUTTON (FaceIQ Style - Dark Theme)
+// CONTRIBUTING RATIO BUTTON (Harmony Style - Dark Theme)
 // ============================================
 
 interface ContributingRatioButtonProps {
@@ -245,7 +245,7 @@ function PlanItem({ name, phase, animationDelay = 0 }: PlanItemProps) {
 }
 
 // ============================================
-// KEY STRENGTH CARD (FaceIQ Style)
+// KEY STRENGTH CARD (Harmony Style)
 // ============================================
 
 interface KeyStrengthCardProps {
@@ -348,7 +348,7 @@ function KeyStrengthCard({
 }
 
 // ============================================
-// AREA OF IMPROVEMENT CARD (FaceIQ Style with Your Plan)
+// AREA OF IMPROVEMENT CARD (Harmony Style with Your Plan)
 // ============================================
 
 interface AreaOfImprovementCardProps {
@@ -500,7 +500,7 @@ function AreaOfImprovementCard({
 }
 
 // ============================================
-// KEY STRENGTHS SECTION (FaceIQ Style)
+// KEY STRENGTHS SECTION (Harmony Style)
 // ============================================
 
 interface KeyStrengthsSectionProps {
@@ -593,7 +593,7 @@ export function KeyStrengthsSection({
 }
 
 // ============================================
-// AREAS OF IMPROVEMENT SECTION (FaceIQ Style with Your Plan)
+// AREAS OF IMPROVEMENT SECTION (Harmony Style with Your Plan)
 // ============================================
 
 interface AreasOfImprovementSectionProps {

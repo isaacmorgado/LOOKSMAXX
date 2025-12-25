@@ -1,7 +1,7 @@
 /**
  * Facial Analysis Scoring Functions
  *
- * This module now uses the FaceIQ-style scoring system with:
+ * This module now uses the Harmony-style scoring system with:
  * - Exponential decay scoring with per-metric decay rates
  * - 70+ facial measurements (front + side profiles)
  * - Quality tiers: Ideal, Excellent, Good
@@ -10,23 +10,23 @@
  * Backward compatible with existing API
  */
 
-// Re-export everything from the new FaceIQ scoring system
-export * from './faceiq-scoring';
+// Re-export everything from the harmony scoring system
+export * from './harmony-scoring';
 
 // Import for backward compatibility wrappers
 import {
-  analyzeFrontProfile as faceiqFrontAnalysis,
-  analyzeSideProfile as faceiqSideAnalysis,
-  FaceIQScoreResult,
+  analyzeFrontProfile as frontAnalysis,
+  analyzeSideProfile as sideAnalysis,
+  MetricScoreResult,
   QualityTier,
-  FACEIQ_METRICS,
-} from './faceiq-scoring';
+  METRIC_CONFIGS,
+} from './harmony-scoring';
 
 import {
   LandmarkPoint,
   ScoringConfig,
-  FACEIQ_SCORING_CONFIGS,
-  FACEIQ_IDEAL_VALUES,
+  SCORING_CONFIGS,
+  IDEAL_VALUES,
   PopulationStats,
   POPULATION_STATS,
 } from './landmarks';
@@ -127,7 +127,7 @@ function qualityToRating(tier: QualityTier): 'excellent' | 'good' | 'average' | 
   }
 }
 
-function faceiqToScoreResult(result: FaceIQScoreResult): ScoreResult {
+function toScoreResult(result: MetricScoreResult): ScoreResult {
   return {
     value: result.value,
     score: result.standardizedScore * 10, // Convert 0-10 to 0-100
@@ -154,12 +154,12 @@ export function analyzeFrontProfile(
   frontLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): FrontAnalysisResults {
-  const newResults = faceiqFrontAnalysis(frontLandmarks, gender);
+  const newResults = frontAnalysis(frontLandmarks, gender);
 
-  // Convert FaceIQ results to old format
+  // Convert results to old format
   const findMeasurement = (id: string) => {
     const m = newResults.measurements.find(m => m.metricId === id);
-    return m ? faceiqToScoreResult(m) : null;
+    return m ? toScoreResult(m) : null;
   };
 
   // Build facial thirds from individual measurements
@@ -199,11 +199,11 @@ export function analyzeSideProfile(
   sideLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): SideAnalysisResults {
-  const newResults = faceiqSideAnalysis(sideLandmarks, gender);
+  const newResults = sideAnalysis(sideLandmarks, gender);
 
   const findMeasurement = (id: string) => {
     const m = newResults.measurements.find(m => m.metricId === id);
-    return m ? faceiqToScoreResult(m) : null;
+    return m ? toScoreResult(m) : null;
   };
 
   // Build E-line from individual measurements
@@ -243,13 +243,13 @@ export function comprehensiveFrontAnalysis(
   gender: 'male' | 'female' = 'male'
 ): ComprehensiveFrontAnalysis {
   const baseAnalysis = analyzeFrontProfile(frontLandmarks, gender);
-  const faceiqResults = faceiqFrontAnalysis(frontLandmarks, gender);
+  const analysisResults = frontAnalysis(frontLandmarks, gender);
 
   const bellCurveScores: Record<string, number> = {};
   const percentiles: Record<string, number> = {};
 
-  // Convert FaceIQ scores to bell curve format
-  for (const m of faceiqResults.measurements) {
+  // Convert scores to bell curve format
+  for (const m of analysisResults.measurements) {
     bellCurveScores[m.metricId] = m.standardizedScore * 10;
     percentiles[m.metricId] = calculatePercentileFromScore(m.standardizedScore);
   }
@@ -258,7 +258,7 @@ export function comprehensiveFrontAnalysis(
     ...baseAnalysis,
     bellCurveScores,
     percentiles,
-    harmonyScore: faceiqResults.overallScore * 10,
+    harmonyScore: analysisResults.overallScore * 10,
   };
 }
 
@@ -270,12 +270,12 @@ export function comprehensiveSideAnalysis(
   gender: 'male' | 'female' = 'male'
 ): ComprehensiveSideAnalysis {
   const baseAnalysis = analyzeSideProfile(sideLandmarks, gender);
-  const faceiqResults = faceiqSideAnalysis(sideLandmarks, gender);
+  const analysisResults = sideAnalysis(sideLandmarks, gender);
 
   const bellCurveScores: Record<string, number> = {};
   const percentiles: Record<string, number> = {};
 
-  for (const m of faceiqResults.measurements) {
+  for (const m of analysisResults.measurements) {
     bellCurveScores[m.metricId] = m.standardizedScore * 10;
     percentiles[m.metricId] = calculatePercentileFromScore(m.standardizedScore);
   }
@@ -284,7 +284,7 @@ export function comprehensiveSideAnalysis(
     ...baseAnalysis,
     bellCurveScores,
     percentiles,
-    harmonyScore: faceiqResults.overallScore * 10,
+    harmonyScore: analysisResults.overallScore * 10,
   };
 }
 
@@ -375,8 +375,8 @@ export function generateMeasurementBellCurve(
 ): BellCurveData | null {
   const stats = POPULATION_STATS[measurementKey];
   if (!stats) {
-    // Create synthetic stats based on FaceIQ config
-    const config = FACEIQ_METRICS[measurementKey];
+    // Create synthetic stats based on config
+    const config = METRIC_CONFIGS[measurementKey];
     if (!config) return null;
 
     const syntheticStats: PopulationStats = {
@@ -385,13 +385,13 @@ export function generateMeasurementBellCurve(
       sampleSize: 10000,
     };
 
-    const idealValues = FACEIQ_IDEAL_VALUES[measurementKey];
+    const idealValues = IDEAL_VALUES[measurementKey];
     const idealValue = idealValues && gender ? idealValues[gender].ideal : syntheticStats.mean;
 
     return generateBellCurveData(syntheticStats, userValue, idealValue);
   }
 
-  const idealValues = FACEIQ_IDEAL_VALUES[measurementKey];
+  const idealValues = IDEAL_VALUES[measurementKey];
   const idealValue = idealValues && gender ? idealValues[gender].ideal : undefined;
 
   return generateBellCurveData(stats, userValue, idealValue);
@@ -417,8 +417,8 @@ export function calculateGenderAwareBellCurveScore(
   measurementKey: string,
   gender: 'male' | 'female'
 ): number {
-  const idealValues = FACEIQ_IDEAL_VALUES[measurementKey];
-  const config = FACEIQ_SCORING_CONFIGS[measurementKey];
+  const idealValues = IDEAL_VALUES[measurementKey];
+  const config = SCORING_CONFIGS[measurementKey];
 
   if (!idealValues || !config) {
     return 0;
@@ -443,7 +443,7 @@ export function calculateHarmonyScore(
   let weightedSum = 0;
 
   for (const [key, score] of Object.entries(scores)) {
-    const config = FACEIQ_SCORING_CONFIGS[key];
+    const config = SCORING_CONFIGS[key];
     if (config) {
       weightedSum += score * config.weight;
       totalWeight += config.weight;
@@ -465,8 +465,8 @@ export function createEnhancedScore(
   measurementKey: string,
   gender: 'male' | 'female' = 'male'
 ): EnhancedScoreResult | null {
-  const config = FACEIQ_SCORING_CONFIGS[measurementKey];
-  const idealValues = FACEIQ_IDEAL_VALUES[measurementKey];
+  const config = SCORING_CONFIGS[measurementKey];
+  const idealValues = IDEAL_VALUES[measurementKey];
   const stats = POPULATION_STATS[measurementKey];
 
   if (!config) return null;
@@ -732,70 +732,70 @@ export async function generateFullRecommendationPlan(
 // ============================================
 
 /**
- * @deprecated Use analyzeFrontProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeFrontProfile or METRIC_CONFIGS directly
  */
 export function calculateFWHR(frontLandmarks: LandmarkPoint[]): ScoreResult | null {
-  const results = faceiqFrontAnalysis(frontLandmarks);
+  const results = frontAnalysis(frontLandmarks);
   const m = results.measurements.find(m => m.metricId === 'faceWidthToHeight');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 /**
- * @deprecated Use analyzeSideProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeSideProfile or METRIC_CONFIGS directly
  */
 export function calculateGonialAngle(
   sideLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): ScoreResult | null {
-  const results = faceiqSideAnalysis(sideLandmarks, gender);
+  const results = sideAnalysis(sideLandmarks, gender);
   const m = results.measurements.find(m => m.metricId === 'gonialAngle');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 /**
- * @deprecated Use analyzeSideProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeSideProfile or METRIC_CONFIGS directly
  */
 export function calculateNasolabialAngle(
   sideLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): ScoreResult | null {
-  const results = faceiqSideAnalysis(sideLandmarks, gender);
+  const results = sideAnalysis(sideLandmarks, gender);
   const m = results.measurements.find(m => m.metricId === 'nasolabialAngle');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 /**
- * @deprecated Use analyzeFrontProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeFrontProfile or METRIC_CONFIGS directly
  */
 export function calculateCanthalTilt(
   frontLandmarks: LandmarkPoint[],
   _side: 'left' | 'right' = 'left'
 ): ScoreResult | null {
   void _side; // Parameter kept for backward compatibility
-  const results = faceiqFrontAnalysis(frontLandmarks);
+  const results = frontAnalysis(frontLandmarks);
   const m = results.measurements.find(m => m.metricId === 'lateralCanthalTilt');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 /**
- * @deprecated Use analyzeFrontProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeFrontProfile or METRIC_CONFIGS directly
  */
 export function calculateNasalIndex(frontLandmarks: LandmarkPoint[]): ScoreResult | null {
-  const results = faceiqFrontAnalysis(frontLandmarks);
+  const results = frontAnalysis(frontLandmarks);
   const m = results.measurements.find(m => m.metricId === 'nasalIndex');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 /**
- * @deprecated Use analyzeFrontProfile or FACEIQ_METRICS directly
+ * @deprecated Use analyzeFrontProfile or METRIC_CONFIGS directly
  */
 export function calculateJawRatio(
   frontLandmarks: LandmarkPoint[],
   gender: 'male' | 'female' = 'male'
 ): ScoreResult | null {
-  const results = faceiqFrontAnalysis(frontLandmarks, gender);
+  const results = frontAnalysis(frontLandmarks, gender);
   const m = results.measurements.find(m => m.metricId === 'jawWidthRatio');
-  return m ? faceiqToScoreResult(m) : null;
+  return m ? toScoreResult(m) : null;
 }
 
 // Re-export types
@@ -806,7 +806,7 @@ export type {
 };
 
 export {
-  FACEIQ_SCORING_CONFIGS,
-  FACEIQ_IDEAL_VALUES,
+  SCORING_CONFIGS,
+  IDEAL_VALUES,
   POPULATION_STATS,
 };

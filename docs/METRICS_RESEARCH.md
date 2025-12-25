@@ -1,24 +1,24 @@
-# FaceIQ and Looksmax Facial Metrics Research
+# LOOKSMAXX and Looksmax Facial Metrics Research
 
 ## Overview
 
-This document compiles research from Looksmax.org forums and related sources about FaceIQ analysis, facial metrics, ideal values, severity classifications, and surgery recommendations.
+This document compiles research from Looksmax.org forums and related sources about LOOKSMAXX analysis, facial metrics, ideal values, severity classifications, and surgery recommendations.
 
 ---
 
-## FaceIQ Services Overview
+## LOOKSMAXX Services Overview
 
-### FaceIQ Products
+### LOOKSMAXX Products
 
 | Service | Price | Features |
 |---------|-------|----------|
-| **FaceIQ Basic Rating** | $10 | Score /10, percentile, rating description |
-| **FaceIQ Premium Analysis** | Paid | 47 measurements, softmax/hardmax advice, morphs, potential score |
-| **FaceIQ Labs** | $25/month | 60+ measurements, front/side harmony scores, percentile rankings |
+| **Basic Rating Rating** | $10 | Score /10, percentile, rating description |
+| **Premium Analysis Analysis** | Paid | 47 measurements, softmax/hardmax advice, morphs, potential score |
+| **LOOKSMAXX** | $25/month | 60+ measurements, front/side harmony scores, percentile rankings |
 
-### FaceIQ Scoring Formula (4 Components)
+### LOOKSMAXX Scoring Formula (4 Components)
 
-FaceIQ rates faces using a weighted formula:
+LOOKSMAXX rates faces using a weighted formula:
 
 | Component | Weight | Description |
 |-----------|--------|-------------|
@@ -36,13 +36,13 @@ DIMO: 7.92 x 0.20 = 1.58400
 Weighted Average = 6.33490
 ```
 
-### FaceIQ Labs Score Components
+### LOOKSMAXX Score Components
 
 - **Overall Score**: 0-10 with percentile (e.g., 7.42 = Top 12%)
 - **Front Profile Score**: Separate measurement (e.g., 7.85 = Top 8%)
 - **Side Profile Score**: Distinct evaluation (e.g., 6.98 = Top 18%)
 
-### Severity Classification Levels (FaceIQ Labs)
+### Severity Classification Levels (LOOKSMAXX)
 
 | Classification | Meaning |
 |----------------|---------|
@@ -339,10 +339,10 @@ Based on forum discussions:
 - [Surgeries and What They Do](https://looksmax.org/threads/surgeries-and-what-they-do.1167064/)
 - [Complete Guide to Facial Ratios and Angles](https://looksmax.org/threads/the-complete-guide-to-facial-ratios-and-angles.1736927/)
 
-### FaceIQ Services
-- [FaceIQ Labs](https://www.faceiqlabs.com/)
-- [FaceIQ Premium Analysis](https://faceiq.gumroad.com/l/full)
-- [FaceIQ Basic Rating](https://faceiq.gumroad.com/l/basic)
+### LOOKSMAXX Services
+- [LOOKSMAXX](https://www.looksmaxx-app.vercel.app/)
+- [Premium Analysis Analysis](https://looksmaxx.gumroad.com/l/full)
+- [Basic Rating Rating](https://looksmaxx.gumroad.com/l/basic)
 
 ### Additional Sources
 - [QOVES Facial Analysis](https://www.qoves.com/)
@@ -354,4 +354,4 @@ Based on forum discussions:
 
 ## Disclaimer
 
-This document compiles information from online looksmaxxing communities and is NOT based on peer-reviewed scientific research. These measurements represent subjective aesthetic preferences discussed within these communities rather than clinically validated standards. FaceIQ Labs explicitly states their service is "for entertainment and informational purposes only" and should not be used for medical decisions.
+This document compiles information from online looksmaxxing communities and is NOT based on peer-reviewed scientific research. These measurements represent subjective aesthetic preferences discussed within these communities rather than clinically validated standards. LOOKSMAXX explicitly states their service is "for entertainment and informational purposes only" and should not be used for medical decisions.

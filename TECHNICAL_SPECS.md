@@ -1,4 +1,4 @@
-# FaceIQ Technical Specifications
+# LOOKSMAXX Technical Specifications
 
 ## Overview
 

@@ -8,7 +8,7 @@
  * - Gaussian scoring with exponential decay
  */
 
-import type { FaceIQScoreResult, QualityTier, SeverityLevel } from './faceiq-scoring';
+import type { MetricScoreResult, QualityTier, SeverityLevel } from './harmony-scoring';
 
 // =============================================================================
 // HARMONY SCORE WEIGHTS
@@ -142,7 +142,7 @@ interface AdviceEntry {
 
 /**
  * Comprehensive advice database for all metrics
- * Keys match metric IDs from faceiq-scoring.ts
+ * Keys match metric IDs from harmony-scoring.ts
  */
 export const ADVICE_DATABASE: Record<string, AdviceEntry> = {
   // === HIGH IMPACT METRICS ===
@@ -397,9 +397,9 @@ export function generateAdvice(
 }
 
 /**
- * Generate advice for a FaceIQ score result
+ * Generate advice for a metric score result
  */
-export function generateAdviceFromResult(result: FaceIQScoreResult): string {
+export function generateAdviceFromResult(result: MetricScoreResult): string {
   return generateAdvice(
     result.metricId,
     result.standardizedScore,
@@ -475,7 +475,7 @@ export interface RankedMetric {
  * Get the top N metrics (strengths) sorted by score descending
  */
 export function getTopMetrics(
-  measurements: FaceIQScoreResult[],
+  measurements: MetricScoreResult[],
   count: number = 3
 ): RankedMetric[] {
   return [...measurements]
@@ -498,7 +498,7 @@ export function getTopMetrics(
  * Get the bottom N metrics (areas to improve) sorted by score ascending
  */
 export function getBottomMetrics(
-  measurements: FaceIQScoreResult[],
+  measurements: MetricScoreResult[],
   count: number = 3
 ): RankedMetric[] {
   return [...measurements]

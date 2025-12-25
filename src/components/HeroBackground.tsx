@@ -4,10 +4,10 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 
 /**
  * HeroBackground.tsx
- * Extracted from faceiqlabs.com HAR file (animation.js)
+ * Extracted from internal reference HAR file (animation.js)
  *
  * This component implements the mouse-following parallax effect
- * from the original FaceIQ Labs homepage.
+ * from the original LOOKSMAXX homepage.
  *
  * Original Logic:
  * - Tracks pointer position within the hero container

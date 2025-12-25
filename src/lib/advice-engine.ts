@@ -20,7 +20,7 @@ interface TriggerRules {
   thresholds: Record<string, Threshold>;
 }
 
-// FaceIQ-style effectiveness rating
+// Harmony-style effectiveness rating
 interface Effectiveness {
   level: 'high' | 'medium' | 'low';
   score: number;  // 1-5
@@ -42,7 +42,7 @@ interface PlanContent {
   risks?: string;
   citations?: string[];
   tags?: string[];
-  // FaceIQ parity - new metadata fields
+  // Treatment metadata fields
   priority_score?: number;  // 1-5, higher = more important
   effectiveness?: Effectiveness;
   ratios_impacted?: Record<string, RatioImpact>;
@@ -366,7 +366,7 @@ export const PLANS: RawPlan[] = [
     }
   },
   // ============================================
-  // NEW PROCEDURES FROM FACEIQ PARITY
+  // ADDITIONAL PROCEDURES
   // ============================================
   {
     id: "kybella",

@@ -246,7 +246,7 @@ export const FRONT_LANDMARK_IMAGES: Record<string, LandmarkImageConfig> = {
 };
 
 // Side profile landmark images (28 landmarks)
-// Matches FaceIQ Labs exact naming - IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts
+// Matches LOOKSMAXX exact naming - IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts
 export const SIDE_LANDMARK_IMAGES: Record<string, LandmarkImageConfig> = {
   // 1. vertex
   vertex: {

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark theme with cyan/neon accents - FaceIQ structure */
+/* Dark theme with cyan/neon accents - app structure */
 :root {
   /* Background colors - Dark theme */
   --background: #000000;
@@ -82,7 +82,7 @@ body {
   }
 }
 
-/* FaceIQ-style animations */
+/* App animations */
 @keyframes fade-in {
   from {
     opacity: 0;

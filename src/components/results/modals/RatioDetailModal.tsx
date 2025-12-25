@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, AlertTriangle, Sparkles, Info, BarChart3 } from 'lucide-react';
-import { FaceIQScoreResult, Gender, Ethnicity, FACEIQ_METRICS } from '@/lib/faceiq-scoring';
+import { MetricScoreResult, Gender, Ethnicity, METRIC_CONFIGS } from '@/lib/harmony-scoring';
 import { generateAIDescription, getSeverityFromScore } from '@/lib/aiDescriptions';
 import { getScoreColor, Ratio } from '@/types/results';
 import { GradientRangeBar } from '../visualization/GradientRangeBar';
@@ -18,7 +18,7 @@ import { LandmarkPoint } from '@/lib/landmarks';
 interface RatioDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  ratio: FaceIQScoreResult | null;
+  ratio: MetricScoreResult | null;
   onPrevious?: () => void;
   onNext?: () => void;
   hasPrevious?: boolean;
@@ -32,7 +32,7 @@ interface RatioDetailModalProps {
 }
 
 // ============================================
-// STAT CARD (FaceIQ Style)
+// STAT CARD (Harmony Style)
 // ============================================
 
 interface StatCardProps {
@@ -81,7 +81,7 @@ function StatCard({ label, value, subtext, variant = 'default', scoreColor, subt
 }
 
 // ============================================
-// SCORING METHODOLOGY CHART (FaceIQ Style)
+// SCORING METHODOLOGY CHART (Harmony Style)
 // ============================================
 
 interface ScoringMethodologyChartProps {
@@ -135,7 +135,7 @@ function ScoringMethodologyChart({
     return Math.max(1, 10 * Math.exp(-decayRate * Math.pow(deviation, 2)));
   }, [idealMin, idealMax, decayRate]);
 
-  // Get color for a score value (FaceIQ gradient)
+  // Get color for a score value (score gradient)
   const getColorForScore = (s: number): string => {
     if (s >= 9) return 'rgb(34, 197, 94)';   // Green - Excellent
     if (s >= 7) return 'rgb(6, 182, 212)';   // Cyan - Good
@@ -177,7 +177,7 @@ function ScoringMethodologyChart({
     const idealMinPos = Math.max(0, Math.min(1, (idealMin - rangeMin) / (rangeMax - rangeMin)));
     const idealMaxPos = Math.max(0, Math.min(1, (idealMax - rangeMin) / (rangeMax - rangeMin)));
 
-    // Draw horizontal grid lines (FaceIQ style - subtle)
+    // Draw horizontal grid lines (Harmony style - subtle)
     ctx.strokeStyle = 'rgba(64, 64, 64, 0.5)';
     ctx.lineWidth = 1;
     for (let i = 0; i <= 10; i += 2) {
@@ -634,7 +634,7 @@ export function RatioDetailModal({
     const found = allRatios.find(r => r.id === ratio.metricId || r.name === ratio.name);
     if (found) return found;
 
-    // Create a minimal Ratio object from FaceIQScoreResult for visualization
+    // Create a minimal Ratio object from MetricScoreResult for visualization
     return {
       id: ratio.metricId,
       name: ratio.name,
@@ -659,7 +659,7 @@ export function RatioDetailModal({
   const severity = getSeverityFromScore(ratio.score);
 
   // Get metric config for decay rate
-  const metricConfig = FACEIQ_METRICS[ratio.metricId];
+  const metricConfig = METRIC_CONFIGS[ratio.metricId];
   const decayRate = metricConfig?.decayRate || 4;
 
   // Format values with units

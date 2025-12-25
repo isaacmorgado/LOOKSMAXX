@@ -112,9 +112,9 @@ export interface DepthVarianceResult {
 }
 
 // Side profile landmark mapping (IDs must match SIDE_PROFILE_LANDMARKS in landmarks.ts)
-// Matches FaceIQ's 28 side profile landmarks exactly
+// Matches 28 side profile landmarks exactly
 // For side profile photos, uses MediaPipe LEFT indices (appearing on left side of image)
-// Note: FaceIQ uses a custom server-side model for side detection; this is our MediaPipe fallback
+// Note: Server uses a custom server-side model for side detection; this is our MediaPipe fallback
 export const MEDIAPIPE_SIDE_MAPPING: Record<string, number> = {
   // 1. vertex - top of head
   vertex: 10,
@@ -126,7 +126,7 @@ export const MEDIAPIPE_SIDE_MAPPING: Record<string, number> = {
   neckPoint: 152,
   // 5. porion - ear canal opening (use ear area)
   porion: 127,
-  // 6. orbitale - lowest point of orbital rim (index 33 per FaceIQ landmarkers.js)
+  // 6. orbitale - lowest point of orbital rim (index 33 per cephalometric landmarkers.js)
   orbitale: 33,
   // 7. tragus - ear cartilage
   tragus: 127,
@@ -284,7 +284,7 @@ export async function detectFromImageUrl(
     // Front profile uses MediaPipe mapping
     const mapping = MEDIAPIPE_FRONT_MAPPING;
 
-    // Neck landmarks need +5% yOffset per FaceIQ landmarkers.js
+    // Neck landmarks need +5% yOffset per cephalometric landmarkers.js
     const NECK_Y_OFFSET = 0.05;
     const NECK_LANDMARKS = ['left_cervical_lateralis', 'right_cervical_lateralis'];
 

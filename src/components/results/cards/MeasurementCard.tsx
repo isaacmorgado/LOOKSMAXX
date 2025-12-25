@@ -5,7 +5,7 @@ import { ChevronDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Ratio, getScoreColor, formatValue } from '@/types/results';
 import { QualityBadge, SeverityBadge, CategoryTag, ExpandableSection } from '../shared';
 import { IdealRangeBar, CompactIdealRangeBar } from '../visualization/IdealRangeBar';
-import { SeverityLevel } from '@/lib/faceiq-scoring';
+import { SeverityLevel } from '@/lib/harmony-scoring';
 
 // Get severity indicator icon and color for header display
 function getSeverityIndicator(severity: SeverityLevel): {

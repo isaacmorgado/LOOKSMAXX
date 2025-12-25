@@ -7,9 +7,9 @@ import { useGender } from '@/contexts/GenderContext';
 import { useEthnicity, EthnicityOption } from '@/contexts/EthnicityContext';
 import { LandmarkAnalysisTool } from '@/components/LandmarkAnalysisTool';
 import { LandmarkPoint } from '@/lib/landmarks';
-import { Ethnicity } from '@/lib/faceiq-scoring';
+import { Ethnicity } from '@/lib/harmony-scoring';
 
-// Map EthnicityContext options to faceiq-scoring Ethnicity type
+// Map EthnicityContext options to harmony-scoring Ethnicity type
 function mapEthnicityOption(option: EthnicityOption): Ethnicity {
   const mapping: Record<EthnicityOption, Ethnicity> = {
     'white': 'white',

@@ -23,7 +23,7 @@
 
 ### 1. cheekFullness (Malar Convexity)
 
-**Location:** `/src/lib/faceiq-scoring.ts:2844-2867`
+**Location:** `/src/lib/harmony-scoring.ts:2844-2867`
 
 **Formula:**
 ```typescript
@@ -59,7 +59,7 @@ if (faceWidth > 0) {
 
 ### 2. chinWidth
 
-**Location:** `/src/lib/faceiq-scoring.ts:2870-2883`
+**Location:** `/src/lib/harmony-scoring.ts:2870-2883`
 
 **Formula:**
 ```typescript
@@ -86,7 +86,7 @@ if (faceWidth > 0) {
 
 ### 3. upperEyelidExposure
 
-**Location:** `/src/lib/faceiq-scoring.ts:2912-2929`
+**Location:** `/src/lib/harmony-scoring.ts:2912-2929`
 
 **Formula:**
 ```typescript
@@ -113,7 +113,7 @@ if (eyeOpen > 0) {
 
 ### 4. tearTroughDepth
 
-**Location:** `/src/lib/faceiq-scoring.ts:2936`
+**Location:** `/src/lib/harmony-scoring.ts:2936`
 
 **Formula:**
 ```typescript
@@ -137,7 +137,7 @@ The hardcoded value prevents unfair penalization of users until proper 3D depth/
 
 ### 1. addMeasurement Helper Function
 
-**Location:** `/src/lib/faceiq-scoring.ts:2665-2669`
+**Location:** `/src/lib/harmony-scoring.ts:2665-2669`
 
 ```typescript
 const addMeasurement = (metricId: string, value: number | null) => {
@@ -159,7 +159,7 @@ const addMeasurement = (metricId: string, value: number | null) => {
 
 ### 2. getLandmark Helper Function
 
-**Location:** `/src/lib/faceiq-scoring.ts:2582-2585`
+**Location:** `/src/lib/harmony-scoring.ts:2582-2585`
 
 ```typescript
 function getLandmark(landmarks: LandmarkPoint[], id: string): Point | null {
@@ -203,7 +203,7 @@ if (denominator > 0) {
 
 ### 4. Vector Magnitude Safety
 
-**Location:** `/src/lib/faceiq-scoring.ts:3106-3111`
+**Location:** `/src/lib/harmony-scoring.ts:3106-3111`
 
 ```typescript
 const mag1 = Math.sqrt(nasalDorsum.x ** 2 + nasalDorsum.y ** 2);
@@ -382,7 +382,7 @@ The measurement pipeline demonstrates excellent defensive programming practices:
 
 ## Appendix: Files Examined
 
-- `/src/lib/faceiq-scoring.ts` (Primary calculation file)
+- `/src/lib/harmony-scoring.ts` (Primary calculation file)
 - `/src/lib/looksmax-scoring.ts` (Scoring wrapper)
 - `/verify-custom-metrics.ts` (Verification test suite)
 
