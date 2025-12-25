@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -17,8 +17,10 @@ import {
   Users,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
+import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
 import { ResultsTab } from '@/types/results';
 import { ScoreCircle, RankBadge } from './shared';
+import { api } from '@/lib/api';
 
 // ============================================
 // TAB NAVIGATION
@@ -97,7 +99,7 @@ function Sidebar({ onClose }: SidebarProps) {
           <p className="text-sm text-neutral-400">Harmony Score</p>
           <p className="text-2xl font-bold text-white">{overallScore.toFixed(2)}</p>
           <div className="mt-2">
-            <RankBadge size="md" />
+            <RankBadge size="md" alwaysShow showPercentile />
           </div>
         </div>
       </div>
@@ -137,6 +139,62 @@ function Sidebar({ onClose }: SidebarProps) {
 }
 
 // ============================================
+// FLOATING RANK CARD (Desktop)
+// ============================================
+
+function FloatingRankCard() {
+  const { setActiveTab } = useResults();
+  const leaderboard = useLeaderboardOptional();
+  const userRank = leaderboard?.userRank;
+  const isAuthenticated = !!api.getToken();
+
+  // Auto-fetch user's rank on mount if authenticated
+  useEffect(() => {
+    if (isAuthenticated && !userRank && leaderboard?.fetchMyRank) {
+      leaderboard.fetchMyRank();
+    }
+  }, [isAuthenticated, userRank, leaderboard]);
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={() => setActiveTab('leaderboard')}
+      className="flex items-center gap-3 px-4 py-3 bg-neutral-900/95 backdrop-blur-sm border border-neutral-800 rounded-xl shadow-lg hover:border-yellow-500/30 transition-all group"
+    >
+      {userRank ? (
+        <>
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/30">
+            <Trophy size={20} className="text-yellow-400" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs text-neutral-500 uppercase tracking-wide">Your Rank</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-yellow-400">#{userRank.genderRank}</span>
+              <span className="text-xs text-neutral-500">Top {userRank.percentile.toFixed(1)}%</span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-neutral-600 group-hover:text-yellow-400 transition-colors ml-1" />
+        </>
+      ) : (
+        <>
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-neutral-800 border border-neutral-700">
+            <Trophy size={20} className="text-neutral-500" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs text-neutral-500 uppercase tracking-wide">Your Rank</p>
+            <span className="text-sm text-neutral-400">
+              {isAuthenticated ? 'Not ranked yet' : 'Sign in to rank'}
+            </span>
+          </div>
+          <ChevronRight size={16} className="text-neutral-600 group-hover:text-neutral-400 transition-colors ml-1" />
+        </>
+      )}
+    </motion.button>
+  );
+}
+
+// ============================================
 // MOBILE HEADER
 // ============================================
 
@@ -161,8 +219,7 @@ function MobileHeader({ onMenuClick }: MobileHeaderProps) {
         <span className="font-medium text-white">{currentTab?.label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <RankBadge size="sm" />
-        <span className="text-sm text-neutral-400">{overallScore.toFixed(1)}</span>
+        <RankBadge size="sm" alwaysShow />
         <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
           <span className="text-xs text-cyan-400 font-bold">{Math.round(overallScore)}</span>
         </div>
@@ -219,6 +276,11 @@ export function ResultsLayout({ children }: ResultsLayoutProps) {
         {/* Mobile Header */}
         <div className="md:hidden">
           <MobileHeader onMenuClick={() => setMobileMenuOpen(true)} />
+        </div>
+
+        {/* Desktop Floating Rank Indicator */}
+        <div className="hidden md:block fixed top-4 right-4 z-30">
+          <FloatingRankCard />
         </div>
 
         {/* Content Area - no overflow so sticky works */}

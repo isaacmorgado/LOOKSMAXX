@@ -1,20 +1,30 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
+import { api } from '@/lib/api';
 
 interface RankBadgeProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showPercentile?: boolean;
+  alwaysShow?: boolean; // Show placeholder when no rank
 }
 
-export function RankBadge({ size = 'sm', className = '', showPercentile = false }: RankBadgeProps) {
+export function RankBadge({ size = 'sm', className = '', showPercentile = false, alwaysShow = false }: RankBadgeProps) {
   const leaderboard = useLeaderboardOptional();
   const userRank = leaderboard?.userRank;
+  const isLoading = leaderboard?.isLoading;
+  const isAuthenticated = !!api.getToken();
 
-  if (!userRank) return null;
+  // Auto-fetch user's rank on mount if authenticated and not already loaded
+  useEffect(() => {
+    if (isAuthenticated && !userRank && leaderboard?.fetchMyRank) {
+      leaderboard.fetchMyRank();
+    }
+  }, [isAuthenticated, userRank, leaderboard]);
 
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs gap-1',
@@ -27,6 +37,33 @@ export function RankBadge({ size = 'sm', className = '', showPercentile = false 
     md: 14,
     lg: 16,
   };
+
+  // Show loading state
+  if (isLoading && alwaysShow) {
+    return (
+      <div className={`inline-flex items-center ${sizeClasses[size]} bg-neutral-800/50 border border-neutral-700 rounded-full ${className}`}>
+        <Loader2 size={iconSize[size]} className="text-neutral-500 animate-spin" />
+        <span className="text-neutral-500">Loading...</span>
+      </div>
+    );
+  }
+
+  // Show "Not ranked" state if alwaysShow is true
+  if (!userRank) {
+    if (!alwaysShow) return null;
+
+    return (
+      <div
+        className={`inline-flex items-center ${sizeClasses[size]} bg-neutral-800/50 border border-neutral-700 rounded-full ${className}`}
+        title={isAuthenticated ? "Complete an analysis to get ranked" : "Sign in to get ranked"}
+      >
+        <Trophy size={iconSize[size]} className="text-neutral-500" />
+        <span className="text-neutral-500">
+          {isAuthenticated ? 'Not ranked' : 'Sign in'}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <motion.div
