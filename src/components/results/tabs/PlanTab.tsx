@@ -9,8 +9,10 @@ import {
   Zap,
   ChevronRight,
   Lock,
+  CheckCircle,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { TabContent } from '../ResultsLayout';
 import { EnhancedRecommendationCard } from '../cards/EnhancedRecommendationCard';
 import { ScoreCircle, PhaseBadge } from '../shared';
@@ -169,10 +171,14 @@ function OrderOfOperations() {
 
 export function PlanTab() {
   const { recommendations, flaws, gender, ethnicity } = useResults();
+  const { user } = useAuth();
   const [selectedPhase, setSelectedPhase] = useState<RecommendationPhase | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+
+  // Check if user has a paid plan
+  const hasPaidPlan = user?.plan === 'basic' || user?.plan === 'pro';
 
   // Count recommendations by phase
   const phaseCounts = useMemo(() => {
@@ -331,27 +337,46 @@ export function PlanTab() {
             </div>
           </div>
 
-          {/* Upgrade CTA */}
-          <motion.div
-            className="bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 rounded-xl p-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={16} className="text-cyan-400" />
-              <span className="text-sm font-medium text-white">Unlock Full Plan</span>
-            </div>
-            <p className="text-xs text-neutral-400 mb-3">
-              Get detailed treatment guides, cost estimates, and provider recommendations.
-            </p>
-            <a
-              href="/pricing"
-              className="block w-full py-2 bg-cyan-500 text-black text-sm font-medium rounded-lg text-center hover:bg-cyan-400 transition-colors"
+          {/* Upgrade CTA or Premium Badge */}
+          {hasPaidPlan ? (
+            <motion.div
+              className="bg-gradient-to-br from-green-500/10 to-emerald-600/10 border border-green-500/30 rounded-xl p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
             >
-              Upgrade Now
-            </a>
-          </motion.div>
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle size={16} className="text-green-400" />
+                <span className="text-sm font-medium text-white">
+                  {user?.plan === 'pro' ? 'Pro Plan' : 'Basic Plan'} Active
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400">
+                You have full access to all {user?.plan === 'pro' ? 'features' : 'non-surgical recommendations'}.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 rounded-xl p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={16} className="text-cyan-400" />
+                <span className="text-sm font-medium text-white">Unlock Full Plan</span>
+              </div>
+              <p className="text-xs text-neutral-400 mb-3">
+                Get detailed treatment guides, cost estimates, and provider recommendations.
+              </p>
+              <a
+                href="/pricing"
+                className="block w-full py-2 bg-cyan-500 text-black text-sm font-medium rounded-lg text-center hover:bg-cyan-400 transition-colors"
+              >
+                Upgrade Now
+              </a>
+            </motion.div>
+          )}
         </div>
       </div>
     </TabContent>
