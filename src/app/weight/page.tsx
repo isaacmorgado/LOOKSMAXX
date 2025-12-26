@@ -67,12 +67,16 @@ export default function WeightPage() {
     value,
     onIncrease,
     onDecrease,
+    onIncrease5,
+    onDecrease5,
     label,
     suffix,
   }: {
     value: number;
     onIncrease: () => void;
     onDecrease: () => void;
+    onIncrease5: () => void;
+    onDecrease5: () => void;
     label: string;
     suffix: string;
   }) => (
@@ -98,17 +102,13 @@ export default function WeightPage() {
       </div>
       <div className="flex gap-2 mt-2">
         <button
-          onClick={() => {
-            for (let i = 0; i < 5; i++) onDecrease();
-          }}
+          onClick={onDecrease5}
           className="px-2 py-1 text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 rounded transition-colors"
         >
           -5
         </button>
         <button
-          onClick={() => {
-            for (let i = 0; i < 5; i++) onIncrease();
-          }}
+          onClick={onIncrease5}
           className="px-2 py-1 text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 rounded transition-colors"
         >
           +5
@@ -177,6 +177,8 @@ export default function WeightPage() {
               value={localLbs}
               onIncrease={() => handleLbsChange(1)}
               onDecrease={() => handleLbsChange(-1)}
+              onIncrease5={() => handleLbsChange(5)}
+              onDecrease5={() => handleLbsChange(-5)}
               label="POUNDS"
               suffix="lbs"
             />
@@ -185,6 +187,8 @@ export default function WeightPage() {
               value={localKg}
               onIncrease={() => handleKgChange(1)}
               onDecrease={() => handleKgChange(-1)}
+              onIncrease5={() => handleKgChange(5)}
+              onDecrease5={() => handleKgChange(-5)}
               label="KILOGRAMS"
               suffix="kg"
             />

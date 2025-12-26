@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Ruler, ChevronUp, ChevronDown } from 'lucide-react';
 import { useHeight } from '@/contexts/HeightContext';
@@ -17,18 +17,25 @@ export default function HeightPage() {
   const [localInches, setLocalInches] = useState<number>(9);
   const [localCm, setLocalCm] = useState<number>(175);
 
-  // Sync from context on mount
+  // Track initialization to prevent circular updates
+  const isInitialMount = useRef(true);
+
+  // Sync from context on initial mount only
   useEffect(() => {
-    if (heightCm) {
+    if (isInitialMount.current && heightCm) {
       setLocalCm(heightCm);
       const { feet, inches } = cmToFeetInches(heightCm);
       setLocalFeet(feet);
       setLocalInches(inches);
     }
-  }, [heightCm]);
+    isInitialMount.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency - intentionally only run on mount
 
-  // Update height when inputs change
+  // Update context when local state changes (skip on initial mount)
   useEffect(() => {
+    if (isInitialMount.current) return;
+
     if (inputMode === 'imperial') {
       const cm = feetInchesToCm(localFeet, localInches);
       setHeightCm(cm);
@@ -43,8 +50,8 @@ export default function HeightPage() {
   };
 
   const handleInchesChange = (delta: number) => {
-    // Use 0.5 inch increments
-    let newInches = localInches + delta * 0.5;
+    // Use 0.5 inch increments with proper rounding to avoid floating point issues
+    let newInches = Math.round((localInches + delta * 0.5) * 2) / 2;
     let newFeet = localFeet;
 
     if (newInches < 0) {

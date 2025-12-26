@@ -8,9 +8,11 @@ const ethnicityOptions: EthnicityOption[] = [
   'white',
   'black',
   'asian',
+  'south-asian',
   'hispanic',
   'middle-eastern',
-  'south-asian',
+  'pacific-islander',
+  'native-american',
   'mixed',
 ];
 

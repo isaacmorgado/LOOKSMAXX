@@ -85,11 +85,15 @@ export default function PhysiquePage() {
     (acceptedFiles: File[]) => {
       const selectedFile = acceptedFiles[0];
       if (selectedFile) {
+        // Revoke old URL to prevent memory leak
+        if (currentPhoto?.preview) {
+          URL.revokeObjectURL(currentPhoto.preview);
+        }
         const objectUrl = URL.createObjectURL(selectedFile);
         setCurrentPhoto({ file: selectedFile, preview: objectUrl });
       }
     },
-    [setCurrentPhoto]
+    [setCurrentPhoto, currentPhoto]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
