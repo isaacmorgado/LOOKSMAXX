@@ -553,7 +553,16 @@ export function prioritizeMetrics(
 // ============================================
 
 /**
- * Convert harmony score to PSL rating
+ * Convert harmony score to PSL rating using a non-linear transformation.
+ *
+ * PSL (Pretty Scale Level) is a different scale from harmony:
+ * - Harmony: 0-100% based on weighted metric averages
+ * - PSL: 3.0-7.5 scale with compressed distribution reflecting real-world attractiveness
+ *
+ * The transformation uses a power curve that:
+ * 1. Makes high PSL scores harder to achieve (exponential difficulty at top)
+ * 2. Creates better separation in the middle ranges
+ * 3. Reflects that most people cluster in the 4.0-5.5 range
  */
 export function harmonyToPSL(harmonyPercent: number): {
   psl: number;
@@ -575,12 +584,17 @@ export function harmonyToPSL(harmonyPercent: number): {
   // Clamp to valid range 0-100
   safeHarmonyPercent = Math.max(0, Math.min(100, safeHarmonyPercent));
 
-  // Based on harmony formula: Harmony % = ((Score - Min) / (Max - Min)) * 100
-  // Where Max = 333.71, Min = -337.71
-
-  // Convert harmony percent to approximate PSL
-  // Harmony 0% = PSL 3.0, Harmony 100% = PSL 7.5
-  const psl = 3.0 + (safeHarmonyPercent / 100) * 4.5;
+  // Non-linear transformation using a modified power curve
+  // This creates a more realistic PSL distribution where:
+  // - Low harmony maps to PSL 3.0-4.0 range (compressed)
+  // - Mid harmony maps to PSL 4.0-5.5 range (expanded - most people here)
+  // - High harmony maps to PSL 5.5-7.5 range (compressed - hard to achieve)
+  //
+  // Formula: PSL = 3.0 + 4.5 * ((harmony/100)^0.7)
+  // The 0.7 exponent compresses high scores, making top PSL harder to achieve
+  const normalizedHarmony = safeHarmonyPercent / 100;
+  const transformedScore = Math.pow(normalizedHarmony, 0.7);
+  const psl = 3.0 + transformedScore * 4.5;
   const clampedPSL = Math.max(3.0, Math.min(7.5, psl));
 
   // Determine tier

@@ -10,27 +10,30 @@ import { UploadProvider } from '@/contexts/UploadContext';
 import { PhysiqueProvider } from '@/contexts/PhysiqueContext';
 import { LeaderboardProvider } from '@/contexts/LeaderboardContext';
 import { ForumProvider } from '@/contexts/ForumContext';
+import { RegionProvider } from '@/contexts/RegionContext';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <GenderProvider>
-        <EthnicityProvider>
-          <HeightProvider>
-            <WeightProvider>
-              <UploadProvider>
-                <PhysiqueProvider>
-                  <LeaderboardProvider>
-                    <ForumProvider>
-                      {children}
-                    </ForumProvider>
-                  </LeaderboardProvider>
-                </PhysiqueProvider>
-              </UploadProvider>
-            </WeightProvider>
-          </HeightProvider>
-        </EthnicityProvider>
-      </GenderProvider>
+      <RegionProvider>
+        <GenderProvider>
+          <EthnicityProvider>
+            <HeightProvider>
+              <WeightProvider>
+                <UploadProvider>
+                  <PhysiqueProvider>
+                    <LeaderboardProvider>
+                      <ForumProvider>
+                        {children}
+                      </ForumProvider>
+                    </LeaderboardProvider>
+                  </PhysiqueProvider>
+                </UploadProvider>
+              </WeightProvider>
+            </HeightProvider>
+          </EthnicityProvider>
+        </GenderProvider>
+      </RegionProvider>
     </AuthProvider>
   );
 }

@@ -214,7 +214,8 @@ export function calculateMetricScore(
     // If Bezier returns -1, it means value is out of range with edge y=0
     // Fall through to exponential decay instead of returning 0
     if (bezierScore >= 0) {
-      return bezierScore;
+      // Clamp to valid range [0, maxScore] to prevent Bezier overshoot
+      return Math.max(0, Math.min(maxScore, bezierScore));
     }
   }
 
@@ -225,7 +226,8 @@ export function calculateMetricScore(
     // If Bezier returns -1, it means value is out of range with edge y=0
     // Fall through to exponential decay instead of returning 0
     if (bezierScore >= 0) {
-      return bezierScore;
+      // Clamp to valid range [0, maxScore] to prevent Bezier overshoot
+      return Math.max(0, Math.min(maxScore, bezierScore));
     }
   }
 
@@ -461,9 +463,11 @@ export function catmullRomSpline(p0: number, p1: number, p2: number, p3: number,
 
 /**
  * Calculate standardized score (0-10 normalized)
+ * Clamps output to [0, 10] to prevent display issues from scoring edge cases
  */
 export function standardizeScore(score: number, maxScore: number): number {
-  return (score / maxScore) * 10;
+  const normalized = (score / maxScore) * 10;
+  return Math.max(0, Math.min(10, normalized));
 }
 
 /**

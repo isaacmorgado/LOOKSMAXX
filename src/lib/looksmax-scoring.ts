@@ -106,9 +106,19 @@ export function calculateHarmonyScore(
     tiers[tier].count++;
   }
 
-  const weightedAverage = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
-  const unweightedAverage = measurements.length > 0 ? unweightedTotal / measurements.length : 0;
-  const harmonyPercentage = (weightedAverage / 10) * 100;
+  const rawWeightedAverage = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
+  const rawUnweightedAverage = measurements.length > 0 ? unweightedTotal / measurements.length : 0;
+
+  // Clamp averages to 0-10 range to prevent any edge case overflows
+  const weightedAverage = Math.max(0, Math.min(10, rawWeightedAverage));
+  const unweightedAverage = Math.max(0, Math.min(10, rawUnweightedAverage));
+  const harmonyPercentage = Math.max(0, Math.min(100, (weightedAverage / 10) * 100));
+
+  // Helper to clamp tier averages to 0-10
+  const clampAvg = (total: number, count: number): number => {
+    if (count === 0) return 0;
+    return Math.max(0, Math.min(10, total / count));
+  };
 
   return {
     harmonyPercentage,
@@ -117,15 +127,15 @@ export function calculateHarmonyScore(
     weightDistribution: {
       highImpact: {
         count: tiers.high.count,
-        avgScore: tiers.high.count > 0 ? tiers.high.total / tiers.high.count : 0,
+        avgScore: clampAvg(tiers.high.total, tiers.high.count),
       },
       mediumImpact: {
         count: tiers.medium.count,
-        avgScore: tiers.medium.count > 0 ? tiers.medium.total / tiers.medium.count : 0,
+        avgScore: clampAvg(tiers.medium.total, tiers.medium.count),
       },
       standard: {
         count: tiers.standard.count,
-        avgScore: tiers.standard.count > 0 ? tiers.standard.total / tiers.standard.count : 0,
+        avgScore: clampAvg(tiers.standard.total, tiers.standard.count),
       },
     },
   };

@@ -145,7 +145,13 @@ export function CommunityTab() {
         {/* Error State */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-400 mb-2">{error}</p>
+            <p className="text-sm text-neutral-400">
+              Unable to load community data. You can still{' '}
+              <Link href="/forum" className="text-cyan-400 hover:underline">
+                browse the forum directly
+              </Link>.
+            </p>
           </div>
         )}
 

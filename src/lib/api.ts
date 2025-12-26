@@ -439,14 +439,20 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const url = `${API_URL}${endpoint}`;
+    console.log(`[API] ${method} ${url}`);
+
+    const response = await fetch(url, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
 
+    console.log(`[API] Response status: ${response.status}`);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+      console.error('[API] Error response:', error);
       throw new Error(error.detail || `HTTP ${response.status}`);
     }
 

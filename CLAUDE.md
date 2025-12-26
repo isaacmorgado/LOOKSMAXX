@@ -145,12 +145,81 @@ Each has gender-specific ideal ranges for 15+ metrics.
 - `ScoreCircle` - Animated score display
 - `RankBadge` - Leaderboard rank indicator
 
+## Product Guides System (In Progress)
+
+### Phase 0: Setup - COMPLETE (2025-12-26)
+
+| Component | File | Details |
+|-----------|------|---------|
+| **Guide Types** | `src/types/guides.ts` | Region, Product, Guide interfaces + locale/timezone mappings |
+| **Region Utility** | `src/lib/region.ts` | detectRegion, getProductLink, buildAmazonUrl, formatPrice |
+| **Region Context** | `src/contexts/RegionContext.tsx` | useRegion hook with state, link resolution, price formatting |
+| **Provider Integration** | `src/components/Providers.tsx` | RegionProvider wired into app |
+
+**Features:**
+- Multi-region affiliate link support (US, UK, DE, FR, AU, Asia)
+- Auto-detection via localStorage → navigator.language → timezone → default
+- Region-aware price formatting with currency symbols
+- Amazon URL builder with affiliate tags
+
+### Phase 1: Product Database - COMPLETE (2025-12-26)
+
+| Component | File | Details |
+|-----------|------|---------|
+| **Product Registry** | `src/data/guides/products-registry.ts` | 33 products with ASINs |
+| **Index Export** | `src/data/guides/index.ts` | Central export for all guide data |
+| **E2E Test** | `src/app/api/test-guides/route.ts` | Verification endpoint (21/21 tests pass) |
+
+**Products by Category:**
+- Hygiene (4): Tongue scraper, cologne, gloves, toothbrush
+- Grooming (5): OneBlade, blades, shaving cream, tweezers, trimmer
+- Skincare (5): Cleanser, chapstick, moisturizer, sunscreen, tretinoin
+- Miscellaneous (9): Water jug, jaw trainer, minoxidil, dermaroller, etc.
+- Supplements (10): Creatine, D3+K2, magnesium, omega-3, etc.
+
+**Features:**
+- All 33 products with 6-region affiliate links (US/UK/DE/FR/AU/Asia)
+- Ross-style taglines for each product
+- Priority rankings (1=essential, 2=recommended, 3=optional)
+- 15 base stack products identified
+- Helper functions: getGuideProductById, getGuideProductsByCategory, getBaseStackProducts, searchGuideProducts
+
+### Phase 2: Guide Content - COMPLETE (2025-12-26)
+
+| Component | File | Details |
+|-----------|------|---------|
+| **Mindset Guide** | `src/data/guides/mindset.ts` | Beginner mistakes, high humor (30%) |
+| **Maintenance Guide** | `src/data/guides/maintenance.ts` | Daily/weekly grooming, high humor (25%) |
+| **Body Fat Guide** | `src/data/guides/body-fat.ts` | Fat loss fundamentals, medium-high humor (20%) |
+| **V-Taper Guide** | `src/data/guides/v-taper.ts` | Shoulder/lat building, medium humor (15%) |
+| **Training Guide** | `src/data/guides/training.ts` | Workout splits, medium humor (15%) |
+| **Core & Neck Guide** | `src/data/guides/core-neck.ts` | Neck thickness, core training, medium humor (15%) |
+| **Cardio Guide** | `src/data/guides/cardio.ts` | LISS vs HIIT, fat loss cardio, medium humor (15%) |
+| **Diet Guide** | `src/data/guides/diet.ts` | Nutrition fundamentals, medium humor (15%) |
+| **Skincare Guide** | `src/data/guides/skincare.ts` | Acne, tretinoin, routines, medium humor (15%) |
+
+**Guide System Stats:**
+- 9 guides with Ross-style content
+- 95 minutes total reading time
+- 3 categories: Fundamentals, Physique, Appearance
+- 19 unique product references across guides
+- Helper functions: getGuideById, getGuideBySlug, getGuidesByCategory, searchGuides, getRelatedGuides
+
+See `docs/PRODUCT_GUIDES_IMPLEMENTATION.md` for full implementation plan.
+
 ## Remaining Tasks
 
 ### High Priority
 1. Investigate auth endpoints 500 errors
 2. Test full payment flow with referral discount
 
-### Future
-3. Implement supplement/product e-commerce layer
-4. Add forum link to main navigation
+### In Progress
+3. Product Guides Implementation (Phase 3-7 remaining)
+   - Phase 3: Advanced Guides (anti-aging, debloating, sleep, bloodwork, hormones)
+   - Phase 4: UI Components (GuidesTab, GuideCard, GuideSection, etc.)
+   - Phase 5: Integration with Results page
+   - Phase 6-7: Polish, QA, and Launch
+
+### Completed
+4. Forum link to main navigation
+5. Product Guides Phase 2: 9 guides with Ross-style content

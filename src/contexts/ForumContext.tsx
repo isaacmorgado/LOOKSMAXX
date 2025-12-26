@@ -108,12 +108,15 @@ export function ForumProvider({ children }: { children: ReactNode }) {
   // === CATEGORIES ===
 
   const fetchCategories = useCallback(async () => {
+    console.log('[ForumContext] fetchCategories called');
     setIsLoadingCategories(true);
     setError(null);
     try {
       const data = await api.getForumCategories();
+      console.log('[ForumContext] Categories fetched:', data.length, 'categories');
       setCategories(data);
     } catch (err) {
+      console.error('[ForumContext] Error fetching categories:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch categories');
     } finally {
       setIsLoadingCategories(false);

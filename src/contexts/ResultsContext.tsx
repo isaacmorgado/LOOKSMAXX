@@ -130,12 +130,15 @@ function transformToRatio(result: MetricScoreResult, landmarks: LandmarkPoint[])
   // Classify metric using Harmony taxonomy
   const taxonomyClassification = classifyMetric(result.name, result.category);
 
+  // Clamp scores to valid 0-10 range for display (defense-in-depth)
+  const clampedScore = Math.max(0, Math.min(10, result.standardizedScore));
+
   return {
     id: result.metricId,
     name: result.name,
     value: result.value,
-    score: result.standardizedScore,  // Use standardized 0-10 score for UI display
-    standardizedScore: result.standardizedScore,
+    score: clampedScore,  // Use standardized 0-10 score for UI display
+    standardizedScore: clampedScore,
     unit: convertUnitToRatioUnit(result.unit),
     idealMin: result.idealMin,
     idealMax: result.idealMax,
@@ -1306,11 +1309,18 @@ export function ResultsProvider({ children, initialData }: ResultsProviderProps)
     return getBottomMetrics(analysisResults.harmony.measurements, 3);
   }, [analysisResults]);
 
-  // Scores - now using weighted harmony
-  const harmonyPercentage = harmonyScoreResult?.harmonyPercentage || 0;
-  const overallScore = harmonyScoreResult?.weightedAverage || analysisResults?.harmony?.overallScore || 0;
-  const frontScore = analysisResults?.harmony?.frontScore || 0;
-  const sideScore = analysisResults?.harmony?.sideScore || 0;
+  // Scores - now using weighted harmony with explicit clamping to 0-10
+  const rawHarmonyPercentage = harmonyScoreResult?.harmonyPercentage || 0;
+  const harmonyPercentage = Math.max(0, Math.min(100, rawHarmonyPercentage));
+
+  const rawOverallScore = harmonyScoreResult?.weightedAverage || analysisResults?.harmony?.overallScore || 0;
+  const overallScore = Math.max(0, Math.min(10, rawOverallScore));
+
+  const rawFrontScore = analysisResults?.harmony?.frontScore || 0;
+  const frontScore = Math.max(0, Math.min(10, rawFrontScore));
+
+  const rawSideScore = analysisResults?.harmony?.sideScore || 0;
+  const sideScore = Math.max(0, Math.min(10, rawSideScore));
 
   // PSL Rating (1-10 scale with tier/percentile)
   const pslRating = useMemo(() => {

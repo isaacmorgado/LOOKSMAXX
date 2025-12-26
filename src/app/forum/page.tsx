@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
 import { ForumHeader } from '@/components/forum';
@@ -9,9 +9,13 @@ import { ArrowRight, TrendingUp, Users, MessageSquare, Flame, Clock, Star } from
 export default function ForumPage() {
   const { categories, isLoadingCategories, fetchCategories, error } = useForum();
   const [activeFilter, setActiveFilter] = useState<'all' | 'trending' | 'new'>('all');
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    fetchCategories();
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchCategories();
+    }
   }, [fetchCategories]);
 
   // Sort categories based on filter
@@ -120,7 +124,11 @@ export default function ForumPage() {
             {/* Error State */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
+                <p className="text-red-400 text-sm font-semibold mb-2">Error loading communities:</p>
                 <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-300/60 text-xs mt-2">
+                  API URL: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
+                </p>
               </div>
             )}
 
