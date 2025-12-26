@@ -239,6 +239,7 @@ function BodyCompositionCard({
   bodyScoreMethod,
   bodyRating,
   gender,
+  weightInputMode = 'imperial',
 }: {
   ffmiData?: FFMIData;
   bodyFatPercent?: number;
@@ -246,6 +247,7 @@ function BodyCompositionCard({
   bodyScoreMethod: 'ffmi' | 'table' | 'default';
   bodyRating: number;
   gender: 'male' | 'female';
+  weightInputMode?: 'metric' | 'imperial';
 }) {
   if (bodyScoreMethod === 'default') return null;
 
@@ -305,9 +307,15 @@ function BodyCompositionCard({
         {ffmiData && (
           <div className="bg-neutral-800/50 rounded-lg p-3 text-center">
             <p className="text-xs text-neutral-400 mb-1">Lean Mass</p>
-            <p className="text-xl font-bold text-green-400">{ffmiData.leanMassKg.toFixed(1)} kg</p>
+            <p className="text-xl font-bold text-green-400">
+              {weightInputMode === 'imperial'
+                ? `${Math.round(ffmiData.leanMassKg * 2.20462)} lbs`
+                : `${ffmiData.leanMassKg.toFixed(1)} kg`}
+            </p>
             <p className="text-xs text-neutral-500 mt-1">
-              {Math.round(ffmiData.leanMassKg * 2.20462)} lbs
+              {weightInputMode === 'imperial'
+                ? `${ffmiData.leanMassKg.toFixed(1)} kg`
+                : `${Math.round(ffmiData.leanMassKg * 2.20462)} lbs`}
             </p>
           </div>
         )}
@@ -392,7 +400,9 @@ export function PSLTab() {
   // Get height and weight from context or local state
   const heightCm = heightContext?.heightCm ?? localHeightCm;
   const setHeightCm = heightContext?.setHeightCm ?? setLocalHeightCm;
+  const heightInputMode = heightContext?.inputMode ?? 'imperial';
   const weightKg = weightContext?.weightKg ?? null;
+  const weightInputMode = weightContext?.inputMode ?? 'imperial';
   const bmi = weightContext?.bmi ?? null;
 
   // Get physique analysis from context
@@ -461,7 +471,9 @@ export function PSLTab() {
                     <div>
                       <p className="text-sm text-neutral-400">Your Height</p>
                       <p className="text-lg font-semibold text-white">
-                        {heightDisplay.feet}&apos;{heightDisplay.inches}&quot; ({heightCm}cm)
+                        {heightInputMode === 'imperial'
+                          ? `${heightDisplay.feet}'${heightDisplay.inches}" (${heightCm}cm)`
+                          : `${heightCm}cm (${heightDisplay.feet}'${heightDisplay.inches}")`}
                       </p>
                     </div>
                   </div>
@@ -489,7 +501,9 @@ export function PSLTab() {
                     <div>
                       <p className="text-sm text-neutral-400">Your Weight</p>
                       <p className="text-lg font-semibold text-white">
-                        {Math.round(weightKg * 2.20462)} lbs ({weightKg} kg)
+                        {weightInputMode === 'imperial'
+                          ? `${Math.round(weightKg * 2.20462)} lbs (${weightKg} kg)`
+                          : `${weightKg} kg (${Math.round(weightKg * 2.20462)} lbs)`}
                       </p>
                     </div>
                   </div>
@@ -518,6 +532,7 @@ export function PSLTab() {
               bodyScoreMethod={pslResult.breakdown.bodyInfo?.method || 'default'}
               bodyRating={pslResult.breakdown.body.raw}
               gender={gender || 'male'}
+              weightInputMode={weightInputMode}
             />
           ) : (
             <AddPhysiquePrompt />
