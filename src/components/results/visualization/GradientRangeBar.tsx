@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 interface GradientRangeBarProps {
   value: number;
@@ -86,54 +87,68 @@ export function GradientRangeBar({
   const formatUnit = (v: number | string | undefined) => {
     if (typeof v !== 'number' || isNaN(v)) return '-';
     const formatted = v.toFixed(unit === 'percent' || unit === '%' ? 1 : 2);
-    const suffix = unit === 'percent' ? ' %' : unit === 'degrees' ? '°' : unit === 'x' || unit === 'ratio' ? ' x' : unit === 'mm' ? ' mm' : '';
+    const suffix = unit === 'percent' ? '%' : unit === 'degrees' ? '°' : unit === 'x' || unit === 'ratio' ? '' : unit === 'mm' ? 'mm' : '';
     return `${formatted}${suffix}`;
   };
 
   return (
-    <div className="rounded-xl bg-neutral-800/50 border border-neutral-700 p-4">
-      <div className="relative mb-4 px-2">
-        {/* Gradient bar */}
-        <div className="relative h-6 rounded-lg overflow-hidden mt-4">
-          <div
-            className="absolute inset-0 h-6"
-            style={{ background: gradient }}
-          />
-        </div>
-
-        {/* Value marker with tooltip */}
-        <div
-          className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 z-10 pointer-events-none"
-          style={{ left: `${markerPos}%`, top: 'calc(50% + 8px)' }}
-        >
-          <div className="relative">
-            {/* Marker dot */}
-            <div className="w-4 h-4 rounded-full bg-white shadow-lg ring-2 ring-neutral-900/30 flex items-center justify-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-neutral-900" />
-            </div>
-
-            {/* Tooltip above */}
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-              <div className="px-3 py-1.5 rounded-lg shadow-lg bg-white border border-neutral-200">
-                <div className="text-sm font-semibold text-neutral-900">{formatUnit(value)}</div>
-              </div>
-              {/* Triangle pointer */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Range labels */}
-      <div className="flex justify-between items-center text-xs text-neutral-500 px-2">
-        <span>{formatUnit(rangeMin)}</span>
-        <span className="text-cyan-400 font-medium">
-          Ideal: {formatUnit(idealMin)} - {formatUnit(idealMax)}
+    <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
+      {/* Header Labels - Premium style */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+          {formatUnit(rangeMin)}
         </span>
-        <span>{formatUnit(rangeMax)}</span>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-cyan-500/50" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">
+            {formatUnit(idealMin)} – {formatUnit(idealMax)}
+          </span>
+          <div className="w-2 h-2 rounded-full bg-cyan-500/50" />
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+          {formatUnit(rangeMax)}
+        </span>
       </div>
+
+      {/* Gradient bar container */}
+      <div className="relative h-3 rounded-full overflow-visible">
+        {/* Background gradient */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{ background: gradient }}
+        />
+
+        {/* Value marker - CENTERED properly */}
+        <motion.div
+          className="absolute top-1/2 z-10"
+          style={{
+            left: `${markerPos}%`,
+            transform: 'translate(-50%, -50%)'
+          }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          {/* Marker dot with ring */}
+          <div className="w-5 h-5 rounded-full bg-white shadow-lg border-2 border-neutral-900 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-neutral-900" />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Value display below - Premium style */}
+      <motion.div
+        className="flex justify-center mt-4"
+        initial={{ opacity: 0, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.4 }}
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+          <span className="text-sm font-black text-white">
+            {formatUnit(value)}
+          </span>
+        </div>
+      </motion.div>
     </div>
   );
 }

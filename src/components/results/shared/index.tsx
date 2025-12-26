@@ -11,7 +11,7 @@ export { ExportButton } from './ExportButton';
 export { RankBadge } from './RankBadge';
 
 // ============================================
-// QUALITY BADGE
+// QUALITY BADGE - Premium Style
 // ============================================
 
 interface QualityBadgeProps {
@@ -22,25 +22,25 @@ interface QualityBadgeProps {
 export function QualityBadge({ quality, size = 'md' }: QualityBadgeProps) {
   const color = getQualityColor(quality);
   const sizeClasses = {
-    sm: 'px-1.5 py-0.5 text-[10px]',
-    md: 'px-2 py-1 text-xs',
-    lg: 'px-3 py-1.5 text-sm',
+    sm: 'px-2 py-0.5 text-[9px]',
+    md: 'px-2.5 py-1 text-[10px]',
+    lg: 'px-3 py-1.5 text-xs',
   };
 
   const labels: Record<QualityTier, string> = {
-    ideal: 'Ideal',
-    excellent: 'Excellent',
-    good: 'Good',
-    below_average: 'Below Avg',
+    ideal: 'IDEAL',
+    excellent: 'EXCELLENT',
+    good: 'GOOD',
+    below_average: 'BELOW AVG',
   };
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${sizeClasses[size]}`}
+      className={`inline-flex items-center font-black uppercase tracking-wider rounded-lg ${sizeClasses[size]}`}
       style={{
         color,
-        backgroundColor: `${color}15`,
-        borderColor: `${color}30`,
+        backgroundColor: `${color}12`,
+        border: `1px solid ${color}20`,
       }}
     >
       {labels[quality]}
@@ -49,7 +49,7 @@ export function QualityBadge({ quality, size = 'md' }: QualityBadgeProps) {
 }
 
 // ============================================
-// SEVERITY BADGE
+// SEVERITY BADGE - Premium Style
 // ============================================
 
 interface SeverityBadgeProps {
@@ -60,27 +60,27 @@ interface SeverityBadgeProps {
 export function SeverityBadge({ severity, size = 'md' }: SeverityBadgeProps) {
   const color = getSeverityColor(severity);
   const sizeClasses = {
-    sm: 'px-1.5 py-0.5 text-[10px]',
-    md: 'px-2 py-1 text-xs',
-    lg: 'px-3 py-1.5 text-sm',
+    sm: 'px-2 py-0.5 text-[9px]',
+    md: 'px-2.5 py-1 text-[10px]',
+    lg: 'px-3 py-1.5 text-xs',
   };
 
   const labels: Record<SeverityLevel, string> = {
-    optimal: 'Optimal',
-    minor: 'Minor',
-    moderate: 'Moderate',
-    major: 'Major',
-    severe: 'Severe',
-    extremely_severe: 'Critical',
+    optimal: 'OPTIMAL',
+    minor: 'MINOR',
+    moderate: 'MODERATE',
+    major: 'MAJOR',
+    severe: 'SEVERE',
+    extremely_severe: 'CRITICAL',
   };
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${sizeClasses[size]}`}
+      className={`inline-flex items-center font-black uppercase tracking-wider rounded-lg ${sizeClasses[size]}`}
       style={{
         color,
-        backgroundColor: `${color}15`,
-        borderColor: `${color}30`,
+        backgroundColor: `${color}12`,
+        border: `1px solid ${color}20`,
       }}
     >
       {labels[severity]}
@@ -89,7 +89,7 @@ export function SeverityBadge({ severity, size = 'md' }: SeverityBadgeProps) {
 }
 
 // ============================================
-// PHASE BADGE
+// PHASE BADGE - Premium Style
 // ============================================
 
 interface PhaseBadgeProps {
@@ -98,29 +98,35 @@ interface PhaseBadgeProps {
 }
 
 export function PhaseBadge({ phase, size = 'md' }: PhaseBadgeProps) {
-  const configs: Record<RecommendationPhase, { color: string; bg: string; border: string }> = {
-    'Surgical': { color: '#ef4444', bg: '#ef444420', border: '#ef444430' },
-    'Minimally Invasive': { color: '#fbbf24', bg: '#fbbf2420', border: '#fbbf2430' },
-    'Foundational': { color: '#22c55e', bg: '#22c55e20', border: '#22c55e30' },
+  const configs: Record<RecommendationPhase, { color: string }> = {
+    'Surgical': { color: '#ef4444' },
+    'Minimally Invasive': { color: '#fbbf24' },
+    'Foundational': { color: '#22c55e' },
   };
 
   const config = configs[phase];
   const sizeClasses = {
-    sm: 'px-1.5 py-0.5 text-[10px]',
-    md: 'px-2 py-1 text-xs',
-    lg: 'px-3 py-1.5 text-sm',
+    sm: 'px-2 py-0.5 text-[9px]',
+    md: 'px-2.5 py-1 text-[10px]',
+    lg: 'px-3 py-1.5 text-xs',
+  };
+
+  const labels: Record<RecommendationPhase, string> = {
+    'Surgical': 'SURGICAL',
+    'Minimally Invasive': 'MINI-INVASIVE',
+    'Foundational': 'FOUNDATIONAL',
   };
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${sizeClasses[size]}`}
+      className={`inline-flex items-center font-black uppercase tracking-wider rounded-lg ${sizeClasses[size]}`}
       style={{
         color: config.color,
-        backgroundColor: config.bg,
-        borderColor: config.border,
+        backgroundColor: `${config.color}12`,
+        border: `1px solid ${config.color}20`,
       }}
     >
-      {phase}
+      {labels[phase]}
     </span>
   );
 }
@@ -287,7 +293,7 @@ export function ExpandableSection({ isExpanded, children }: ExpandableSectionPro
 }
 
 // ============================================
-// CATEGORY TAG
+// CATEGORY TAG - Premium Style
 // ============================================
 
 interface CategoryTagProps {
@@ -310,14 +316,15 @@ export function CategoryTag({ category, color, size = 'sm' }: CategoryTagProps) 
   };
 
   const tagColor = color || categoryColors[category] || '#6b7280';
-  const sizeClasses = size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs';
+  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[9px]' : 'px-2.5 py-1 text-[10px]';
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded ${sizeClasses}`}
+      className={`inline-flex items-center font-bold uppercase tracking-wider rounded-md ${sizeClasses}`}
       style={{
         color: tagColor,
-        backgroundColor: `${tagColor}15`,
+        backgroundColor: `${tagColor}10`,
+        border: `1px solid ${tagColor}15`,
       }}
     >
       {category}
