@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronDown, AlertTriangle, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { Ratio, getScoreColor, formatValue } from '@/types/results';
-import { QualityBadge, SeverityBadge, CategoryTag, ExpandableSection } from '../shared';
+import { QualityBadge, SeverityBadge, ExpandableSection } from '../shared';
 import { IdealRangeBar, CompactIdealRangeBar } from '../visualization/IdealRangeBar';
 import { SeverityLevel } from '@/lib/harmony-scoring';
 
