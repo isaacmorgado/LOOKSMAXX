@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Scan, BarChart3, Zap, Check, X } from 'lucide-react';
+import { ArrowRight, Scan, BarChart3, Zap, Check, X, MessageSquare } from 'lucide-react';
 
 export default function HomePage() {
   const features = [
@@ -76,13 +76,22 @@ export default function HomePage() {
             </div>
             <span className="text-lg font-semibold text-white">LOOKSMAXX</span>
           </div>
-          <Link
-            href="/login"
-            className="h-10 px-5 rounded-lg bg-[#00f3ff] text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
-          >
-            Get Started
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/forum"
+              className="flex items-center gap-2 text-neutral-400 hover:text-white text-sm font-medium transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Community
+            </Link>
+            <Link
+              href="/login"
+              className="h-10 px-5 rounded-lg bg-[#00f3ff] text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+            >
+              Get Started
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </header>
 
