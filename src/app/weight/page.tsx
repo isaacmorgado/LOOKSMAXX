@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Scale, ChevronUp, ChevronDown } from 'lucide-react';
 import { useWeight } from '@/contexts/WeightContext';
@@ -18,38 +18,35 @@ function lbsToKg(lbs: number): number {
 export default function WeightPage() {
   const router = useRouter();
   const { weightKg, setWeightKg, setWeightLbs, inputMode, setInputMode } = useWeight();
+  const hasInitialized = useRef(false);
 
-  // Local state for input
-  const [localKg, setLocalKg] = useState<number>(75);
-  const [localLbs, setLocalLbs] = useState<number>(165);
+  // Local state for input - initialize from context if available
+  const [localKg, setLocalKg] = useState<number>(() => weightKg ?? 75);
+  const [localLbs, setLocalLbs] = useState<number>(() => weightKg ? kgToLbs(weightKg) : 165);
 
-  // Sync from context on mount
+  // Sync from context only on initial mount (hydration)
   useEffect(() => {
-    if (weightKg) {
+    if (!hasInitialized.current && weightKg) {
       setLocalKg(weightKg);
       setLocalLbs(kgToLbs(weightKg));
+      hasInitialized.current = true;
     }
   }, [weightKg]);
-
-  // Update weight when inputs change
-  useEffect(() => {
-    if (inputMode === 'imperial') {
-      setWeightLbs(localLbs);
-    } else {
-      setWeightKg(localKg);
-    }
-  }, [localKg, localLbs, inputMode, setWeightKg, setWeightLbs]);
 
   const handleKgChange = (delta: number) => {
     const newKg = Math.min(200, Math.max(40, localKg + delta));
     setLocalKg(newKg);
     setLocalLbs(kgToLbs(newKg));
+    // Update context directly in handler
+    setWeightKg(newKg);
   };
 
   const handleLbsChange = (delta: number) => {
     const newLbs = Math.min(440, Math.max(88, localLbs + delta));
     setLocalLbs(newLbs);
     setLocalKg(lbsToKg(newLbs));
+    // Update context directly in handler
+    setWeightLbs(newLbs);
   };
 
   const handleContinue = () => {

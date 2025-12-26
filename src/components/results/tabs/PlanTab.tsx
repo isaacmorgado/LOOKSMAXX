@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Lock,
   CheckCircle,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +21,10 @@ import { ScoreCircle, PhaseBadge } from '../shared';
 import { BeforeAfterPreview } from '../visualization/BeforeAfterPreview';
 import { TreatmentTimeline } from '../visualization/TreatmentTimeline';
 import { RecommendationPhase } from '@/types/results';
+import { DailyStackCard } from '../cards/DailyStackCard';
+import { ProductCard } from '../cards/ProductCard';
+import { generateDailyStack } from '@/lib/daily-stack';
+import { getProductRecommendations } from '@/lib/product-recommendations';
 
 // ============================================
 // POTENTIAL SCORE CARD
@@ -200,7 +206,7 @@ function OrderOfOperations() {
 // ============================================
 
 export function PlanTab() {
-  const { recommendations, flaws, gender, ethnicity } = useResults();
+  const { recommendations, flaws, gender, ethnicity, frontRatios, sideRatios } = useResults();
   const { user } = useAuth();
   const [selectedPhase, setSelectedPhase] = useState<RecommendationPhase | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -209,6 +215,32 @@ export function PlanTab() {
 
   // Check if user has a paid plan
   const hasPaidPlan = user?.plan === 'basic' || user?.plan === 'pro';
+
+  // Generate Daily Stack for all users
+  const dailyStack = useMemo(() => {
+    return generateDailyStack(gender);
+  }, [gender]);
+
+  // Generate Product Recommendations based on metrics
+  const productRecommendations = useMemo(() => {
+    // Build metrics and severity dictionaries from ratios
+    const metricsDict: Record<string, number> = {};
+    const severityDict: Record<string, string> = {};
+
+    [...frontRatios, ...sideRatios].forEach(ratio => {
+      metricsDict[ratio.name] = ratio.value;
+      severityDict[ratio.name] = ratio.severity;
+    });
+
+    return getProductRecommendations(metricsDict, severityDict, gender, ethnicity);
+  }, [frontRatios, sideRatios, gender, ethnicity]);
+
+  // Split product recommendations by state
+  const { flawProducts, idealProducts } = useMemo(() => {
+    const flaw = productRecommendations.filter(r => r.state === 'flaw');
+    const ideal = productRecommendations.filter(r => r.state === 'ideal');
+    return { flawProducts: flaw, idealProducts: ideal };
+  }, [productRecommendations]);
 
   // Count recommendations by phase
   const phaseCounts = useMemo(() => {
@@ -269,8 +301,47 @@ export function PlanTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Daily Stack Card - Hero Element for ALL users */}
+          {dailyStack && <DailyStackCard dailyStack={dailyStack} />}
+
           {/* Potential Score */}
           <PotentialScoreCard />
+
+          {/* Targeted Product Recommendations - Corrective */}
+          {flawProducts.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle size={20} className="text-red-400" />
+                <h3 className="text-lg font-semibold text-white">Fix These Areas</h3>
+                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                  Corrective
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {flawProducts.slice(0, 6).map((rec, index) => (
+                  <ProductCard key={rec.product.id} recommendation={rec} rank={index + 1} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Targeted Product Recommendations - Maintenance */}
+          {idealProducts.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={20} className="text-green-400" />
+                <h3 className="text-lg font-semibold text-white">Protect Your Strengths</h3>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
+                  Maintenance
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {idealProducts.slice(0, 4).map((rec) => (
+                  <ProductCard key={rec.product.id} recommendation={rec} />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Treatment Timeline */}
           {recommendations.length > 0 && (

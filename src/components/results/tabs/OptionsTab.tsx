@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
   Bell,
@@ -12,8 +13,11 @@ import {
   Lock,
   Globe,
   ChevronRight,
+  CheckCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { TabContent } from '../ResultsLayout';
+import { useResults } from '@/contexts/ResultsContext';
 
 // ============================================
 // SETTING ITEM
@@ -82,15 +86,150 @@ function ToggleSwitch({ enabled, onToggle }: ToggleSwitchProps) {
 // ============================================
 
 export function OptionsTab() {
+  const router = useRouter();
+  const { frontRatios, sideRatios, overallScore, pslRating } = useResults();
   const [showLandmarks, setShowLandmarks] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const handleProfile = () => {
+    router.push('/profile');
+  };
+
+  const handlePrivacy = () => {
+    showToast('Privacy settings coming soon!');
+  };
+
+  const handleExport = useCallback(() => {
+    try {
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        overallScore,
+        pslRating,
+        frontRatios,
+        sideRatios,
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `looksmaxx-analysis-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Analysis exported successfully!');
+    } catch {
+      showToast('Failed to export analysis', 'error');
+    }
+  }, [frontRatios, sideRatios, overallScore, pslRating, showToast]);
+
+  const handleShare = useCallback(async () => {
+    try {
+      const shareUrl = window.location.href;
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My LOOKSMAXX Analysis',
+          text: `Check out my facial analysis results - PSL Rating: ${pslRating?.tier || 'N/A'}`,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Link copied to clipboard!');
+      }
+    } catch {
+      showToast('Failed to share', 'error');
+    }
+  }, [pslRating, showToast]);
+
+  const handleDeleteAnalysis = useCallback(() => {
+    // Clear localStorage
+    localStorage.removeItem('looksmaxx_results');
+    localStorage.removeItem('looksmaxx_photos');
+    showToast('Analysis deleted successfully');
+    setShowDeleteConfirm(false);
+    // Redirect to home after short delay
+    setTimeout(() => router.push('/'), 1500);
+  }, [router, showToast]);
 
   return (
     <TabContent
       title="Options"
       subtitle="Customize your experience"
     >
+      {/* Toast notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+              toast.type === 'success'
+                ? 'bg-neutral-800 border border-neutral-700'
+                : 'bg-red-900/80 border border-red-700'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <CheckCircle size={16} className="text-cyan-400" />
+            ) : (
+              <AlertTriangle size={16} className="text-red-400" />
+            )}
+            <span className="text-sm text-white">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-sm w-full"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <AlertTriangle size={20} className="text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Delete Analysis?</h3>
+              </div>
+              <p className="text-neutral-400 text-sm mb-6">
+                This will permanently delete your analysis and all associated data. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAnalysis}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-2xl space-y-6">
         {/* Display Settings */}
         <div>
@@ -118,7 +257,7 @@ export function OptionsTab() {
               icon={<User size={20} className="text-green-400" />}
               title="Profile Settings"
               description="Manage your account information"
-              onClick={() => {}}
+              onClick={handleProfile}
             />
 
             <SettingItem
@@ -133,7 +272,7 @@ export function OptionsTab() {
               icon={<Lock size={20} className="text-red-400" />}
               title="Privacy Settings"
               description="Control how your data is used"
-              onClick={() => {}}
+              onClick={handlePrivacy}
             />
           </div>
         </div>
@@ -148,14 +287,14 @@ export function OptionsTab() {
               icon={<Download size={20} className="text-cyan-400" />}
               title="Export Analysis"
               description="Download your results as PDF or JSON"
-              onClick={() => {}}
+              onClick={handleExport}
             />
 
             <SettingItem
               icon={<Share2 size={20} className="text-blue-400" />}
               title="Share Results"
               description="Generate a shareable link to your analysis"
-              onClick={() => {}}
+              onClick={handleShare}
             />
 
             <SettingItem
@@ -178,7 +317,7 @@ export function OptionsTab() {
               icon={<Trash2 size={20} className="text-red-400" />}
               title="Delete Analysis"
               description="Permanently delete this analysis and all data"
-              onClick={() => {}}
+              onClick={() => setShowDeleteConfirm(true)}
             />
           </div>
         </div>

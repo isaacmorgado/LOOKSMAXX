@@ -45,6 +45,9 @@ export function CommunityTab() {
   }, [frontRatios, sideRatios, gender, ethnicity]);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     async function fetchData() {
       setIsLoading(true);
       setError(null);
@@ -66,17 +69,28 @@ export function CommunityTab() {
           api.getForumCategories(),
         ]);
 
-        setRecommendedForums(recommended);
-        setArchetypeForums(archetype);
-        setAllCategories(all);
+        if (isMounted) {
+          setRecommendedForums(recommended);
+          setArchetypeForums(archetype);
+          setAllCategories(all);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load communities');
+        if (isMounted && err instanceof Error && err.name !== 'AbortError') {
+          setError(err.message || 'Failed to load communities');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [flaws, archetypeClassification]);
 
   return (

@@ -266,6 +266,14 @@ export function ForumProvider({ children }: { children: ReactNode }) {
       // Add to comments list (append for top-level, insert in replies for nested)
       if (!parentId) {
         setComments(prev => [...prev, comment]);
+      } else {
+        // Add reply to parent comment's replies array
+        const addReplyToParent = (list: Comment[]): Comment[] =>
+          list.map(c => c.id === parentId
+            ? { ...c, replies: [...c.replies, comment] }
+            : { ...c, replies: addReplyToParent(c.replies) }
+          );
+        setComments(prev => addReplyToParent(prev));
       }
       // Update comment count in current post
       if (currentPost?.id === postId) {

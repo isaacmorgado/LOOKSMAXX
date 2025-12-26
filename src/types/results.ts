@@ -340,3 +340,39 @@ export function formatValue(value: number, unit: 'x' | 'mm' | '%' | '°' | Measu
   }
   return `${value.toFixed(2)}${unitStr}`;
 }
+
+// ============================================
+// PRODUCT & SUPPLEMENT TYPES
+// ============================================
+
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  category: "skin" | "hair" | "anti-aging" | "hormonal" | "bone" | "general";
+  affiliateLink: string;
+  affiliateType: "amazon" | "direct";
+  supplementId: string;
+  priority: number;
+  baseStackItem?: boolean;
+}
+
+export interface ProductRecommendation {
+  product: Product;
+  state: "flaw" | "ideal";
+  targetMetric: string;
+  message: string;
+  urgency: "high" | "medium" | "low";
+  matchedMetrics: string[];
+}
+
+export interface DailyStack {
+  products: Product[];
+  totalCostPerMonth: { min: number; max: number };
+  timing: {
+    morning: Product[];
+    evening: Product[];
+    anytime: Product[];
+  };
+  rationale: string;
+}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   HelpCircle,
@@ -11,8 +12,12 @@ import {
   FileText,
   Video,
   Users,
+  CheckCircle,
 } from 'lucide-react';
 import { TabContent } from '../ResultsLayout';
+
+const DISCORD_URL = 'https://discord.gg/looksmaxx';
+const SUPPORT_EMAIL = 'support@looksmaxx.app';
 
 // ============================================
 // SUPPORT CARD
@@ -77,11 +82,47 @@ function FAQItem({ question, answer }: FAQItemProps) {
 // ============================================
 
 export function SupportTab() {
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleDocs = () => {
+    showToast('Documentation coming soon!');
+  };
+
+  const handleVideos = () => {
+    window.open('https://youtube.com/@looksmaxx', '_blank');
+  };
+
+  const handleDiscord = () => {
+    window.open(DISCORD_URL, '_blank');
+  };
+
+  const handleEmail = () => {
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=Support Request`;
+  };
+
   return (
     <TabContent
       title="Support"
       subtitle="Get help and learn more about facial analysis"
     >
+      {/* Toast notification */}
+      {toast && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="fixed top-4 right-4 z-50 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg flex items-center gap-2"
+        >
+          <CheckCircle size={16} className="text-cyan-400" />
+          <span className="text-sm text-white">{toast}</span>
+        </motion.div>
+      )}
+
       <div className="max-w-3xl space-y-8">
         {/* Quick Help */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,14 +131,14 @@ export function SupportTab() {
             title="Documentation"
             description="Learn about facial measurements and what they mean"
             action="Read docs"
-            onClick={() => {}}
+            onClick={handleDocs}
           />
           <SupportCard
             icon={<Video size={24} className="text-purple-400" />}
             title="Video Tutorials"
             description="Watch step-by-step guides on using the app"
             action="Watch videos"
-            onClick={() => {}}
+            onClick={handleVideos}
             external
           />
           <SupportCard
@@ -105,7 +146,7 @@ export function SupportTab() {
             title="Community"
             description="Connect with others and share experiences"
             action="Join Discord"
-            onClick={() => {}}
+            onClick={handleDiscord}
             external
           />
           <SupportCard
@@ -113,7 +154,7 @@ export function SupportTab() {
             title="Contact Support"
             description="Get personalized help from our team"
             action="Send email"
-            onClick={() => {}}
+            onClick={handleEmail}
           />
         </div>
 
@@ -185,7 +226,10 @@ export function SupportTab() {
           <p className="text-sm text-neutral-400 mb-4">
             Our support team is available 24/7 to assist you with any questions.
           </p>
-          <button className="px-6 py-2.5 bg-cyan-500 text-black font-medium rounded-lg hover:bg-cyan-400 transition-colors">
+          <button
+            onClick={handleEmail}
+            className="px-6 py-2.5 bg-cyan-500 text-black font-medium rounded-lg hover:bg-cyan-400 transition-colors"
+          >
             Contact Support
           </button>
         </div>

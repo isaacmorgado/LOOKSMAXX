@@ -285,19 +285,31 @@ function RecommendedForumsSection({
   const colors = ARCHETYPE_COLORS[archetype];
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchForums() {
       setIsLoading(true);
       try {
         const recommendations = await api.getArchetypeForumRecommendations(archetype);
-        setForums(recommendations.slice(0, 3)); // Show top 3
+        if (isMounted) {
+          setForums(recommendations.slice(0, 3)); // Show top 3
+        }
       } catch (error) {
-        console.error('[ArchetypeTab] Failed to fetch forum recommendations:', error);
+        if (isMounted) {
+          console.error('[ArchetypeTab] Failed to fetch forum recommendations:', error);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchForums();
+
+    return () => {
+      isMounted = false;
+    };
   }, [archetype]);
 
   if (isLoading) {
