@@ -114,7 +114,7 @@ function Sidebar({ onClose }: SidebarProps) {
           <div className="text-center border-l border-neutral-800">
             <p className="text-xs text-neutral-500 mb-0.5">PSL</p>
             <p className="text-xl font-bold text-cyan-400">
-              {pslRating?.psl ? pslRating.psl.toFixed(1) : '-'}
+              {pslRating?.psl ? Number(pslRating.psl).toFixed(1) : '-'}
             </p>
           </div>
         </div>

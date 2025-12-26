@@ -178,7 +178,7 @@ export function OptionsTab() {
         showToast('Failed to generate PDF', 'error');
         console.error(result.error);
       }
-    } catch (err) {
+    } catch {
       showToast('Failed to export', 'error');
     }
   }, [showToast]);
@@ -472,7 +472,6 @@ export function OptionsTab() {
                   return results?.analysis?.side_landmarks || [];
                 } catch { return []; }
               })(),
-              // @ts-ignore
               scores: { masculinity: 50, femininity: 50, symmetry: 50, skinQuality: 50, aging: 25 },
             }}
             results={{ overallScore, pslRating, frontRatios, sideRatios }}

@@ -109,6 +109,23 @@ Each has gender-specific ideal ranges for 15+ metrics.
 
 **Foundational**: Mewing, Body Recomposition, Posture Correction, Skincare, Eyebrow Grooming, Beard Growth
 
+#### Medical Tourism Regions (9) - Full Coverage ✅
+All 25 surgeries have pricing for 9 destinations:
+
+| Region | Surgeries | Price Advantage | Notes |
+|--------|-----------|-----------------|-------|
+| USA | 25 | Base | Gold standard pricing |
+| Turkey | 18 | 50-70% cheaper | World capital of hair transplants |
+| South Korea | 15 | 40-60% cheaper | V-line & aesthetic jaw surgery leader |
+| Mexico | 25 | 35-50% cheaper | Tijuana/Mexico City - border proximity |
+| UK | 25 | Similar to USA | Harley Street specialists (GBP) |
+| Germany | 25 | Similar to USA | Munich/Berlin (EUR) |
+| Spain | 25 | 20-35% cheaper | Barcelona/Madrid - Dr. Alfaro (EUR) |
+| Thailand | 25 | 40-60% cheaper | Bangkok medical tourism hub |
+| Brazil | 25 | 50-70% cheaper | São Paulo/Rio - world leader in body contouring |
+
+File: `src/lib/recommendations/hardmaxxing.ts`
+
 ## Archetype Classification ✅
 
 | Component | File | Details |
