@@ -98,22 +98,28 @@ export function CommunityTab() {
       title="Community"
       subtitle="Connect with others on your self-improvement journey"
     >
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Hero CTA */}
-        <div className="bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-purple-500/10 border border-cyan-500/20 rounded-2xl p-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
+        <div className="rounded-[2rem] bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-purple-500/10 border border-cyan-500/20 p-8 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-full blur-3xl" />
+
+          <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
-                Your Personalized Communities
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400 block mb-3">
+                Personalized For You
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-3">
+                Your Communities
               </h2>
-              <p className="text-neutral-400">
+              <p className="text-neutral-400 text-sm max-w-lg">
                 Based on your analysis results, we&apos;ve identified communities where you can
-                learn from others with similar goals and share your journey.
+                learn from others with similar goals.
               </p>
             </div>
             <Link
               href="/forum"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-cyan-500 text-black font-semibold rounded-xl hover:bg-cyan-400 transition-colors whitespace-nowrap"
+              className="flex items-center justify-center gap-3 px-7 py-4 bg-cyan-500 text-black font-black uppercase tracking-wider rounded-xl hover:bg-cyan-400 transition-colors whitespace-nowrap"
             >
               Explore All
               <ArrowRight className="w-4 h-4" />
@@ -125,15 +131,15 @@ export function CommunityTab() {
         {isLoading && (
           <div className="grid gap-4 md:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 animate-pulse">
+              <div key={i} className="rounded-2xl bg-neutral-900/40 border border-white/5 p-6 animate-pulse">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-neutral-800" />
+                  <div className="w-14 h-14 rounded-xl bg-neutral-800" />
                   <div className="flex-1">
-                    <div className="h-5 bg-neutral-800 rounded w-2/3 mb-2" />
-                    <div className="h-4 bg-neutral-800 rounded w-full mb-3" />
+                    <div className="h-5 bg-neutral-800 rounded w-2/3 mb-3" />
+                    <div className="h-4 bg-neutral-800 rounded w-full mb-4" />
                     <div className="flex gap-2">
-                      <div className="h-6 bg-neutral-800 rounded w-20" />
-                      <div className="h-6 bg-neutral-800 rounded w-16" />
+                      <div className="h-6 bg-neutral-800 rounded-lg w-24" />
+                      <div className="h-6 bg-neutral-800 rounded-lg w-20" />
                     </div>
                   </div>
                 </div>
@@ -144,11 +150,11 @@ export function CommunityTab() {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-            <p className="text-red-400 mb-2">{error}</p>
+          <div className="rounded-2xl bg-red-500/10 border border-red-500/20 p-6">
+            <p className="text-red-400 font-bold mb-2">{error}</p>
             <p className="text-sm text-neutral-400">
               Unable to load community data. You can still{' '}
-              <Link href="/forum" className="text-cyan-400 hover:underline">
+              <Link href="/forum" className="text-cyan-400 hover:underline font-medium">
                 browse the forum directly
               </Link>.
             </p>
@@ -158,12 +164,16 @@ export function CommunityTab() {
         {/* Archetype-Based Recommendations */}
         {!isLoading && !error && archetypeForums.length > 0 && archetypeClassification && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Crown className="w-5 h-5 text-amber-400" />
-              <h3 className="text-lg font-semibold text-white">Based on Your Archetype</h3>
-              <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-400 rounded">
-                {archetypeClassification.primary.category}
-              </span>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">Based on Your Archetype</h3>
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                  {archetypeClassification.primary.category}
+                </span>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -174,35 +184,37 @@ export function CommunityTab() {
 
                 return (
                   <Link key={af.category.id} href={`/forum/${af.category.slug}`}>
-                    <div className="group bg-neutral-900/50 border border-neutral-800 hover:border-amber-500/30 rounded-xl p-5 transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+                    <div className="group rounded-2xl bg-neutral-900/40 border border-white/5 hover:border-amber-500/30 p-6 transition-all">
                       <div className="flex items-start gap-4">
                         {/* Icon */}
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/20 flex items-center justify-center text-2xl flex-shrink-0">
                           {af.category.icon || '💬'}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-white group-hover:text-amber-400 transition-colors">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-black text-white group-hover:text-amber-400 transition-colors">
                               {af.category.name}
                             </h4>
                             <Crown className="w-4 h-4 text-amber-400" />
                           </div>
-                          <p className="text-sm text-neutral-400 line-clamp-2 mb-3">
+                          <p className="text-sm text-neutral-500 line-clamp-2 mb-4">
                             {af.reason || af.category.description}
                           </p>
 
                           {/* Archetype tag */}
-                          <div className="flex flex-wrap gap-1.5">
-                            <span className="px-2 py-0.5 text-xs bg-amber-500/10 text-amber-400 rounded">
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
                               {af.archetype} archetype
                             </span>
                           </div>
                         </div>
 
                         {/* Arrow */}
-                        <ArrowRight className="w-5 h-5 text-neutral-600 group-hover:text-amber-400 transition-colors flex-shrink-0" />
+                        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-all flex-shrink-0">
+                          <ArrowRight className="w-4 h-4 text-neutral-600 group-hover:text-amber-400 transition-colors" />
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -215,48 +227,52 @@ export function CommunityTab() {
         {/* Recommended Forums */}
         {!isLoading && !error && recommendedForums.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-lg font-semibold text-white">Recommended For You</h3>
-              <span className="px-2 py-0.5 text-xs font-medium bg-cyan-500/20 text-cyan-400 rounded">
-                Based on your results
-              </span>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
+                <Target className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">Recommended For You</h3>
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                  Based on your results
+                </span>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               {recommendedForums.map((rf) => (
                 <Link key={rf.category.id} href={`/forum/${rf.category.slug}`}>
-                  <div className="group bg-neutral-900/50 border border-neutral-800 hover:border-cyan-500/30 rounded-xl p-5 transition-all hover:shadow-[0_0_30px_rgba(0,243,255,0.05)]">
+                  <div className="group rounded-2xl bg-neutral-900/40 border border-white/5 hover:border-cyan-500/30 p-6 transition-all">
                     <div className="flex items-start gap-4">
                       {/* Icon */}
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl flex-shrink-0">
                         {rf.category.icon || '💬'}
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-black text-white group-hover:text-cyan-400 transition-colors">
                             {rf.category.name}
                           </h4>
                           <Sparkles className="w-4 h-4 text-cyan-400" />
                         </div>
-                        <p className="text-sm text-neutral-400 line-clamp-2 mb-3">
+                        <p className="text-sm text-neutral-500 line-clamp-2 mb-4">
                           {rf.category.description}
                         </p>
 
                         {/* Matched flaws */}
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {rf.matchedFlaws.slice(0, 3).map((flaw) => (
                             <span
                               key={flaw}
-                              className="px-2 py-0.5 text-xs bg-cyan-500/10 text-cyan-400 rounded"
+                              className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20"
                             >
                               {flaw}
                             </span>
                           ))}
                           {rf.matchedFlaws.length > 3 && (
-                            <span className="px-2 py-0.5 text-xs text-neutral-500">
+                            <span className="px-3 py-1 text-[10px] font-bold text-neutral-600">
                               +{rf.matchedFlaws.length - 3} more
                             </span>
                           )}
@@ -264,7 +280,9 @@ export function CommunityTab() {
                       </div>
 
                       {/* Arrow */}
-                      <ArrowRight className="w-5 h-5 text-neutral-600 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                      <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all flex-shrink-0">
+                        <ArrowRight className="w-4 h-4 text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -276,30 +294,32 @@ export function CommunityTab() {
         {/* All Communities */}
         {!isLoading && !error && allCategories.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-purple-400" />
-              <h3 className="text-lg font-semibold text-white">All Communities</h3>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
+                <Users className="w-5 h-5 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-black text-white">All Communities</h3>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {allCategories.map((category) => (
                 <Link key={category.id} href={`/forum/${category.slug}`}>
-                  <div className="group bg-neutral-900/30 border border-neutral-800 hover:border-neutral-700 rounded-xl p-4 transition-all">
+                  <div className="group rounded-xl bg-neutral-900/40 border border-white/5 hover:border-white/10 p-4 transition-all">
                     <div className="flex items-center gap-3">
                       {/* Icon */}
-                      <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center text-lg flex-shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-lg flex-shrink-0">
                         {category.icon || '💬'}
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-white group-hover:text-cyan-400 transition-colors truncate">
+                        <h4 className="font-bold text-white group-hover:text-cyan-400 transition-colors truncate">
                           {category.name}
                         </h4>
-                        <div className="flex items-center gap-3 text-xs text-neutral-500">
+                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
-                            {category.postCount} posts
+                            {category.postCount}
                           </span>
                           <span className="flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" />
@@ -308,7 +328,7 @@ export function CommunityTab() {
                         </div>
                       </div>
 
-                      <ArrowRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                      <ArrowRight className="w-4 h-4 text-neutral-700 group-hover:text-cyan-400 transition-colors" />
                     </div>
                   </div>
                 </Link>
@@ -319,14 +339,14 @@ export function CommunityTab() {
 
         {/* Empty State */}
         {!isLoading && !error && allCategories.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-2xl bg-neutral-900 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-neutral-600" />
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-2xl bg-neutral-900/40 border border-white/5 flex items-center justify-center mx-auto mb-6">
+              <Users className="w-10 h-10 text-neutral-700" />
             </div>
-            <p className="text-neutral-400 mb-4">No communities available yet.</p>
+            <p className="text-neutral-500 mb-4 font-medium">No communities available yet.</p>
             <Link
               href="/forum"
-              className="text-cyan-400 hover:text-cyan-300 font-medium"
+              className="text-cyan-400 hover:text-cyan-300 font-black uppercase tracking-wider text-sm"
             >
               Check back soon
             </Link>
@@ -334,20 +354,20 @@ export function CommunityTab() {
         )}
 
         {/* Bottom CTA */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
           <Link
             href="/forum"
-            className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-white font-medium rounded-xl hover:bg-neutral-700 transition-colors"
+            className="flex items-center gap-3 px-7 py-4 rounded-xl bg-neutral-900/60 border border-white/5 hover:border-white/10 transition-all group"
           >
-            <Flame className="w-4 h-4 text-orange-400" />
-            Browse Trending Posts
+            <Flame className="w-5 h-5 text-orange-400" />
+            <span className="font-black uppercase tracking-wider text-white">Browse Trending</span>
           </Link>
           <Link
             href="/forum"
-            className="flex items-center gap-2 px-6 py-3 border border-neutral-700 text-neutral-300 font-medium rounded-xl hover:bg-neutral-900 transition-colors"
+            className="flex items-center gap-3 px-7 py-4 rounded-xl border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all group"
           >
-            View All Communities
-            <ArrowRight className="w-4 h-4" />
+            <span className="font-black uppercase tracking-wider text-neutral-400 group-hover:text-cyan-400 transition-colors">All Communities</span>
+            <ArrowRight className="w-4 h-4 text-neutral-600 group-hover:text-cyan-400 transition-colors" />
           </Link>
         </div>
       </div>

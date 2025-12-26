@@ -9,22 +9,24 @@ const DETECTION_API_URL = process.env.DETECTION_API_URL || 'http://localhost:800
 
 export interface SideLandmarkResponse {
   success: boolean;
-  message: string;
-  direction?: 'left' | 'right';
-  rotation_angle?: number;
-  raw_landmarks?: Array<{ x: number; y: number }>;
-  mapped_landmarks?: Record<string, { x: number; y: number }>;
-  face_box?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+  data?: {
+    landmarks: Array<{ x: number; y: number }>;
+    namedLandmarks: Record<string, { x: number; y: number }>;
+    bbox: number[];
+    direction: 'left' | 'right';
+    rotationAngle: number;
+    crop: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      scale: number;
+    };
+    center: { x: number; y: number };
+    allLandmarks?: Record<string, { x: number; y: number }>;
+    landmarkCount: number;
   };
-  frankfort_plane?: {
-    angle: number;
-    orbitale: { x: number; y: number };
-    porion: { x: number; y: number };
-  };
+  error?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Handle JSON request with base64 image
     const body = await request.json();
 
-    const response = await fetch(`${DETECTION_API_URL}/detection/side`, {
+    const response = await fetch(`${DETECTION_API_URL}/api/side-landmarks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

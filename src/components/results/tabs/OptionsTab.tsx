@@ -44,19 +44,23 @@ function SettingItem({ icon, title, description, children, onClick }: SettingIte
   return (
     <Wrapper
       onClick={onClick}
-      className={`w-full flex items-center gap-4 p-4 bg-neutral-900/60 border border-neutral-800 rounded-xl ${onClick ? 'hover:border-neutral-700 transition-all cursor-pointer' : ''
+      className={`group w-full flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/40 border border-white/5 ${onClick ? 'hover:border-white/10 transition-all cursor-pointer' : ''
         }`}
     >
-      <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center flex-shrink-0">
+      <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center flex-shrink-0">
         {icon}
       </div>
       <div className="flex-1 text-left">
-        <h4 className="font-medium text-white">{title}</h4>
+        <h4 className="font-black text-white">{title}</h4>
         {description && (
-          <p className="text-sm text-neutral-500">{description}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-0.5">{description}</p>
         )}
       </div>
-      {children || (onClick && <ChevronRight size={18} className="text-neutral-600" />)}
+      {children || (onClick && (
+        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all">
+          <ChevronRight size={14} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+        </div>
+      ))}
     </Wrapper>
   );
 }
@@ -247,33 +251,33 @@ export function OptionsTab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-sm w-full"
+              className="bg-neutral-900/90 border border-white/10 rounded-2xl p-8 max-w-sm w-full"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
-                  <LogOut size={20} className="text-white" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-neutral-800 border border-white/10 flex items-center justify-center">
+                  <LogOut size={22} className="text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Sign Out?</h3>
+                <h3 className="text-xl font-black text-white">Sign Out?</h3>
               </div>
-              <p className="text-neutral-400 text-sm mb-6">
+              <p className="text-neutral-500 text-sm mb-8">
                 Are you sure you want to sign out of your account?
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors"
+                  className="flex-1 px-5 py-3 bg-neutral-800 border border-white/5 text-white font-bold rounded-xl hover:bg-neutral-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors"
+                  className="flex-1 px-5 py-3 bg-cyan-500 text-black font-black uppercase tracking-wider rounded-xl hover:bg-cyan-400 transition-colors"
                 >
                   Sign Out
                 </button>
@@ -290,33 +294,33 @@ export function OptionsTab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-sm w-full"
+              className="bg-neutral-900/90 border border-white/10 rounded-2xl p-8 max-w-sm w-full"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                  <AlertTriangle size={20} className="text-red-400" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/20 flex items-center justify-center">
+                  <AlertTriangle size={22} className="text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Delete Analysis?</h3>
+                <h3 className="text-xl font-black text-white">Delete Analysis?</h3>
               </div>
-              <p className="text-neutral-400 text-sm mb-6">
+              <p className="text-neutral-500 text-sm mb-8">
                 This will permanently delete your analysis and all associated data. This action cannot be undone.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors"
+                  className="flex-1 px-5 py-3 bg-neutral-800 border border-white/5 text-white font-bold rounded-xl hover:bg-neutral-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAnalysis}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
+                  className="flex-1 px-5 py-3 bg-red-500 text-white font-black uppercase tracking-wider rounded-xl hover:bg-red-400 transition-colors"
                 >
                   Delete
                 </button>
@@ -326,11 +330,12 @@ export function OptionsTab() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-2xl space-y-6">
+      <div className="max-w-2xl space-y-8">
         {/* Achievements Section */}
         <div>
-          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 flex items-center gap-4">
             Achievements
+            <div className="flex-1 h-px bg-neutral-800" />
           </h3>
           <AchievementsShowcase
             unlockedIds={mockAchievements.unlockedIds}
@@ -342,8 +347,9 @@ export function OptionsTab() {
 
         {/* Usage & Quota Section */}
         <div>
-          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 flex items-center gap-4">
             Usage & Quota
+            <div className="flex-1 h-px bg-neutral-800" />
           </h3>
           <QuotaSummary
             analyses={analyses}
@@ -356,8 +362,9 @@ export function OptionsTab() {
 
         {/* Display Settings */}
         <div>
-          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 flex items-center gap-4">
             Display
+            <div className="flex-1 h-px bg-neutral-800" />
           </h3>
           <div className="space-y-3">
             <SettingItem
@@ -372,8 +379,9 @@ export function OptionsTab() {
 
         {/* Account Settings */}
         <div>
-          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 flex items-center gap-4">
             Account
+            <div className="flex-1 h-px bg-neutral-800" />
           </h3>
           <div className="space-y-3">
             <SettingItem
@@ -409,8 +417,9 @@ export function OptionsTab() {
 
         {/* Data Settings */}
         <div>
-          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 flex items-center gap-4">
             Data
+            <div className="flex-1 h-px bg-neutral-800" />
           </h3>
           <div className="space-y-3">
             <SettingItem
@@ -439,16 +448,25 @@ export function OptionsTab() {
 
         {/* Danger Zone */}
         <div>
-          <h3 className="text-sm font-medium text-red-400 mb-3 uppercase tracking-wider">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500/80 mb-4 flex items-center gap-4">
             Danger Zone
+            <div className="flex-1 h-px bg-red-500/20" />
           </h3>
           <div className="space-y-3">
-            <SettingItem
-              icon={<Trash2 size={20} className="text-red-400" />}
-              title="Delete Analysis"
-              description="Permanently delete this analysis and all data"
+            <div className="group w-full flex items-center gap-4 p-5 rounded-2xl bg-red-500/5 border border-red-500/20 hover:border-red-500/40 transition-all cursor-pointer"
               onClick={() => setShowDeleteConfirm(true)}
-            />
+            >
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                <Trash2 size={20} className="text-red-400" />
+              </div>
+              <div className="flex-1 text-left">
+                <h4 className="font-black text-red-400">Delete Analysis</h4>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-400/60 mt-0.5">Permanently delete this analysis and all data</p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:bg-red-500/20 transition-all">
+                <ChevronRight size={14} className="text-red-400" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

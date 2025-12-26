@@ -94,31 +94,33 @@ export async function detectSideProfileServer(
 
     const data: SideLandmarkResponse = await response.json();
 
-    if (!data.success || !data.mapped_landmarks) {
-      console.log('[ServerDetection] Detection failed:', data.message);
+    if (!data.success || !data.data?.namedLandmarks) {
+      console.log('[ServerDetection] Detection failed:', data.error || 'No landmarks found');
       return null;
     }
 
-    console.log('[ServerDetection] Detection successful:', data.message);
+    const resultData = data.data;
+    console.log('[ServerDetection] Detection successful, count:', resultData.landmarkCount);
 
-    // Convert mapped_landmarks object to array format matching our system
-    const landmarks = Object.entries(data.mapped_landmarks).map(([id, point]) => ({
+    // Convert namedLandmarks object to array format matching our system
+    const landmarks = Object.entries(resultData.namedLandmarks).map(([id, point]) => ({
       id,
       x: point.x,
       y: point.y,
     }));
 
-    // Use Frankfort Plane from server if available, otherwise calculate locally
+    // Use Frankfort Plane from server if available (future proof), otherwise calculate locally
     let frankfortPlane: ServerDetectionResult['frankfortPlane'];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serverFrankfort = (data as any).frankfort_plane;
+    const serverFrankfort = (resultData as any).frankfort_plane;
+
     if (serverFrankfort) {
       frankfortPlane = serverFrankfort;
       console.log('[ServerDetection] Frankfort Plane angle (from server):', serverFrankfort.angle.toFixed(2), 'degrees');
-    } else if (data.mapped_landmarks.orbitale && data.mapped_landmarks.porion) {
+    } else if (resultData.namedLandmarks.orbitale && resultData.namedLandmarks.porion) {
       frankfortPlane = calculateFrankfortPlane(
-        data.mapped_landmarks.orbitale,
-        data.mapped_landmarks.porion
+        resultData.namedLandmarks.orbitale,
+        resultData.namedLandmarks.porion
       );
       console.log('[ServerDetection] Frankfort Plane angle (calculated):', frankfortPlane.angle.toFixed(2), 'degrees');
     }
@@ -126,9 +128,9 @@ export async function detectSideProfileServer(
     return {
       landmarks,
       confidence: 0.95, // InsightFace is generally high confidence
-      faceBox: data.face_box || { x: 0, y: 0, width: 1, height: 1 },
-      direction: data.direction,
-      rotationAngle: data.rotation_angle,
+      faceBox: resultData.crop || { x: 0, y: 0, width: 1, height: 1 },
+      direction: resultData.direction,
+      rotationAngle: resultData.rotationAngle,
       frankfortPlane,
     };
   } catch (error) {

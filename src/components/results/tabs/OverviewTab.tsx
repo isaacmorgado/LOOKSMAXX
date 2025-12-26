@@ -36,15 +36,15 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
   return (
     <motion.button
       onClick={onClick}
-      className="group bg-neutral-900/60 border border-neutral-800/50 rounded-2xl p-4 hover:border-cyan-500/30 hover:bg-neutral-900/80 transition-all text-left w-full"
+      className="group rounded-[1.5rem] bg-neutral-900/40 border border-white/5 p-5 hover:border-white/10 transition-all text-left w-full"
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center gap-4">
         {/* Photo */}
-        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0">
+        <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-neutral-900 border border-white/10 flex-shrink-0">
           {photo ? (
-            <Image src={photo} alt={title} width={48} height={48} className="object-cover" unoptimized />
+            <Image src={photo} alt={title} width={56} height={56} className="object-cover" unoptimized />
           ) : (
             <div className="w-full h-full flex items-center justify-center">{icon}</div>
           )}
@@ -52,19 +52,21 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{title}</h3>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-bold" style={{ color }}>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600 mb-1">{title} Profile</h3>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black" style={{ color }}>
               {typeof score === 'number' ? score.toFixed(1) : score}
             </span>
-            <span className="text-xs text-neutral-600">/10</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">/10</span>
           </div>
         </div>
 
-        {/* Arrow */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-600">{ratioCount}</span>
-          <ChevronRight size={16} className="text-neutral-700 group-hover:text-cyan-400 transition-colors" />
+        {/* Arrow + Count */}
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-black uppercase tracking-wider text-neutral-700">{ratioCount} metrics</span>
+          <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all">
+            <ChevronRight size={14} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+          </div>
         </div>
       </div>
     </motion.button>
@@ -90,30 +92,39 @@ function QuickStatsRow({ topMetrics, bottomMetrics, onViewDetails }: QuickStatsR
   return (
     <div className="flex flex-wrap items-center gap-3">
       {topMetric && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-xl">
-          <TrendingUp size={14} className="text-green-400" />
-          <span className="text-xs text-neutral-400">Best:</span>
-          <span className="text-sm font-medium text-green-400">{topMetric.name}</span>
-          <span className="text-xs text-green-400/70">
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <TrendingUp size={14} className="text-emerald-400" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block">Top Strength</span>
+            <span className="text-sm font-black text-emerald-400">{topMetric.name}</span>
+          </div>
+          <span className="text-lg font-black text-emerald-400 ml-2">
             {typeof topMetric.score === 'number' ? topMetric.score.toFixed(1) : topMetric.score}
           </span>
         </div>
       )}
       {bottomMetric && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-          <TrendingDown size={14} className="text-orange-400" />
-          <span className="text-xs text-neutral-400">Focus:</span>
-          <span className="text-sm font-medium text-orange-400">{bottomMetric.name}</span>
-          <span className="text-xs text-orange-400/70">
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+          <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
+            <TrendingDown size={14} className="text-orange-400" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block">Focus Area</span>
+            <span className="text-sm font-black text-orange-400">{bottomMetric.name}</span>
+          </div>
+          <span className="text-lg font-black text-orange-400 ml-2">
             {typeof bottomMetric.score === 'number' ? bottomMetric.score.toFixed(1) : bottomMetric.score}
           </span>
         </div>
       )}
       <button
         onClick={onViewDetails}
-        className="ml-auto text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+        className="ml-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 border border-white/5 hover:border-cyan-500/30 transition-all group"
       >
-        View all metrics <ChevronRight size={12} />
+        <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500 group-hover:text-cyan-400 transition-colors">All Metrics</span>
+        <ChevronRight size={14} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
       </button>
     </div>
   );
@@ -142,40 +153,50 @@ function HeroScoreCard() {
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-neutral-900/90 to-neutral-950 border border-neutral-800/50 rounded-2xl p-6"
+      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-8 relative overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-cyan-500/5 to-transparent rounded-full blur-3xl" />
+
       {/* Header */}
-      <p className="text-xs text-neutral-500 uppercase tracking-wider mb-4">Weighted Harmony Score</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-6 relative z-10">Facial Harmony Score</p>
 
       {/* PSL + Tier Badge */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="px-4 py-2 bg-neutral-800/80 border border-neutral-700/50 rounded-xl">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold" style={{ color: getPslColor(safePsl) }}>
+      <div className="flex items-center gap-4 mb-6 relative z-10">
+        <div className="px-5 py-3 bg-neutral-900/60 border border-white/10 rounded-2xl">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl font-black" style={{ color: getPslColor(safePsl) }}>
               {safePsl.toFixed(1)}
             </span>
-            <span className="text-xs text-neutral-500">PSL</span>
-            <div className="h-4 w-px bg-neutral-700" />
-            <span className="text-xs font-medium" style={{ color: getPslColor(safePsl) }}>
-              {safeTier}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">PSL</span>
+              <span className="text-sm font-black" style={{ color: getPslColor(safePsl) }}>
+                {safeTier}
+              </span>
+            </div>
+            <div className="h-8 w-px bg-white/10 mx-2" />
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">Rank</span>
+              <span className="text-sm font-black text-white">Top {(100 - safePercentile).toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Harmony Badge */}
+        <div className="px-4 py-3 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+              {safeHarmonyPercentage.toFixed(0)}%
             </span>
-            <span className="text-[10px] text-neutral-600">Top {(100 - safePercentile).toFixed(0)}%</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">Harmony</span>
           </div>
         </div>
       </div>
 
-      {/* Harmony Badge */}
-      <div className="inline-flex px-3 py-1 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 rounded-full mb-6">
-        <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-          {safeHarmonyPercentage.toFixed(0)}%
-        </span>
-        <span className="text-xs text-neutral-500 ml-2 self-center">Harmony</span>
-      </div>
-
       {/* Main Score */}
-      <div className="flex justify-center">
+      <div className="flex justify-center relative z-10">
         <AnimatedScore
           score={safeOverallScore}
           duration={2}
@@ -195,13 +216,13 @@ function HeroScoreCard() {
 function RadarCard() {
   return (
     <motion.div
-      className="bg-neutral-900/60 border border-neutral-800/50 rounded-2xl p-4 h-full"
+      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 h-full"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.2 }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-neutral-500 uppercase tracking-wider">Category Breakdown</p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Category Breakdown</p>
       </div>
       <div className="h-[220px]">
         <FacialRadarChart height={220} />
@@ -407,7 +428,7 @@ export function OverviewTab() {
         </div>
 
         {/* Row 3: Quick Stats */}
-        <div className="bg-neutral-900/40 border border-neutral-800/50 rounded-2xl p-4">
+        <div className="rounded-[1.5rem] bg-neutral-900/40 border border-white/5 p-5">
           <QuickStatsRow
             topMetrics={topMetrics}
             bottomMetrics={bottomMetrics}
@@ -416,21 +437,23 @@ export function OverviewTab() {
         </div>
 
         {/* Row 4: Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* PSL Card */}
           <motion.button
             onClick={() => setActiveTab('psl')}
-            className="group flex items-center gap-4 p-4 bg-neutral-900/60 border border-neutral-800/50 rounded-2xl hover:border-purple-500/30 transition-all text-left"
+            className="group flex items-center gap-5 p-5 rounded-[1.5rem] bg-neutral-900/40 border border-white/5 hover:border-purple-500/30 transition-all text-left"
             whileHover={{ y: -2 }}
           >
-            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-              <Eye size={18} className="text-purple-400" />
+            <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
+              <Eye size={20} className="text-purple-400" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-neutral-500 uppercase tracking-wider">PSL Rating</p>
-              <p className="text-sm font-medium text-white">View detailed breakdown</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600 mb-1">PSL Rating</p>
+              <p className="text-sm font-black text-white">View detailed breakdown</p>
             </div>
-            <ChevronRight size={16} className="text-neutral-700 group-hover:text-purple-400" />
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-purple-500/30 group-hover:bg-purple-500/10 transition-all">
+              <ChevronRight size={14} className="text-neutral-600 group-hover:text-purple-400 transition-colors" />
+            </div>
           </motion.button>
 
           {/* Plan Card */}
@@ -442,19 +465,21 @@ export function OverviewTab() {
                 openPricingModal('overview_cta');
               }
             }}
-            className="group flex items-center gap-4 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl hover:border-cyan-500/40 transition-all text-left"
+            className="group flex items-center gap-5 p-5 rounded-[1.5rem] bg-gradient-to-r from-cyan-500/10 to-blue-500/5 border border-cyan-500/20 hover:border-cyan-500/40 transition-all text-left"
             whileHover={{ y: -2 }}
           >
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-              <Zap size={18} className="text-cyan-400" />
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
+              <Zap size={20} className="text-cyan-400" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-neutral-500 uppercase tracking-wider">Your Plan</p>
-              <p className="text-sm font-medium text-white">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600 mb-1">Your Plan</p>
+              <p className="text-sm font-black text-white">
                 {isUnlocked ? 'View recommendations' : 'Unlock your potential'}
               </p>
             </div>
-            <ChevronRight size={16} className="text-neutral-700 group-hover:text-cyan-400" />
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all">
+              <ChevronRight size={14} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+            </div>
           </motion.button>
         </div>
       </div>
