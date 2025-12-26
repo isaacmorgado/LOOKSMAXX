@@ -898,7 +898,8 @@ function generateStrengthsFromAnalysis(analysis: HarmonyAnalysis): Strength[] {
 
     // Only create a grouped strength if we have 2+ metrics with good scores
     if (groupMeasurements.length >= 2) {
-      const avgScore = groupMeasurements.reduce((sum, m) => sum + m.score, 0) / groupMeasurements.length;
+      const rawAvgScore = groupMeasurements.reduce((sum, m) => sum + m.score, 0) / groupMeasurements.length;
+      const avgScore = Math.max(0, Math.min(10, rawAvgScore));  // Clamp to 0-10
       const bestQuality = avgScore >= 9 ? 'excellent' : avgScore >= 8 ? 'good' : 'below_average';
 
       // Mark these metrics as used
@@ -915,7 +916,7 @@ function generateStrengthsFromAnalysis(analysis: HarmonyAnalysis): Strength[] {
         responsibleRatios: groupMeasurements.map(m => ({
           ratioName: m.name,
           ratioId: m.metricId,
-          score: m.score,
+          score: Math.max(0, Math.min(10, m.score)),  // Clamp to 0-10 to prevent display overflow
           value: m.value,
           idealMin: m.idealMin,
           idealMax: m.idealMax,
@@ -931,18 +932,19 @@ function generateStrengthsFromAnalysis(analysis: HarmonyAnalysis): Strength[] {
     if (usedMetricIds.has(s.metricId)) return; // Skip if already used in a group
 
     const matchingMeasurement = analysis.measurements.find(m => m.metricId === s.metricId);
+    const clampedScore = Math.max(0, Math.min(10, matchingMeasurement?.score || 8));
 
     strengths.push({
       id: `strength_${i}`,
       strengthName: s.metricName,
       summary: s.reasoning,
-      avgScore: matchingMeasurement?.score || 8,
+      avgScore: clampedScore,
       qualityLevel: s.qualityTier,
       categoryName: s.category,
       responsibleRatios: [{
         ratioName: s.metricName,
         ratioId: s.metricId,
-        score: matchingMeasurement?.score || 8,
+        score: clampedScore,  // Use clamped score
         value: s.value,
         idealMin: matchingMeasurement?.idealMin || 0,
         idealMax: matchingMeasurement?.idealMax || 1,
@@ -1053,7 +1055,7 @@ function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
         responsibleRatios: groupMeasurements.map(m => ({
           ratioName: m.name,
           ratioId: m.metricId,
-          score: m.score,
+          score: Math.max(0, Math.min(10, m.score)),  // Clamp to 0-10 to prevent display overflow
           value: m.value,
           idealMin: m.idealMin,
           idealMax: m.idealMax,
@@ -1072,7 +1074,8 @@ function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
     if (usedMetricIds.has(f.metricId)) return; // Skip if already used in a group
 
     const matchingMeasurement = analysis.measurements.find(m => m.metricId === f.metricId);
-    const impact = matchingMeasurement ? (10 - matchingMeasurement.score) * 0.5 : 2;
+    const clampedScore = Math.max(0, Math.min(10, matchingMeasurement?.score || 3));
+    const impact = matchingMeasurement ? (10 - clampedScore) * 0.5 : 2;
     rollingLost += impact;
 
     flaws.push({
@@ -1085,7 +1088,7 @@ function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
       responsibleRatios: [{
         ratioName: f.metricName,
         ratioId: f.metricId,
-        score: matchingMeasurement?.score || 3,
+        score: clampedScore,  // Use clamped score
         value: matchingMeasurement?.value || 0,
         idealMin: matchingMeasurement?.idealMin || 0,
         idealMax: matchingMeasurement?.idealMax || 1,

@@ -199,6 +199,7 @@ export type ResultsTab =
   | 'psl'
   | 'archetype'
   | 'plan'
+  | 'guides'
   | 'community'
   | 'options'
   | 'support';

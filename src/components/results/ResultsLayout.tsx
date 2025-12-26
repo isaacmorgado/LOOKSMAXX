@@ -17,6 +17,7 @@ import {
   Users,
   Gauge,
   Shapes,
+  BookOpen,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
@@ -42,6 +43,7 @@ const TABS: TabConfig[] = [
   { id: 'psl', label: 'PSL Rating', icon: <Gauge size={18} /> },
   { id: 'archetype', label: 'Archetype', icon: <Shapes size={18} /> },
   { id: 'plan', label: 'Your Plan', icon: <Sparkles size={18} /> },
+  { id: 'guides', label: 'Guides', icon: <BookOpen size={18} /> },
   { id: 'community', label: 'Community', icon: <Users size={18} /> },
   { id: 'options', label: 'Options', icon: <Settings size={18} /> },
   { id: 'support', label: 'Support', icon: <HelpCircle size={18} /> },

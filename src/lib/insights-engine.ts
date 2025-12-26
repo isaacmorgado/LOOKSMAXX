@@ -2573,14 +2573,14 @@ export function convertToStrength(classified: ClassifiedStrength): Strength {
     id: `insight_strength_${classified.insightId}`,
     strengthName: `${classified.title} (${classified.gradeLabel})`,
     summary: classified.description,
-    avgScore: classified.avgScore,
+    avgScore: Math.max(0, Math.min(10, classified.avgScore)),  // Clamp to 0-10
     qualityLevel: classified.grade === 'ideal' ? 'ideal' :
                   classified.grade === 'excellent' ? 'excellent' : 'good',
     categoryName: classified.matchedMetrics[0]?.category || 'General',
     responsibleRatios: classified.matchedMetrics.map(m => ({
       ratioName: m.metricName,
       ratioId: m.metricId,
-      score: m.score,
+      score: Math.max(0, Math.min(10, m.score)),  // Clamp to 0-10 to prevent display overflow
       value: m.value,
       idealMin: m.idealMin,
       idealMax: m.idealMax,
@@ -2607,7 +2607,7 @@ export function convertToFlaw(classified: ClassifiedWeakness, index: number, rol
     responsibleRatios: classified.matchedMetrics.map(m => ({
       ratioName: m.metricName,
       ratioId: m.metricId,
-      score: m.score,
+      score: Math.max(0, Math.min(10, m.score)),  // Clamp to 0-10 to prevent display overflow
       value: m.value,
       idealMin: m.idealMin,
       idealMax: m.idealMax,

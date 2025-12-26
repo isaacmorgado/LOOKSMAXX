@@ -7,6 +7,7 @@ import { ResultsLayout } from './ResultsLayout';
 import { OverviewTab } from './tabs/OverviewTab';
 import { FrontRatiosTab, SideRatiosTab } from './tabs/RatiosTab';
 import { PlanTab } from './tabs/PlanTab';
+import { GuidesTab } from './tabs/GuidesTab';
 import { OptionsTab } from './tabs/OptionsTab';
 import { SupportTab } from './tabs/SupportTab';
 import { LeaderboardTab } from './tabs/LeaderboardTab';
@@ -65,6 +66,8 @@ export function Results() {
         return <ArchetypeTab />;
       case 'plan':
         return <PlanTab />;
+      case 'guides':
+        return <GuidesTab />;
       case 'community':
         return <CommunityTab />;
       case 'options':
