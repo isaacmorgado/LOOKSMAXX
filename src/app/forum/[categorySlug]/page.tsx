@@ -3,10 +3,119 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { useForum } from '@/contexts/ForumContext';
-import { PostCard, CreatePostForm, ForumHeader } from '@/components/forum';
+import { PostCard, CreatePostForm, ForumHeader, ForumBreadcrumb } from '@/components/forum';
 import { SortOrder } from '@/types/forum';
+import {
+  Flame,
+  Clock,
+  TrendingUp,
+  X,
+  Image as ImageIcon,
+  LinkIcon,
+  Hash,
+  ShieldCheck,
+  ArrowLeft,
+  PenSquare
+} from 'lucide-react';
 
+// ============================================
+// SORT TABS
+// ============================================
+function SortTabs({ sortOrder, setSortOrder }: { sortOrder: SortOrder; setSortOrder: (s: SortOrder) => void }) {
+  const sorts = [
+    { id: 'hot' as const, label: 'Hot', icon: Flame },
+    { id: 'new' as const, label: 'New', icon: Clock },
+    { id: 'top' as const, label: 'Top', icon: TrendingUp },
+  ];
+
+  return (
+    <div className="flex items-center gap-1 p-1.5 bg-neutral-900/30 border border-white/5 rounded-xl">
+      {sorts.map((sort) => (
+        <button
+          key={sort.id}
+          onClick={() => setSortOrder(sort.id)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+            sortOrder === sort.id
+              ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+              : 'text-neutral-600 hover:text-white border border-transparent'
+          }`}
+        >
+          <sort.icon size={12} />
+          {sort.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ============================================
+// TOPIC PILLS
+// ============================================
+function TopicPills({
+  subForums,
+  selected,
+  onSelect
+}: {
+  subForums: { id: string; name: string; slug: string; postCount: number }[];
+  selected: string | null;
+  onSelect: (slug: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {subForums.map((sf) => (
+        <button
+          key={sf.id}
+          onClick={() => onSelect(sf.slug)}
+          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+            selected === sf.slug
+              ? 'bg-cyan-500 text-black'
+              : 'bg-neutral-900/50 border border-white/5 text-neutral-400 hover:border-cyan-500/30 hover:text-cyan-400'
+          }`}
+        >
+          {sf.name}
+          {sf.postCount > 0 && (
+            <span className="ml-1.5 opacity-60">{sf.postCount}</span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ============================================
+// POST SKELETON
+// ============================================
+function PostSkeleton() {
+  return (
+    <div className="rounded-2xl bg-neutral-900/30 border border-white/5 overflow-hidden animate-pulse">
+      <div className="flex">
+        <div className="w-12 bg-neutral-900/50 py-4 flex flex-col items-center gap-2">
+          <div className="w-6 h-6 bg-neutral-800 rounded" />
+          <div className="w-4 h-4 bg-neutral-800 rounded" />
+          <div className="w-6 h-6 bg-neutral-800 rounded" />
+        </div>
+        <div className="flex-1 p-4 space-y-3">
+          <div className="flex gap-2">
+            <div className="h-4 w-16 bg-neutral-800 rounded" />
+            <div className="h-4 w-24 bg-neutral-800 rounded" />
+          </div>
+          <div className="h-5 w-3/4 bg-neutral-800 rounded" />
+          <div className="h-4 w-full bg-neutral-800 rounded" />
+          <div className="flex gap-2">
+            <div className="h-6 w-20 bg-neutral-800 rounded" />
+            <div className="h-6 w-16 bg-neutral-800 rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// MAIN PAGE
+// ============================================
 export default function CategoryPage() {
   const params = useParams();
   const router = useRouter();
@@ -60,152 +169,111 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303]">
+    <div className="min-h-screen bg-black selection:bg-cyan-500/30">
       <ForumHeader />
+      <ForumBreadcrumb items={[
+        { label: 'Community', href: '/forum' },
+        { label: currentCategory?.name || categorySlug }
+      ]} />
 
-      {/* Banner */}
-      <div className="h-20 bg-gradient-to-r from-[#00f3ff] to-[#0088ff]" />
-
-      {/* Subreddit header */}
-      <div className="bg-[#1a1a1b] border-b border-[#343536]">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-end gap-4 -mt-4 pb-3">
-            <div className="w-20 h-20 rounded-full bg-[#1a1a1b] border-4 border-[#1a1a1b] flex items-center justify-center text-3xl">
+      {/* Category Header */}
+      <section className="border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="flex items-start gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center text-3xl flex-shrink-0">
               {currentCategory?.icon || '📂'}
             </div>
-            <div className="flex-1 min-w-0 pb-1">
-              <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-[#d7dadc]">
-                  {currentCategory?.name || 'Loading...'}
-                </h1>
-                <button className="px-4 py-1.5 text-sm font-bold bg-[#d7dadc] text-[#1a1a1b] rounded-full hover:bg-white transition-colors">
-                  Joined
-                </button>
-              </div>
-              <p className="text-sm text-[#818384]">r/{categorySlug}</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter italic uppercase mb-3">
+                {currentCategory?.name || 'Loading...'}
+              </h1>
+              <p className="text-neutral-500 text-sm max-w-2xl leading-relaxed">
+                {currentCategory?.description}
+              </p>
             </div>
-          </div>
-
-          {/* Navigation tabs */}
-          <div className="flex gap-2 -mb-px">
-            {[
-              { id: 'posts', label: 'Posts', icon: '📝' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                className="px-4 py-2 text-sm font-medium text-[#d7dadc] border-b-2 border-[#d7dadc] bg-transparent"
-              >
-                {tab.label}
-              </button>
-            ))}
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="hidden md:flex h-11 px-6 rounded-xl bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest items-center gap-2 hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/20"
+            >
+              <PenSquare size={14} />
+              New Post
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Content */}
-      <main className="max-w-5xl mx-auto px-4 py-4">
-        <div className="flex gap-6">
-          {/* Main feed */}
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Main Feed */}
           <div className="flex-1 min-w-0">
-            {/* Create post bar */}
+            {/* Create Post Form */}
             {showCreateForm && currentCategory ? (
-              <div className="bg-[#1a1a1b] border border-[#343536] rounded p-4 mb-4">
-                <h2 className="text-lg font-medium text-[#d7dadc] mb-4">Create a post</h2>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-2xl bg-neutral-900/30 border border-white/5 mb-6"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-sm font-black uppercase tracking-wider text-white">Create a Post</h2>
+                  <button
+                    onClick={() => setShowCreateForm(false)}
+                    className="p-2 rounded-lg hover:bg-white/5 text-neutral-500 hover:text-white transition-all"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
                 <CreatePostForm
                   subForums={currentCategory.subForums}
                   onSubmit={handleCreatePost}
                   onCancel={() => setShowCreateForm(false)}
                 />
-              </div>
+              </motion.div>
             ) : (
               <div
                 onClick={() => setShowCreateForm(true)}
-                className="bg-[#1a1a1b] border border-[#343536] rounded p-2 mb-4 flex items-center gap-3 cursor-pointer hover:border-[#818384] transition-colors"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-neutral-900/30 border border-white/5 hover:border-cyan-500/20 cursor-pointer transition-all mb-6"
               >
-                <div className="w-10 h-10 rounded-full bg-[#272729] border border-[#343536]" />
-                <input
-                  type="text"
-                  placeholder="Create Post"
-                  className="flex-1 bg-[#272729] border border-[#343536] rounded px-4 py-2 text-sm text-[#d7dadc] placeholder-[#818384] focus:outline-none focus:border-[#d7dadc]"
-                  onFocus={() => setShowCreateForm(true)}
-                  readOnly
-                />
-                <button className="p-2 text-[#818384] hover:bg-[#272729] rounded">
-                  <ImageIcon className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/5" />
+                <div className="flex-1 px-4 py-2.5 rounded-xl bg-neutral-900/50 border border-white/5 text-neutral-600 text-sm">
+                  Create Post
+                </div>
+                <button className="p-2 rounded-lg hover:bg-white/5 text-neutral-600 hover:text-cyan-400 transition-all">
+                  <ImageIcon size={18} />
                 </button>
-                <button className="p-2 text-[#818384] hover:bg-[#272729] rounded">
-                  <LinkIcon className="w-6 h-6" />
+                <button className="p-2 rounded-lg hover:bg-white/5 text-neutral-600 hover:text-cyan-400 transition-all">
+                  <LinkIcon size={18} />
                 </button>
               </div>
             )}
 
-            {/* Sort bar */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded px-3 py-2 mb-4 flex items-center gap-2">
-              {(['hot', 'new', 'top'] as SortOrder[]).map((sort) => (
-                <button
-                  key={sort}
-                  onClick={() => setSortOrder(sort)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    sortOrder === sort
-                      ? 'bg-[#272729] text-[#d7dadc]'
-                      : 'text-[#818384] hover:bg-[#272729]'
-                  }`}
-                >
-                  {sort === 'hot' && <HotIcon className="w-5 h-5" />}
-                  {sort === 'new' && <NewIcon className="w-5 h-5" />}
-                  {sort === 'top' && <TopIcon className="w-5 h-5" />}
-                  {sort.charAt(0).toUpperCase() + sort.slice(1)}
-                </button>
-              ))}
+            {/* Sort & Filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+              <SortTabs sortOrder={sortOrder} setSortOrder={setSortOrder} />
             </div>
 
-            {/* Topic filter pills */}
+            {/* Topic Filter */}
             {currentCategory && currentCategory.subForums.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {currentCategory.subForums.map((sf) => (
-                  <button
-                    key={sf.id}
-                    onClick={() => handleSubForumClick(sf.slug)}
-                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                      selectedSubForum === sf.slug
-                        ? 'bg-[#00f3ff] text-black'
-                        : 'bg-[#272729] text-[#d7dadc] hover:bg-[#343536]'
-                    }`}
-                  >
-                    {sf.name}
-                    {sf.postCount > 0 && (
-                      <span className="ml-1 opacity-60">{sf.postCount}</span>
-                    )}
-                  </button>
-                ))}
+              <div className="mb-6">
+                <TopicPills
+                  subForums={currentCategory.subForums}
+                  selected={selectedSubForum}
+                  onSelect={handleSubForumClick}
+                />
               </div>
             )}
 
             {/* Error */}
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded p-4 mb-4">
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-6">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
 
             {/* Posts */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               {isLoadingPosts && posts.length === 0 ? (
-                [1, 2, 3].map((i) => (
-                  <div key={i} className="bg-[#1a1a1b] border border-[#343536] rounded p-4 animate-pulse">
-                    <div className="flex gap-3">
-                      <div className="w-10 space-y-2">
-                        <div className="h-4 bg-[#343536] rounded" />
-                        <div className="h-4 bg-[#343536] rounded" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-3 bg-[#343536] rounded w-1/4 mb-2" />
-                        <div className="h-5 bg-[#343536] rounded w-3/4 mb-2" />
-                        <div className="h-3 bg-[#343536] rounded w-full" />
-                      </div>
-                    </div>
-                  </div>
-                ))
+                [1, 2, 3].map((i) => <PostSkeleton key={i} />)
               ) : posts.length > 0 ? (
                 <>
                   {posts.map((post) => (
@@ -219,46 +287,46 @@ export default function CategoryPage() {
                     <button
                       onClick={() => loadMorePosts(categorySlug, selectedSubForum || undefined)}
                       disabled={isLoadingPosts}
-                      className="w-full py-3 text-sm font-medium text-[#00f3ff] hover:text-[#00d4e6] disabled:opacity-50"
+                      className="w-full py-4 text-[10px] font-black uppercase tracking-widest text-cyan-400 hover:text-cyan-300 disabled:opacity-50 transition-colors"
                     >
-                      {isLoadingPosts ? 'Loading...' : 'Load More'}
+                      {isLoadingPosts ? 'Loading...' : 'Load More Posts'}
                     </button>
                   )}
                 </>
               ) : (
-                <div className="bg-[#1a1a1b] border border-[#343536] rounded p-12 text-center">
+                <div className="text-center py-16 rounded-2xl bg-neutral-900/30 border border-white/5">
                   <div className="text-5xl mb-4">🌱</div>
-                  <p className="text-[#d7dadc] font-medium mb-2">No posts yet</p>
-                  <p className="text-[#818384] text-sm">Be the first to share something!</p>
+                  <p className="text-white font-bold mb-2">No posts yet</p>
+                  <p className="text-neutral-500 text-sm">Be the first to share something!</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Sidebar */}
-          <aside className="hidden lg:block w-80 space-y-4">
-            {/* About Community */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded overflow-hidden">
-              <div className="bg-[#00f3ff] px-4 py-2">
-                <h3 className="text-xs font-bold text-black">About Community</h3>
+          <aside className="lg:w-80 space-y-6">
+            {/* About */}
+            <div className="rounded-2xl bg-neutral-900/30 border border-white/5 overflow-hidden">
+              <div className="px-5 py-3 bg-cyan-500/10 border-b border-white/5">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">About Community</h3>
               </div>
-              <div className="p-4">
-                <p className="text-sm text-[#d7dadc] mb-4">
+              <div className="p-5">
+                <p className="text-sm text-neutral-400 mb-5 leading-relaxed">
                   {currentCategory?.description || 'Loading...'}
                 </p>
-                <div className="flex gap-4 text-sm border-b border-[#343536] pb-4 mb-4">
+                <div className="grid grid-cols-2 gap-4 pb-5 border-b border-white/5 mb-5">
                   <div>
-                    <div className="font-bold text-[#d7dadc]">{currentCategory?.postCount || 0}</div>
-                    <div className="text-xs text-[#818384]">Posts</div>
+                    <p className="text-lg font-black italic text-white">{currentCategory?.postCount || 0}</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600">Posts</p>
                   </div>
                   <div>
-                    <div className="font-bold text-[#d7dadc]">{currentCategory?.subForums.length || 0}</div>
-                    <div className="text-xs text-[#818384]">Topics</div>
+                    <p className="text-lg font-black italic text-white">{currentCategory?.subForums.length || 0}</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600">Topics</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="w-full py-2 text-sm font-bold bg-[#d7dadc] text-[#1a1a1b] rounded-full hover:bg-white transition-colors"
+                  className="w-full py-3 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all"
                 >
                   Create Post
                 </button>
@@ -267,23 +335,26 @@ export default function CategoryPage() {
 
             {/* Topics */}
             {currentCategory && currentCategory.subForums.length > 0 && (
-              <div className="bg-[#1a1a1b] border border-[#343536] rounded overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#343536]">
-                  <h3 className="text-xs font-bold text-[#818384] uppercase tracking-wide">Topics</h3>
+              <div className="rounded-2xl bg-neutral-900/30 border border-white/5 overflow-hidden">
+                <div className="px-5 py-3 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <Hash size={12} className="text-cyan-400" />
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Topics</h3>
+                  </div>
                 </div>
-                <div className="p-2">
+                <div className="p-3">
                   {currentCategory.subForums.map((sf) => (
                     <button
                       key={sf.id}
                       onClick={() => handleSubForumClick(sf.slug)}
-                      className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex justify-between ${
+                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm transition-all flex justify-between items-center ${
                         selectedSubForum === sf.slug
-                          ? 'bg-[#00f3ff]/10 text-[#00f3ff]'
-                          : 'text-[#d7dadc] hover:bg-[#272729]'
+                          ? 'bg-cyan-500/10 text-cyan-400'
+                          : 'text-neutral-400 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       <span>{sf.name}</span>
-                      <span className="text-[#818384]">{sf.postCount}</span>
+                      <span className="text-[10px] text-neutral-600">{sf.postCount}</span>
                     </button>
                   ))}
                 </div>
@@ -291,21 +362,24 @@ export default function CategoryPage() {
             )}
 
             {/* Rules */}
-            <div className="bg-[#1a1a1b] border border-[#343536] rounded overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#343536]">
-                <h3 className="text-xs font-bold text-[#818384] uppercase tracking-wide">Rules</h3>
+            <div className="rounded-2xl bg-neutral-900/30 border border-white/5 overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={12} className="text-cyan-400" />
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Rules</h3>
+                </div>
               </div>
-              <div className="p-4 text-sm text-[#d7dadc] space-y-3">
-                <div className="flex gap-2">
-                  <span className="text-[#818384]">1.</span>
+              <div className="p-5 space-y-3 text-sm text-neutral-400">
+                <div className="flex gap-3">
+                  <span className="text-cyan-400 font-black">1.</span>
                   <span>Be respectful to others</span>
                 </div>
-                <div className="flex gap-2">
-                  <span className="text-[#818384]">2.</span>
+                <div className="flex gap-3">
+                  <span className="text-cyan-400 font-black">2.</span>
                   <span>No medical advice</span>
                 </div>
-                <div className="flex gap-2">
-                  <span className="text-[#818384]">3.</span>
+                <div className="flex gap-3">
+                  <span className="text-cyan-400 font-black">3.</span>
                   <span>Share evidence-based info</span>
                 </div>
               </div>
@@ -314,53 +388,14 @@ export default function CategoryPage() {
             {/* Back link */}
             <Link
               href="/forum"
-              className="block text-sm text-[#818384] hover:text-[#d7dadc] text-center py-2"
+              className="flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest text-neutral-600 hover:text-cyan-400 transition-colors"
             >
-              ← Back to all communities
+              <ArrowLeft size={12} />
+              Back to all communities
             </Link>
           </aside>
         </div>
       </main>
     </div>
-  );
-}
-
-function HotIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function NewIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function TopIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function ImageIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-    </svg>
   );
 }

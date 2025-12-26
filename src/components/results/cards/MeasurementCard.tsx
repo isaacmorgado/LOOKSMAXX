@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronDown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ChevronDown, AlertTriangle, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Ratio, getScoreColor, formatValue } from '@/types/results';
 import { QualityBadge, SeverityBadge, CategoryTag, ExpandableSection } from '../shared';
 import { IdealRangeBar, CompactIdealRangeBar } from '../visualization/IdealRangeBar';
@@ -11,23 +11,24 @@ import { SeverityLevel } from '@/lib/harmony-scoring';
 function getSeverityIndicator(severity: SeverityLevel): {
   icon: 'check' | 'alert' | 'warning';
   color: string;
+  bgColor: string;
   showBadge: boolean;
 } {
   switch (severity) {
     case 'optimal':
-      return { icon: 'check', color: '#67e8f9', showBadge: false };
+      return { icon: 'check', color: '#22d3ee', bgColor: 'rgba(34, 211, 238, 0.1)', showBadge: false };
     case 'minor':
-      return { icon: 'check', color: '#22c55e', showBadge: false };
+      return { icon: 'check', color: '#22c55e', bgColor: 'rgba(34, 197, 94, 0.1)', showBadge: false };
     case 'moderate':
-      return { icon: 'warning', color: '#fbbf24', showBadge: true };
+      return { icon: 'warning', color: '#fbbf24', bgColor: 'rgba(251, 191, 36, 0.1)', showBadge: true };
     case 'major':
-      return { icon: 'warning', color: '#f97316', showBadge: true };
+      return { icon: 'warning', color: '#f97316', bgColor: 'rgba(249, 115, 22, 0.1)', showBadge: true };
     case 'severe':
-      return { icon: 'alert', color: '#ef4444', showBadge: true };
+      return { icon: 'alert', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)', showBadge: true };
     case 'extremely_severe':
-      return { icon: 'alert', color: '#dc2626', showBadge: true };
+      return { icon: 'alert', color: '#dc2626', bgColor: 'rgba(220, 38, 38, 0.1)', showBadge: true };
     default:
-      return { icon: 'check', color: '#6b7280', showBadge: false };
+      return { icon: 'check', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.1)', showBadge: false };
   }
 }
 
@@ -44,7 +45,7 @@ export function MeasurementCard({
 }: MeasurementCardProps) {
   // Handle string values for obfuscated data
   const numericScore = typeof ratio.score === 'number' ? ratio.score : 0;
-  const numericValue = typeof ratio.value === 'number' ? ratio.value : 0; // Default to 0 for visualizations if obfuscated
+  const numericValue = typeof ratio.value === 'number' ? ratio.value : 0;
 
   const scoreColor = getScoreColor(numericScore);
   const severityIndicator = getSeverityIndicator(ratio.severity);
@@ -52,22 +53,23 @@ export function MeasurementCard({
   return (
     <motion.div
       layout
-      className={`bg-neutral-900/80 border rounded-xl overflow-hidden transition-all ${isExpanded ? 'border-cyan-500/50' : 'border-neutral-800 hover:border-neutral-700'
-        }`}
+      className={`rounded-2xl bg-neutral-900/30 border overflow-hidden transition-all ${
+        isExpanded ? 'border-cyan-500/30' : 'border-white/5 hover:border-white/10'
+      }`}
     >
       {/* Collapsed Header */}
       <button
         onClick={onToggle}
-        className="w-full p-4 flex items-center gap-4 text-left"
+        className="w-full p-5 flex items-center gap-5 text-left"
       >
         {/* Score indicator with severity ring */}
         <div className="relative flex-shrink-0">
           <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg"
+            className="w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl italic"
             style={{
-              backgroundColor: typeof ratio.score === 'string' ? '#262626' : `${scoreColor}15`,
+              backgroundColor: typeof ratio.score === 'string' ? 'rgba(38, 38, 38, 0.5)' : severityIndicator.bgColor,
               color: typeof ratio.score === 'string' ? '#a3a3a3' : scoreColor,
-              border: severityIndicator.showBadge ? `2px solid ${severityIndicator.color}40` : 'none',
+              border: `2px solid ${severityIndicator.showBadge ? `${severityIndicator.color}30` : 'rgba(255,255,255,0.05)'}`,
             }}
           >
             {typeof ratio.score === 'number' ? ratio.score.toFixed(1) : ratio.score}
@@ -75,33 +77,54 @@ export function MeasurementCard({
           {/* Severity indicator dot for non-optimal metrics */}
           {severityIndicator.showBadge && (
             <div
-              className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-neutral-900"
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center"
               style={{ backgroundColor: severityIndicator.color }}
               title={`${ratio.severity.replace('_', ' ')} issue`}
-            />
+            >
+              {severityIndicator.icon === 'alert' && (
+                <span className="text-white text-[8px] font-black">!</span>
+              )}
+            </div>
           )}
         </div>
 
         {/* Main info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="font-semibold text-white truncate">{ratio.name}</h3>
-            <CategoryTag category={ratio.category} />
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <h3 className="text-sm font-black uppercase tracking-wider text-white truncate">{ratio.name}</h3>
+            <span
+              className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"
+              style={{
+                color: '#84cc16',
+                backgroundColor: 'rgba(132, 204, 22, 0.1)',
+              }}
+            >
+              {ratio.category}
+            </span>
             {/* Show compact severity badge for moderate and above */}
             {severityIndicator.showBadge && (
-              <SeverityBadge severity={ratio.severity} size="sm" />
+              <span
+                className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border"
+                style={{
+                  color: severityIndicator.color,
+                  backgroundColor: severityIndicator.bgColor,
+                  borderColor: `${severityIndicator.color}30`,
+                }}
+              >
+                {ratio.severity.replace('_', ' ')}
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-medium text-white">
+          <div className="flex items-center gap-4">
+            <span className="text-lg font-black italic text-white">
               {typeof ratio.value === 'number' ? formatValue(ratio.value, ratio.unit) : ratio.value}
             </span>
-            <span className="text-xs text-neutral-500">
+            <span className="text-[10px] font-medium text-neutral-600">
               Ideal: {formatValue(ratio.idealMin, ratio.unit)} - {formatValue(ratio.idealMax, ratio.unit)}
             </span>
           </div>
           {/* Compact range bar */}
-          <div className="mt-2">
+          <div className="mt-3">
             <CompactIdealRangeBar
               value={numericValue}
               idealMin={ratio.idealMin}
@@ -119,15 +142,15 @@ export function MeasurementCard({
           transition={{ duration: 0.2 }}
           className="flex-shrink-0"
         >
-          <ChevronDown size={20} className="text-neutral-500" />
+          <ChevronDown size={20} className="text-neutral-600" />
         </motion.div>
       </button>
 
       {/* Expanded Content */}
       <ExpandableSection isExpanded={isExpanded}>
-        <div className="px-4 pb-4 space-y-4 border-t border-neutral-800 pt-4">
+        <div className="px-5 pb-5 space-y-5 border-t border-white/5 pt-5">
           {/* Full range visualization */}
-          <div className="bg-neutral-800/50 rounded-lg p-4">
+          <div className="rounded-xl bg-neutral-900/50 border border-white/5 p-5">
             <IdealRangeBar
               value={numericValue}
               idealMin={ratio.idealMin}
@@ -140,23 +163,25 @@ export function MeasurementCard({
           </div>
 
           {/* Quality and Severity badges */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <QualityBadge quality={ratio.qualityLevel} />
             <SeverityBadge severity={ratio.severity} />
           </div>
 
           {/* May indicate sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Strengths */}
             {ratio.mayIndicateStrengths.length > 0 && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span className="text-xs font-medium text-green-400">May Indicate Strengths</span>
+              <div className="rounded-xl bg-green-500/5 border border-green-500/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <TrendingUp size={12} className="text-green-400" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-green-400">Strengths</span>
                 </div>
-                <ul className="space-y-1">
+                <ul className="space-y-2">
                   {ratio.mayIndicateStrengths.map((strength, i) => (
-                    <li key={i} className="text-sm text-neutral-300">
+                    <li key={i} className="text-sm text-neutral-300 pl-3 border-l-2 border-green-500/30">
                       {strength}
                     </li>
                   ))}
@@ -166,14 +191,16 @@ export function MeasurementCard({
 
             {/* Flaws */}
             {ratio.mayIndicateFlaws.length > 0 && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle size={14} className="text-red-400" />
-                  <span className="text-xs font-medium text-red-400">May Indicate Flaws</span>
+              <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-red-500/20 flex items-center justify-center">
+                    <TrendingDown size={12} className="text-red-400" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-red-400">Areas to Improve</span>
                 </div>
-                <ul className="space-y-1">
+                <ul className="space-y-2">
                   {ratio.mayIndicateFlaws.map((flaw, i) => (
-                    <li key={i} className="text-sm text-neutral-300">
+                    <li key={i} className="text-sm text-neutral-300 pl-3 border-l-2 border-red-500/30">
                       {flaw}
                     </li>
                   ))}
@@ -208,16 +235,16 @@ export function CompactMeasurementCard({ ratio, onClick, showSeverity = true }: 
   return (
     <button
       onClick={onClick}
-      className="w-full p-3 bg-neutral-900/60 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-all text-left flex items-center gap-3"
+      className="w-full p-4 rounded-xl bg-neutral-900/30 border border-white/5 hover:border-cyan-500/20 transition-all text-left flex items-center gap-4"
     >
       {/* Score with severity indicator */}
       <div className="relative flex-shrink-0">
         <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center font-bold"
+          className="w-11 h-11 rounded-lg flex items-center justify-center font-black italic"
           style={{
-            backgroundColor: typeof ratio.score === 'string' ? '#262626' : `${scoreColor}15`,
+            backgroundColor: typeof ratio.score === 'string' ? 'rgba(38, 38, 38, 0.5)' : severityIndicator.bgColor,
             color: typeof ratio.score === 'string' ? '#a3a3a3' : scoreColor,
-            border: severityIndicator.showBadge ? `1.5px solid ${severityIndicator.color}30` : 'none',
+            border: severityIndicator.showBadge ? `1.5px solid ${severityIndicator.color}30` : '1px solid rgba(255,255,255,0.05)',
           }}
         >
           {typeof ratio.score === 'number' ? ratio.score.toFixed(1) : ratio.score}
@@ -225,32 +252,32 @@ export function CompactMeasurementCard({ ratio, onClick, showSeverity = true }: 
         {/* Severity dot */}
         {showSeverity && severityIndicator.showBadge && (
           <div
-            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-neutral-900"
+            className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-black"
             style={{ backgroundColor: severityIndicator.color }}
           />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <h4 className="font-medium text-white truncate text-sm">{ratio.name}</h4>
+        <div className="flex items-center gap-2">
+          <h4 className="font-black uppercase tracking-wider text-white truncate text-xs">{ratio.name}</h4>
           {/* Compact severity badge for severe/extremely severe */}
           {showSeverity && (ratio.severity === 'severe' || ratio.severity === 'extremely_severe') && (
             <span
-              className="px-1 py-0.5 text-[9px] font-medium rounded"
+              className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider rounded"
               style={{
                 color: severityIndicator.color,
-                backgroundColor: `${severityIndicator.color}20`,
+                backgroundColor: severityIndicator.bgColor,
               }}
             >
               {ratio.severity === 'extremely_severe' ? 'Critical' : 'Severe'}
             </span>
           )}
         </div>
-        <p className="text-xs text-neutral-500">
+        <p className="text-[10px] text-neutral-500 font-medium">
           {typeof ratio.value === 'number' ? formatValue(ratio.value, ratio.unit) : ratio.value}
         </p>
       </div>
-      <ChevronDown size={16} className="text-neutral-500 flex-shrink-0" />
+      <ChevronDown size={16} className="text-neutral-600 flex-shrink-0" />
     </button>
   );
 }

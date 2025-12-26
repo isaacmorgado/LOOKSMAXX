@@ -36,22 +36,28 @@ export async function GET() {
   // PRODUCT TESTS
   // ============================================
 
-  // Test 1: Total product count
+  // Test 1: Total product count (74 = 33 original + 40 new + 1 gum_mastic)
   const totalCount = getTotalProductCount();
   tests.push({
-    name: 'Products: Total = 33',
-    passed: totalCount === 33,
+    name: 'Products: Total = 74',
+    passed: totalCount === 74,
     details: `Got: ${totalCount}`,
   });
 
-  // Test 2: Category counts
+  // Test 2: Category counts (11 categories)
   const categories = getProductCategories();
   const expectedCounts: Record<string, number> = {
     hygiene: 4,
     grooming: 5,
-    skincare: 5,
-    miscellaneous: 9,
+    skincare: 10,
+    miscellaneous: 10,
     supplements: 10,
+    hair: 8,
+    beard: 5,
+    teeth: 6,
+    kbeauty: 8,
+    hormonal: 5,
+    surgery: 3,
   };
 
   let categoryPassed = true;
@@ -129,11 +135,11 @@ export async function GET() {
   // GUIDE TESTS
   // ============================================
 
-  // Test 9: Total guide count
+  // Test 9: Total guide count (27 = 9 original + 18 new)
   const guideCount = getTotalGuideCount();
   tests.push({
-    name: 'Guides: Total = 9',
-    passed: guideCount === 9,
+    name: 'Guides: Total = 27',
+    passed: guideCount === 27,
     details: `Got: ${guideCount}`,
   });
 
@@ -181,10 +187,10 @@ export async function GET() {
     details: bodyFatGuide ? `Found: ${bodyFatGuide.id}` : 'Not found',
   });
 
-  // Test 14: Guide categories
+  // Test 14: Guide categories (7 = 3 original + 4 new)
   tests.push({
-    name: 'Guides: Categories = 3',
-    passed: GUIDE_CATEGORIES.length === 3,
+    name: 'Guides: Categories = 7',
+    passed: GUIDE_CATEGORIES.length === 7,
     details: `Categories: ${GUIDE_CATEGORIES.map(c => c.name).join(', ')}`,
   });
 
@@ -242,13 +248,13 @@ export async function GET() {
   // GUIDE ORDER TEST
   // ============================================
 
-  // Test 21: Guides are in correct order
-  const expectedOrder = ['mindset', 'maintenance', 'body-fat', 'v-taper', 'training', 'core-neck', 'cardio', 'diet', 'skincare'];
+  // Test 21: Guides are in correct order (by order property)
   const actualOrder = ALL_GUIDES.map(g => g.id);
+  const isOrdered = ALL_GUIDES.every((g, i) => i === 0 || ALL_GUIDES[i - 1].order <= g.order);
   tests.push({
     name: 'Guides: Order',
-    passed: JSON.stringify(expectedOrder) === JSON.stringify(actualOrder),
-    details: `Order: ${actualOrder.join(' → ')}`,
+    passed: isOrdered && actualOrder.length === 27,
+    details: `${actualOrder.length} guides sorted by order property`,
   });
 
   // ============================================

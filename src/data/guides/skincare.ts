@@ -127,10 +127,18 @@ After cleansing, skin should feel clean but not tight or squeaky. If it feels st
       media: [
         {
           id: 'cleansing-technique',
-          type: 'image',
-          url: 'https://images.unsplash.com/photo-1556228994-6c24d36f2d8e?w=800&q=80',
-          alt: 'Skincare routine and cleansing',
+          type: 'gif',
+          url: 'https://media1.tenor.com/m/WiFCFmsD9_oAAAAC/scrubbing-face-skincare.gif',
+          alt: 'Face cleansing technique',
           caption: 'Gentle circular motions for 30-60 seconds',
+          placement: 'inline',
+        },
+        {
+          id: 'face-wash-demo',
+          type: 'gif',
+          url: 'https://media1.tenor.com/m/81EMyjB1X9IAAAAC/washing-face-getting-ready.gif',
+          alt: 'Proper face washing technique',
+          caption: 'Rinse thoroughly with lukewarm water',
           placement: 'inline',
         },
       ],
@@ -505,6 +513,141 @@ If fine → normal`,
 
 **Remember:**
 Start with basics. Add one product at a time. Wait 2-4 weeks between additions. This lets you identify what works and what causes problems.`,
+    },
+    {
+      id: 'accutane-nuclear',
+      title: 'The Nuclear Option: Accutane',
+      humorLevel: 'medium',
+      content: `When everything else fails, there's isotretinoin (Accutane). This is the only true "cure" for severe acne.
+
+**Who Should Consider It:**
+- Severe cystic or nodular acne
+- Moderate acne that hasn't responded to other treatments (3+ months)
+- Acne that's causing scarring
+- Significant psychological impact from acne
+
+**How It Works:**
+Accutane shrinks your oil glands by 80-90% and fundamentally changes how your skin produces sebum. Unlike other treatments, the effects are often permanent after a single course.
+
+**The Reality Check:**
+
+| Aspect | What to Expect |
+|--------|----------------|
+| **Duration** | 5-7 months typically |
+| **Side Effects** | Dry lips (100%), dry skin, joint pain |
+| **Monitoring** | Monthly blood tests, pregnancy tests (females) |
+| **Results** | 80-85% clearance rate, often permanent |
+
+**The iPledge Program (USA):**
+If you're in the US, you'll need to enroll in iPledge. This means monthly appointments, blood tests, and pregnancy prevention requirements. It's a hassle, but it's why Accutane is so safe today.
+
+**Common Side Effects:**
+- Extremely dry lips (Aquaphor is your new best friend)
+- Dry skin and eyes
+- Joint pain (especially lower back)
+- Initial purging (gets worse before better)
+- Sun sensitivity (sunscreen is critical)
+
+**When NOT to Take It:**
+- Pregnancy (causes severe birth defects)
+- Concurrent with tetracyclines
+- History of inflammatory bowel disease
+- Active liver disease
+
+This guide covers the basics—if you're serious about Accutane, consult a dermatologist. We'll have a full Accutane guide coming soon with month-by-month protocols.`,
+      products: ['aquaphor_lip', 'cerave_moisturizer', 'sunscreen_elta'],
+      warnings: [
+        'NEVER take Accutane if pregnant or planning pregnancy',
+        'The purge is real—expect month 1-2 to look worse before better',
+        'Alcohol on Accutane stresses your liver—limit heavily or abstain'
+      ],
+    },
+    {
+      id: 'retinoids-comparison',
+      title: 'Prescription vs OTC Retinoids',
+      humorLevel: 'medium',
+      content: `Not all retinoids are created equal. Here's the hierarchy:
+
+**The Retinoid Ladder:**
+
+| Product | Strength | Access | Best For |
+|---------|----------|--------|----------|
+| **Tretinoin 0.1%** | Strongest | Rx only | Stubborn acne, serious anti-aging |
+| **Tretinoin 0.05%** | Strong | Rx only | Standard treatment strength |
+| **Tretinoin 0.025%** | Medium | Rx only | Beginners, sensitive skin |
+| **Adapalene 0.3%** | Medium | Rx only | Acne-focused treatment |
+| **Adapalene 0.1%** | Medium-Low | OTC (Differin) | OTC acne treatment |
+| **Retinol 1%** | Low-Medium | OTC | Gentle anti-aging |
+| **Retinol 0.5%** | Low | OTC | Beginner OTC option |
+| **Retinaldehyde** | Low | OTC (expensive) | Sensitive skin OTC |
+| **Retinyl Palmitate** | Very Low | OTC | Basically useless |
+
+**The Conversion Problem:**
+Your skin needs to convert OTC retinol → retinaldehyde → retinoic acid (what tretinoin already is). Each step loses potency. That's why tretinoin works faster and more effectively.
+
+**OTC Path (No Prescription):**
+1. Start with 0.3% retinol
+2. Build to 0.5% over 4-6 weeks
+3. Move to 1% retinol or Differin
+4. Use for 6-12 months before considering Rx
+
+**Prescription Path (Faster Results):**
+1. Get tretinoin 0.025% from dermatologist or telehealth
+2. Build tolerance over 6-12 weeks
+3. Increase to 0.05% when tolerated
+4. Optional: move to 0.1% for maximum efficacy
+
+**Telehealth Options:**
+- Curology (custom formulations, $20-30/month)
+- Apostrophe (tretinoin available)
+- Dermatica (UK)
+
+These services offer tretinoin without an in-person dermatologist visit.`,
+    },
+    {
+      id: 'dermatologist-decision',
+      title: 'When to See a Dermatologist',
+      humorLevel: 'medium',
+      content: `Some things you can handle at home. Others need a professional. Here's the decision tree:
+
+**See a Dermatologist If:**
+
+✅ **Acne Issues:**
+- Cystic/nodular acne (deep, painful, under-skin)
+- Acne that scars (you're running out of time)
+- No improvement after 3 months of OTC treatment
+- Acne covering large areas (back, chest, face)
+
+✅ **Prescription Needs:**
+- Want tretinoin but can't access telehealth
+- Need isotretinoin (Accutane)
+- Hormonal acne (women: may need spironolactone)
+- Need antibiotics (short-term)
+
+✅ **Suspicious Spots:**
+- Any mole that changes in size, shape, or color
+- New spots that don't heal in 3 weeks
+- Anything that bleeds, itches, or crusts repeatedly
+
+✅ **Chronic Conditions:**
+- Rosacea (flushing, visible blood vessels)
+- Eczema/dermatitis (persistent dry, itchy patches)
+- Psoriasis (thick, scaly patches)
+- Melasma (hormonal dark patches)
+
+**Handle at Home:**
+- Mild acne (occasional pimples, blackheads)
+- General skincare routine building
+- Hyperpigmentation (dark spots from healed acne)
+- Dry skin issues
+- Sun damage prevention
+
+**Cost-Effective Options:**
+1. **Telehealth first** — Curology, Apostrophe ($20-40/month)
+2. **Walk-in clinic** — Can prescribe basic Rx ($50-150)
+3. **Full dermatologist** — For complex cases ($150-300)
+
+**Pro Tip:** Take photos of your skin over time. Show them to your dermatologist. They can only see your skin in that moment—photos show the full picture.`,
     },
     {
       id: 'action-plan',

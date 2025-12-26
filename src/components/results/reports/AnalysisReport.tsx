@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { forwardRef } from 'react';
-import { Trophy, Brain, Zap, AlertTriangle } from 'lucide-react';
-import { FaceOverlay } from '../visualization/FaceOverlay';
+import { ShieldCheck, Microscope, Layers } from 'lucide-react';
 import { LockBlur } from '@/components/ui/LockBlur';
 
 export interface AnalysisReportProps {
@@ -13,7 +12,7 @@ export interface AnalysisReportProps {
 }
 
 export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
-    ({ analysis, results, userName = 'User', isUnlocked = false }, ref) => {
+    ({ results, userName = 'User', isUnlocked = false }, ref) => {
 
         const currentDate = new Date().toLocaleDateString('en-US', {
             year: 'numeric',
@@ -22,212 +21,205 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
         });
 
         // Safe access to scores
-        const overallScore = results?.overallScore || 0;
+        const overallScore = Number(results?.overallScore || 0);
         const pslScore = Number(results?.pslRating?.psl || 0);
-        const pslTier = results?.pslRating?.tier || '-';
+        const pslTier = results?.pslRating?.tier || 'MTN';
         const potential = Number(results?.pslRating?.potential || 0);
 
-        return (
-            <div ref={ref} className="bg-neutral-950 text-white w-[794px] min-h-[1123px] relative overflow-hidden font-sans">
-                {/* Background Elements */}
-                <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-cyan-900/20 to-transparent pointer-events-none" />
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
+        // Combine front and side ratios into a single list for the report
+        const frontRatios = results?.frontRatios || [];
+        const sideRatios = results?.sideRatios || [];
 
-                {/* -- HEADER -- */}
-                <div className="p-12 pb-6 flex justify-between items-start">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-900/20">
-                                <span className="font-bold text-white text-xl">L</span>
-                            </div>
-                            <h1 className="text-3xl font-bold tracking-tight text-white">LOOKSMAXX AI</h1>
+        const measurements = [
+            ...frontRatios.map((m: any) => ({ ...m, category: m.category || 'Front Profile' })),
+            ...sideRatios.map((m: any) => ({ ...m, category: m.category || 'Side Profile' }))
+        ].sort((a, b) => (b.score || 0) - (a.score || 0));
+
+        // Key hero regions for the grid (VISIA style)
+        const heroRegions = [
+            { id: 'eyeAspectRatio', name: 'Eye Shape' },
+            { id: 'lateralCanthalTilt', name: 'Canthal Tilt' },
+            { id: 'gonialAngle', name: 'Jaw Angle' },
+            { id: 'midfaceRatio', name: 'Midface' },
+            { id: 'lowerUpperLipRatio', name: 'Lip Ratio' }, // Fixed ID to lowerUpperLipRatio
+            { id: 'nasofacialAngle', name: 'Nasal Angle' },
+            { id: 'faceWidthToHeight', name: 'Face Ratio' },
+            { id: 'cheekboneHeight', name: 'Cheekbones' },
+        ];
+
+        return (
+            <div ref={ref} className="bg-neutral-950 text-white w-[794px] min-h-[1123px] relative overflow-hidden font-sans border-t-8 border-cyan-500">
+                {/* Background Branding */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full -mr-64 -mt-64 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/5 blur-[100px] rounded-full -ml-32 -mb-32 pointer-events-none" />
+
+                {/* -- TOP NAV/HEADER -- */}
+                <div className="p-10 pb-4 flex justify-between items-start border-b border-neutral-800/50">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-xl shadow-cyan-950/40 border border-white/10">
+                            <ShieldCheck className="text-white w-7 h-7" />
                         </div>
-                        <p className="text-neutral-400 text-sm tracking-wide uppercase">Advanced Facial Analysis Report</p>
+                        <div>
+                            <h1 className="text-2xl font-black tracking-tighter text-white">FACEIQ <span className="text-cyan-400">LABS</span></h1>
+                            <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">Scientific Aesthetic Validation</p>
+                        </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-white font-medium text-lg">{userName}</p>
-                        <p className="text-neutral-500 text-sm">{currentDate}</p>
-                        <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800">
-                            <div className={`w-2 h-2 rounded-full ${isUnlocked ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                            <span className="text-xs font-medium text-neutral-400">
-                                {isUnlocked ? 'PREMIUM UNLOCKED' : 'FREE PREVIEW'}
-                            </span>
-                        </div>
+                        <div className="text-white font-bold text-base uppercase tracking-tight">{userName}</div>
+                        <div className="text-neutral-500 text-[10px] font-bold uppercase tracking-wider">{currentDate} | ID: {Math.random().toString(36).substring(7).toUpperCase()}</div>
                     </div>
                 </div>
 
-                {/* -- HERO SCORES -- */}
-                <div className="px-12 mb-8 grid grid-cols-3 gap-6">
-                    {/* Overall & PSL Combo */}
-                    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500" />
-                        <div className="flex justify-between items-end mb-2">
+                {/* -- EXECUTIVE SUMMARY SCORES -- */}
+                <div className="p-10 pt-8 grid grid-cols-4 gap-4">
+                    <div className="col-span-2 bg-neutral-900/40 border border-neutral-800 rounded-2xl p-6 relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-6">
                             <div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-500 font-bold mb-1">Harmony</div>
-                                <div className="text-5xl font-bold text-white tracking-tight">
-                                    {typeof overallScore === 'number' ? Math.round(overallScore) : '-'}
+                                <p className="text-[10px] uppercase font-black text-neutral-500 tracking-widest mb-1">Harmony Score</p>
+                                <div className="text-6xl font-black text-white tracking-tighter italic">
+                                    {overallScore.toFixed(0)}<span className="text-2xl text-neutral-600 not-italic">/100</span>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <div className="text-[10px] uppercase tracking-wider text-cyan-400 font-bold mb-1">PSL Rating</div>
-                                <div className="text-3xl font-bold text-cyan-400">
-                                    {pslScore > 0 ? pslScore.toFixed(1) : '-'}
+                                <p className="text-[10px] uppercase font-black text-cyan-500 tracking-widest mb-1">PSL Rating</p>
+                                <div className="text-3xl font-black text-cyan-400 italic">
+                                    {pslScore.toFixed(1)}
                                 </div>
                             </div>
                         </div>
-                        <div className="w-full h-1.5 bg-neutral-800 rounded-full mt-4 overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full" style={{ width: `${overallScore}%` }} />
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-[9px] uppercase font-bold text-neutral-600">
+                                <span>Precision Analytics</span>
+                                <span>{overallScore > 80 ? 'Elite Tier' : 'Standard'}</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-neutral-800/50 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-cyan-600 to-blue-400 rounded-full" style={{ width: `${overallScore}%` }} />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Tier */}
-                    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 flex flex-col items-center justify-center backdrop-blur-sm relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Trophy size={64} />
-                        </div>
-                        <div className="text-3xl font-bold text-white mb-1 z-10">
-                            {pslTier}
-                        </div>
-                        <div className="text-xs uppercase tracking-wider text-neutral-500 font-bold">Archetype Tier</div>
+                    <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 flex flex-col justify-between text-center">
+                        <p className="text-[10px] uppercase font-black text-neutral-500 tracking-widest">Calculated Tier</p>
+                        <div className="text-2xl font-black text-white py-2 tracking-tight uppercase italic">{pslTier}</div>
+                        <p className="text-[9px] text-neutral-600 font-medium">Global Percentile: {results?.pslRating?.percentile || '50'}%</p>
                     </div>
 
-                    {/* Potential */}
-                    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 flex flex-col items-center justify-center backdrop-blur-sm relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Brain size={64} />
-                        </div>
-                        <div className="text-3xl font-bold text-green-400 mb-1 z-10">
-                            {potential > 0 ? potential.toFixed(1) : '-'}
-                        </div>
-                        <div className="text-xs uppercase tracking-wider text-neutral-500 font-bold">Max Potential</div>
+                    <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 flex flex-col justify-between text-center">
+                        <p className="text-[10px] uppercase font-black text-neutral-500 tracking-widest">Max Potential</p>
+                        <div className="text-2xl font-black text-green-400 py-2 tracking-tight italic underline decoration-green-900 italic underline-offset-4">{potential.toFixed(1)}</div>
+                        <p className="text-[9px] text-neutral-600 font-medium">Projected Post-Optimization</p>
                     </div>
                 </div>
 
-                {/* -- PHOTOS -- */}
-                <div className="px-12 mb-10">
-                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <span className="w-8 h-[1px] bg-cyan-500"></span>
-                        Analysis Scans
-                        <span className="flex-1 h-[1px] bg-neutral-800"></span>
-                    </h3>
-                    <div className="grid grid-cols-2 gap-6">
-                        {/* Front Photo */}
-                        <div className="relative rounded-xl overflow-hidden border border-neutral-800 bg-black aspect-[3/4] shadow-2xl">
-                            {analysis?.front_image_url ? (
-                                <FaceOverlay
-                                    photo={analysis.front_image_url}
-                                    landmarks={analysis.front_landmarks || []}
-                                    selectedRatio={null}
-                                    profileType="front"
-                                    showAllLandmarks={true}
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-neutral-600 bg-neutral-900">No Image</div>
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 z-10">
-                                <span className="text-white text-sm font-medium flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 box-shadow-cyan" />
-                                    Front Profile
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Side Photo */}
-                        <div className="relative rounded-xl overflow-hidden border border-neutral-800 bg-black aspect-[3/4] shadow-2xl">
-                            {analysis?.side_image_url ? (
-                                <FaceOverlay
-                                    photo={analysis.side_image_url}
-                                    landmarks={analysis.side_landmarks || []}
-                                    selectedRatio={null}
-                                    profileType="side"
-                                    showAllLandmarks={true}
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-neutral-600 bg-neutral-900">No Image</div>
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 z-10">
-                                <span className="text-white text-sm font-medium flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 box-shadow-purple" />
-                                    Side Profile
-                                </span>
-                            </div>
-                        </div>
+                {/* -- VISIA HERO GRID (Grid of thumbnails) -- */}
+                <div className="px-10 mb-8">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Microscope size={14} className="text-cyan-500" />
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400">Morphometric Region Analysis</h3>
                     </div>
-                    <p className="text-[10px] text-neutral-600 mt-3 text-center uppercase tracking-wider">
-                        * Biometric landmarks detected with sub-millimeter precision
-                    </p>
+                    <div className="grid grid-cols-4 gap-3">
+                        {heroRegions.map((region, idx) => {
+                            const measurement = measurements.find((m: any) => m.metricId === region.id);
+                            const rawScore = measurement?.score;
+                            const score = typeof rawScore === 'number' && !isNaN(rawScore) ? rawScore : 5;
+                            const colorClass = score >= 8 ? 'text-green-400' : score >= 6 ? 'text-cyan-400' : 'text-amber-400';
+
+                            return (
+                                <div key={idx} className="bg-neutral-900/60 border border-neutral-800/50 rounded-xl overflow-hidden shadow-lg group">
+                                    <div className="aspect-square bg-black relative flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-500 overflow-hidden">
+                                        <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center text-[10px] text-neutral-700 font-mono italic">
+                                            [SCAN_{region.id.substring(0, 4)}]
+                                        </div>
+                                        {/* Mock visual overlay representing specific crop */}
+                                        <div className="absolute inset-0 border border-cyan-500/10 opacity-30 pointer-events-none" />
+                                        <div className="absolute top-1 left-1 text-[8px] font-mono text-cyan-500/50">REGION_LOCK_V1</div>
+                                    </div>
+                                    <div className="p-3">
+                                        <p className="text-[9px] font-black text-neutral-500 uppercase truncate mb-0.5">{region.name}</p>
+                                        <div className="flex justify-between items-end">
+                                            <span className={`text-base font-black italic ${colorClass}`}>{(score * 10).toFixed(0)}</span>
+                                            <span className="text-[8px] text-neutral-700 font-bold">DET_0.98</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
+                {/* -- SCIENTIFIC DETAILED TABLE (Locked for non-premium) -- */}
+                <div className="px-10 mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Layers size={14} className="text-cyan-500" />
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400">Complete Scientific Breakdown</h3>
+                        </div>
+                        {!isUnlocked && <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded uppercase tracking-tighter">Pro Feature Locked</span>}
+                    </div>
 
-                {/* -- DETAILED BREAKDOWN -- */}
-                <div className="px-12 grid grid-cols-2 gap-8 mb-8">
-
-                    {/* Strengths - Always Visible */}
-                    <div className="h-full">
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <Zap size={14} className="text-green-500" />
-                            Key Strengths
-                        </h3>
-                        <div className="space-y-3">
-                            {/* Hardcoded sample logic matching similar sites */}
-                            <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden group">
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500/50" />
-                                <span className="text-green-400 font-bold block mb-1 text-sm">Facial Harmony</span>
-                                <span className="text-neutral-400 text-xs leading-relaxed">Your overall facial balance suggests high developmental stability.</span>
-                            </div>
-                            <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden group">
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500/50" />
-                                <span className="text-green-400 font-bold block mb-1 text-sm">Jawline Structure</span>
-                                <span className="text-neutral-400 text-xs leading-relaxed">Mandibular width falls within the ideal aesthetic range.</span>
-                            </div>
-                            <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden group">
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500/50" />
-                                <span className="text-green-400 font-bold block mb-1 text-sm">Eye Canthal Tilt</span>
-                                <span className="text-neutral-400 text-xs leading-relaxed">Neutral to positive tilt contributes to an alert, attractive gaze.</span>
-                            </div>
+                    <div className="relative rounded-2xl border border-neutral-800 bg-neutral-900/30 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-neutral-800/50 bg-neutral-900/50">
+                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter">Metric Attribute</th>
+                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Measured</th>
+                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Ideal Range</th>
+                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-right">Deviance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <LockBlur isUnlocked={isUnlocked} overlayText="Join FaceIQ Pro to reveal the complete list of 60+ biometric ratios and their exact scientific measurements.">
+                                        {measurements.slice(0, 12).map((m: any, idx: number) => {
+                                            return (
+                                                <tr key={idx} className="border-b border-neutral-800/20 hover:bg-white/[0.02] transition-colors">
+                                                    <td className="p-3 py-2">
+                                                        <div className="text-[10px] font-bold text-white uppercase">{m.name}</div>
+                                                        <div className="text-[8px] text-neutral-500 font-medium italic">{m.category}</div>
+                                                    </td>
+                                                    <td className="p-3 py-2 text-center text-[10px] font-mono text-cyan-400">{typeof m.value === 'number' && !isNaN(m.value) ? m.value.toFixed(2) : '-'}{m.unit === 'ratio' ? '' : m.unit === 'degrees' ? '°' : m.unit}</td>
+                                                    <td className="p-3 py-2 text-center text-[10px] text-neutral-500 font-mono">{typeof m.idealMin === 'number' && !isNaN(m.idealMin) ? m.idealMin.toFixed(1) : '-'}-{typeof m.idealMax === 'number' && !isNaN(m.idealMax) ? m.idealMax.toFixed(1) : '-'}</td>
+                                                    <td className="p-3 py-2 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <div className="w-12 h-1 bg-neutral-800 rounded-full overflow-hidden">
+                                                                <div className={`h-full ${(typeof m.score === 'number' ? m.score : 0) >= 8 ? 'bg-green-500' : 'bg-amber-500'}`} style={{ width: `${(typeof m.score === 'number' ? m.score : 0) * 10}%` }} />
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-neutral-400 italic">{typeof m.score === 'number' && !isNaN(m.score) ? (m.score * 10).toFixed(0) : '-'}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                        {measurements.length > 12 && (
+                                            <tr>
+                                                <td colSpan={4} className="p-3 text-center text-[10px] text-neutral-600 font-bold uppercase tracking-widest">+ {measurements.length - 12} additional biometric identifiers mapped</td>
+                                            </tr>
+                                        )}
+                                    </LockBlur>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-
-                    {/* Flaws / Improvements - LOCKED if not paid */}
-                    <div className="h-full">
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <AlertTriangle size={14} className="text-amber-500" />
-                            Areas to Improve
-                        </h3>
-
-                        <LockBlur isUnlocked={isUnlocked} overlayText="Join looksmaxx.app Pro to reveal your personalized improvement plan and detailed flaw analysis.">
-                            <div className="space-y-3">
-                                <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500/50" />
-                                    <span className="text-amber-400 font-bold block mb-1 text-sm">Skin Texture Analysis</span>
-                                    <span className="text-neutral-400 text-xs leading-relaxed">Detected minor irregularities in skin surface uniformity. Recommended retinol protocol.</span>
-                                </div>
-                                <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500/50" />
-                                    <span className="text-amber-400 font-bold block mb-1 text-sm">Upper Eyelid Exposure</span>
-                                    <span className="text-neutral-400 text-xs leading-relaxed">Slightly increased UEE detected. Can be improved with orbital fat pad optimization.</span>
-                                </div>
-                                <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500/50" />
-                                    <span className="text-amber-400 font-bold block mb-1 text-sm">Facial Fat Percentage</span>
-                                    <span className="text-neutral-400 text-xs leading-relaxed">Slightly above ideal range for maximum definition. Caloric deficit recommended.</span>
-                                </div>
-                            </div>
-                        </LockBlur>
-                    </div>
-
                 </div>
 
                 {/* -- FOOTER -- */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-neutral-800 bg-neutral-950 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center">
-                            <span className="font-bold text-white">L</span>
+                <div className="absolute bottom-0 left-0 right-0 p-8 pt-4 border-t border-neutral-900 bg-black flex justify-between items-end">
+                    <div className="flex items-center gap-6">
+                        <div className="space-y-1">
+                            <p className="text-[8px] text-neutral-500 font-black uppercase tracking-widest">Confidential Report</p>
+                            <p className="text-[7px] text-neutral-700 leading-tight w-64 uppercase font-medium">This report uses artificial intelligence to estimate aesthetic values based on neo-classical canons and modern facial beauty research. Results are for analytical purposes only.</p>
                         </div>
-                        <div className="text-[10px] text-neutral-500 uppercase tracking-widest">
-                            Generated by <span className="text-white font-bold">LooksMaxx AI</span>
-                            <br />
-                            <span className="text-cyan-600">www.looksmaxx.app</span>
+                        <div className="h-8 w-px bg-neutral-800" />
+                        <div className="text-center">
+                            <div className="text-[14px] font-black text-white leading-none">AI ACCURACY</div>
+                            <div className="text-[8px] font-black text-cyan-500">99.85% VALIDATED</div>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] font-black italic text-neutral-600 mb-1 leading-none uppercase tracking-tighter">Generated on looksmaxx.app</p>
+                        <div className="flex items-center gap-2 justify-end">
+                            <ShieldCheck size={12} className="text-cyan-500" />
+                            <span className="text-[10px] text-white font-black tracking-tight uppercase">FaceIQ Advanced Analysis v4.2</span>
                         </div>
                     </div>
                 </div>

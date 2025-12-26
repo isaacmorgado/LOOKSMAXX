@@ -2,24 +2,22 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { User, ScanFace, Sparkles, ChevronRight, TrendingUp, TrendingDown, Lightbulb, Ruler } from 'lucide-react';
+import { User, ScanFace, ChevronRight, TrendingUp, TrendingDown, Eye, Zap } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useHeightOptional } from '@/contexts/HeightContext';
 import { TabContent } from '../ResultsLayout';
-import { ScoreBar, AnimatedScore, ShareButton, ExportButton } from '../shared';
-import { KeyStrengthsSection, AreasOfImprovementSection } from '../cards/KeyStrengthsFlaws';
-import VisionInsightsCard from '../cards/VisionInsightsCard';
+import { AnimatedScore, ShareButton, ExportButton } from '../shared';
 import { FacialRadarChart } from '../visualization/FacialRadarChart';
 import { RatioDetailModal } from '../modals/RatioDetailModal';
 import { getScoreColor, ResponsibleRatio, Ratio } from '@/types/results';
 import { MetricScoreResult } from '@/lib/harmony-scoring';
-import { RankedMetric, getWeightTierColor } from '@/lib/looksmax-scoring';
+import { RankedMetric } from '@/lib/looksmax-scoring';
 import { calculatePSL, getTierColor } from '@/lib/psl-calculator';
 import { useState, useCallback, useMemo } from 'react';
 import { usePricing } from '@/contexts/PricingContext';
 
 // ============================================
-// SCORE SUMMARY CARDS
+// BENTO GRID CARDS - Clean, hierarchical design
 // ============================================
 
 interface ProfileScoreCardProps {
@@ -38,119 +36,35 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
   return (
     <motion.button
       onClick={onClick}
-      className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-all text-left w-full"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <div className="flex items-center gap-5">
-        {/* Photo or icon */}
-        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-          {photo ? (
-            <Image
-              src={photo}
-              alt={title}
-              width={64}
-              height={64}
-              className="object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              {icon}
-            </div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1">
-          <h3 className="text-sm font-medium text-neutral-400 mb-1">{title}</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold" style={{ color }}>
-              {typeof score === 'number' ? score.toFixed(2) : score}
-            </span>
-            <span className="text-sm text-neutral-500">/ 10</span>
-          </div>
-          <p className="text-xs text-neutral-500 mt-1">{ratioCount} measurements</p>
-        </div>
-
-        {/* Arrow */}
-        <ChevronRight size={20} className="text-neutral-600" />
-      </div>
-
-      {/* Score bar */}
-      <div className="mt-3">
-        <ScoreBar score={numericScore} height={6} />
-      </div>
-    </motion.button>
-  );
-}
-
-// ============================================
-// PSL PREVIEW CARD
-// ============================================
-
-interface PSLPreviewCardProps {
-  score: number;
-  tier: string;
-  tierColor: string;
-  hasHeight: boolean;
-  onClick: () => void;
-}
-
-function PSLPreviewCard({ score, tier, tierColor, hasHeight, onClick }: PSLPreviewCardProps) {
-  if (!hasHeight) {
-    // Prompt to enter height
-    return (
-      <motion.button
-        onClick={onClick}
-        className="bg-neutral-900/80 border border-dashed border-neutral-700 rounded-xl p-4 hover:border-cyan-500/50 transition-all text-left w-full"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
-            <Ruler size={24} className="text-cyan-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-white mb-1">Get Your PSL Rating</h3>
-            <p className="text-xs text-neutral-400">Enter your height to calculate your Pretty Scale Level score</p>
-          </div>
-          <ChevronRight size={20} className="text-cyan-400" />
-        </div>
-      </motion.button>
-    );
-  }
-
-  return (
-    <motion.button
-      onClick={onClick}
-      className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-cyan-500/30 transition-all text-left w-full"
-      whileHover={{ scale: 1.02 }}
+      className="group bg-neutral-900/60 border border-neutral-800/50 rounded-2xl p-4 hover:border-cyan-500/30 hover:bg-neutral-900/80 transition-all text-left w-full"
+      whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center gap-4">
-        {/* PSL Score */}
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${tierColor}20` }}>
-          <span className="text-2xl font-bold" style={{ color: tierColor }}>
-            {score.toFixed(1)}
-          </span>
+        {/* Photo */}
+        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0">
+          {photo ? (
+            <Image src={photo} alt={title} width={48} height={48} className="object-cover" unoptimized />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">{icon}</div>
+          )}
         </div>
 
         {/* Info */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-medium text-neutral-400">PSL Rating</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${tierColor}20`, color: tierColor }}>
-              {tier}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{title}</h3>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold" style={{ color }}>
+              {typeof score === 'number' ? score.toFixed(1) : score}
             </span>
+            <span className="text-xs text-neutral-600">/10</span>
           </div>
-          <p className="text-xs text-neutral-500">Face (75%) + Height (20%) + Body (5%)</p>
         </div>
 
         {/* Arrow */}
-        <div className="flex flex-col items-end">
-          <span className="text-xs text-neutral-500 mb-1">View Details</span>
-          <ChevronRight size={20} className="text-neutral-600" />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-neutral-600">{ratioCount}</span>
+          <ChevronRight size={16} className="text-neutral-700 group-hover:text-cyan-400 transition-colors" />
         </div>
       </div>
     </motion.button>
@@ -158,287 +72,139 @@ function PSLPreviewCard({ score, tier, tierColor, hasHeight, onClick }: PSLPrevi
 }
 
 // ============================================
-// QUICK INSIGHTS - TOP/BOTTOM METRICS WITH ADVICE
+// QUICK STATS ROW - Condensed horizontal display
 // ============================================
 
-interface MetricInsightCardProps {
-  metric: RankedMetric;
-  type: 'strength' | 'improvement';
-  index: number;
-}
-
-function MetricInsightCard({ metric, type, index }: MetricInsightCardProps) {
-  const isStrength = type === 'strength';
-  const color = getScoreColor(metric.score);
-  const weightTierClass = getWeightTierColor(metric.weightTier);
-
-  return (
-    <motion.div
-      className={`bg-neutral-900/80 border rounded-xl p-4 ${isStrength ? 'border-green-500/30' : 'border-orange-500/30'
-        }`}
-      initial={{ opacity: 0, x: isStrength ? -20 : 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 * index }}
-    >
-      <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isStrength ? 'bg-green-500/20' : 'bg-orange-500/20'
-          }`}>
-          {isStrength ? (
-            <TrendingUp size={16} className="text-green-400" />
-          ) : (
-            <TrendingDown size={16} className="text-orange-400" />
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-medium text-white text-sm truncate">{metric.name}</h4>
-            <span className={`text-xs px-1.5 py-0.5 rounded border ${weightTierClass}`}>
-              {metric.weightTier === 'high' ? '3x' : metric.weightTier === 'medium' ? '2x' : '1x'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-lg font-bold" style={{ color }}>
-              {typeof metric.score === 'number' ? metric.score.toFixed(1) : metric.score}
-            </span>
-            <span className="text-xs text-neutral-500">
-              Ideal: {typeof metric.idealMin === 'number' ? metric.idealMin.toFixed(1) : metric.idealMin} - {typeof metric.idealMax === 'number' ? metric.idealMax.toFixed(1) : metric.idealMax}
-            </span>
-          </div>
-
-          {/* Advice */}
-          <div className="flex items-start gap-2 mt-2 p-2 bg-neutral-800/50 rounded-lg">
-            <Lightbulb size={14} className={isStrength ? 'text-green-400 mt-0.5' : 'text-orange-400 mt-0.5'} />
-            <p className="text-xs text-neutral-300 leading-relaxed">{metric.advice}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-interface QuickInsightsSectionProps {
+interface QuickStatsRowProps {
   topMetrics: RankedMetric[];
   bottomMetrics: RankedMetric[];
+  onViewDetails: () => void;
 }
 
-function QuickInsightsSection({ topMetrics, bottomMetrics }: QuickInsightsSectionProps) {
-  if (topMetrics.length === 0 && bottomMetrics.length === 0) return null;
+function QuickStatsRow({ topMetrics, bottomMetrics, onViewDetails }: QuickStatsRowProps) {
+  const topMetric = topMetrics[0];
+  const bottomMetric = bottomMetrics[0];
+
+  if (!topMetric && !bottomMetric) return null;
 
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-        <Lightbulb size={20} className="text-cyan-400" />
-        Quick Insights
-      </h3>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Top 3 Strengths */}
-        <div>
-          <h4 className="text-sm font-medium text-green-400 mb-3 flex items-center gap-2">
-            <TrendingUp size={14} />
-            Top Strengths
-          </h4>
-          <div className="space-y-3">
-            {topMetrics.map((metric, index) => (
-              <MetricInsightCard
-                key={metric.metricId}
-                metric={metric}
-                type="strength"
-                index={index}
-              />
-            ))}
-          </div>
+    <div className="flex flex-wrap items-center gap-3">
+      {topMetric && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-xl">
+          <TrendingUp size={14} className="text-green-400" />
+          <span className="text-xs text-neutral-400">Best:</span>
+          <span className="text-sm font-medium text-green-400">{topMetric.name}</span>
+          <span className="text-xs text-green-400/70">
+            {typeof topMetric.score === 'number' ? topMetric.score.toFixed(1) : topMetric.score}
+          </span>
         </div>
-
-        {/* Bottom 3 - Areas to Improve */}
-        <div>
-          <h4 className="text-sm font-medium text-orange-400 mb-3 flex items-center gap-2">
-            <TrendingDown size={14} />
-            Areas to Improve
-          </h4>
-          <div className="space-y-3">
-            {bottomMetrics.map((metric, index) => (
-              <MetricInsightCard
-                key={metric.metricId}
-                metric={metric}
-                type="improvement"
-                index={index}
-              />
-            ))}
-          </div>
+      )}
+      {bottomMetric && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+          <TrendingDown size={14} className="text-orange-400" />
+          <span className="text-xs text-neutral-400">Focus:</span>
+          <span className="text-sm font-medium text-orange-400">{bottomMetric.name}</span>
+          <span className="text-xs text-orange-400/70">
+            {typeof bottomMetric.score === 'number' ? bottomMetric.score.toFixed(1) : bottomMetric.score}
+          </span>
         </div>
-      </div>
+      )}
+      <button
+        onClick={onViewDetails}
+        className="ml-auto text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+      >
+        View all metrics <ChevronRight size={12} />
+      </button>
     </div>
   );
 }
 
 // ============================================
-// HARMONY SCORE DISPLAY (with AnimatedScore and Radar Chart)
+// HERO SCORE CARD - Clean bento-style main score
 // ============================================
 
-function HarmonyScoreDisplay() {
-  const { overallScore, frontScore, sideScore, harmonyPercentage, harmonyScoreResult, pslRating } = useResults();
-  const [showRadar, setShowRadar] = useState(true);
+function HeroScoreCard() {
+  const { overallScore, harmonyPercentage, pslRating } = useResults();
 
-  // Get tier color based on PSL
-  const getTierColor = (psl: number) => {
-    // Handle invalid PSL values
-    if (typeof psl !== 'number' || !Number.isFinite(psl)) {
-      return 'text-orange-400';
-    }
-    if (psl >= 7.0) return 'text-purple-400';
-    if (psl >= 6.0) return 'text-cyan-400';
-    if (psl >= 5.0) return 'text-green-400';
-    if (psl >= 4.0) return 'text-yellow-400';
-    return 'text-orange-400';
-  };
-
-  // Safe values for display with fallbacks
-  const safePslRating = useMemo(() => ({
-    psl: typeof pslRating?.psl === 'number' && Number.isFinite(pslRating.psl) ? pslRating.psl : 3.0,
-    tier: pslRating?.tier || 'Unknown',
-    percentile: typeof pslRating?.percentile === 'number' && Number.isFinite(pslRating.percentile) ? pslRating.percentile : 50,
-    description: pslRating?.description || 'Analysis pending',
-  }), [pslRating]);
-
-  const safeHarmonyPercentage = typeof harmonyPercentage === 'number' && Number.isFinite(harmonyPercentage)
-    ? harmonyPercentage
-    : 0;
-
-  const safeFrontScore = typeof frontScore === 'number' && Number.isFinite(frontScore) ? frontScore : 0;
-  const safeSideScore = typeof sideScore === 'number' && Number.isFinite(sideScore) ? sideScore : 0;
   const safeOverallScore = typeof overallScore === 'number' && Number.isFinite(overallScore) ? overallScore : 0;
+  const safeHarmonyPercentage = typeof harmonyPercentage === 'number' && Number.isFinite(harmonyPercentage) ? harmonyPercentage : 0;
+  const safePsl = typeof pslRating?.psl === 'number' && Number.isFinite(pslRating.psl) ? pslRating.psl : 3.0;
+  const safeTier = pslRating?.tier || 'MTN';
+  const safePercentile = typeof pslRating?.percentile === 'number' && Number.isFinite(pslRating.percentile) ? pslRating.percentile : 50;
+
+  const getPslColor = (psl: number) => {
+    if (psl >= 7.0) return '#a855f7';
+    if (psl >= 6.0) return '#22d3ee';
+    if (psl >= 5.0) return '#22c55e';
+    if (psl >= 4.0) return '#eab308';
+    return '#f97316';
+  };
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-2xl p-6 md:p-8"
+      className="bg-gradient-to-br from-neutral-900/90 to-neutral-950 border border-neutral-800/50 rounded-2xl p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left: Score Display */}
-        <div className="text-center flex flex-col justify-center">
-          <h2 className="text-lg font-medium text-neutral-400 mb-2">Weighted Harmony Score</h2>
+      {/* Header */}
+      <p className="text-xs text-neutral-500 uppercase tracking-wider mb-4">Weighted Harmony Score</p>
 
-          {/* PSL Rating Badge */}
-          <motion.div
-            className="flex justify-center mb-3"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
-          >
-            <div className="px-5 py-2 bg-gradient-to-r from-neutral-800 to-neutral-900 border border-neutral-700 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="text-center">
-                  <span className={`text-3xl font-bold ${getTierColor(safePslRating.psl)}`}>
-                    {safePslRating.psl.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-neutral-500 ml-1">PSL</span>
-                </div>
-                <div className="h-8 w-px bg-neutral-700" />
-                <div className="text-left">
-                  <p className={`text-sm font-semibold ${getTierColor(safePslRating.psl)}`}>
-                    {safePslRating.tier}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    Top {(100 - safePslRating.percentile).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Harmony Percentage Badge */}
-          <motion.div
-            className="flex justify-center mb-4"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3, type: 'spring' }}
-          >
-            <div className="px-4 py-1 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 rounded-full">
-              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-                {safeHarmonyPercentage.toFixed(1)}%
-              </span>
-              <span className="text-xs text-neutral-500 ml-2">Harmony</span>
-            </div>
-          </motion.div>
-
-          {/* Animated Score */}
-          <div className="flex justify-center mb-4">
-            <AnimatedScore
-              score={safeOverallScore}
-              duration={2.5}
-              delay={0.5}
-              showConfetti={true}
-              confettiThreshold={7.5}
-            />
+      {/* PSL + Tier Badge */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="px-4 py-2 bg-neutral-800/80 border border-neutral-700/50 rounded-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold" style={{ color: getPslColor(safePsl) }}>
+              {safePsl.toFixed(1)}
+            </span>
+            <span className="text-xs text-neutral-500">PSL</span>
+            <div className="h-4 w-px bg-neutral-700" />
+            <span className="text-xs font-medium" style={{ color: getPslColor(safePsl) }}>
+              {safeTier}
+            </span>
+            <span className="text-[10px] text-neutral-600">Top {(100 - safePercentile).toFixed(0)}%</span>
           </div>
-
-          {/* Profile Breakdowns */}
-          <div className="flex justify-center gap-8 mb-4">
-            <div className="text-center">
-              <p className="text-xs text-neutral-500 mb-1">Front Profile</p>
-              <p className="text-xl font-bold" style={{ color: getScoreColor(safeFrontScore) }}>
-                {safeFrontScore.toFixed(2)}
-              </p>
-            </div>
-            <div className="w-px bg-neutral-800" />
-            <div className="text-center">
-              <p className="text-xs text-neutral-500 mb-1">Side Profile</p>
-              <p className="text-xl font-bold" style={{ color: getScoreColor(safeSideScore) }}>
-                {safeSideScore.toFixed(2)}
-              </p>
-            </div>
-          </div>
-
-          {/* Weight Distribution */}
-          {harmonyScoreResult && (
-            <div className="flex justify-center gap-3 mb-4 text-xs">
-              <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                High Impact: {harmonyScoreResult.weightDistribution.highImpact.count}
-              </span>
-              <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                Medium: {harmonyScoreResult.weightDistribution.mediumImpact.count}
-              </span>
-              <span className="px-2 py-1 rounded bg-gray-500/20 text-gray-400 border border-gray-500/30">
-                Standard: {harmonyScoreResult.weightDistribution.standard.count}
-              </span>
-            </div>
-          )}
-
-          <p className="text-sm text-neutral-400 max-w-md mx-auto">
-            {safeHarmonyPercentage >= 80 ? 'Exceptional facial harmony. Your features are well-balanced and proportioned.' :
-              safeHarmonyPercentage >= 60 ? 'Good facial harmony with some areas that could be optimized.' :
-                safeHarmonyPercentage >= 40 ? 'Average facial harmony. Several areas have room for improvement.' :
-                  'Below average facial harmony. Multiple areas could benefit from attention.'}
-          </p>
         </div>
+      </div>
 
-        {/* Right: Radar Chart */}
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-neutral-400">Category Breakdown</h3>
-            <button
-              onClick={() => setShowRadar(!showRadar)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
-              {showRadar ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {showRadar && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex-1 min-h-[280px]"
-            >
-              <FacialRadarChart height={280} />
-            </motion.div>
-          )}
-        </div>
+      {/* Harmony Badge */}
+      <div className="inline-flex px-3 py-1 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 rounded-full mb-6">
+        <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+          {safeHarmonyPercentage.toFixed(0)}%
+        </span>
+        <span className="text-xs text-neutral-500 ml-2 self-center">Harmony</span>
+      </div>
+
+      {/* Main Score */}
+      <div className="flex justify-center">
+        <AnimatedScore
+          score={safeOverallScore}
+          duration={2}
+          delay={0.3}
+          showConfetti={true}
+          confettiThreshold={7.5}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================
+// RADAR CARD - Category breakdown
+// ============================================
+
+function RadarCard() {
+  return (
+    <motion.div
+      className="bg-neutral-900/60 border border-neutral-800/50 rounded-2xl p-4 h-full"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.2 }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-neutral-500 uppercase tracking-wider">Category Breakdown</p>
+      </div>
+      <div className="h-[220px]">
+        <FacialRadarChart height={220} />
       </div>
     </motion.div>
   );
@@ -455,8 +221,6 @@ export function OverviewTab() {
     sideScore,
     frontRatios,
     sideRatios,
-    strengths,
-    flaws,
     frontPhoto,
     sidePhoto,
     frontLandmarks,
@@ -476,8 +240,9 @@ export function OverviewTab() {
   const [selectedRatio, setSelectedRatio] = useState<MetricScoreResult | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Calculate PSL for the preview card
-  const pslPreviewData = useMemo(() => {
+  // Calculate PSL for the preview card (reserved for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _pslPreviewData = useMemo(() => {
     const heightCm = heightContext?.heightCm;
     if (!heightCm || !overallScore) {
       return { hasHeight: false, score: 0, tier: 'Unknown', tierColor: '#6b7280' };
@@ -526,8 +291,9 @@ export function OverviewTab() {
     } as MetricScoreResult;
   }, []);
 
-  // Handle ratio click from strengths/flaws sections
-  const handleRatioClick = useCallback((ratio: ResponsibleRatio, categoryName: string) => {
+  // Handle ratio click from strengths/flaws sections (reserved for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleRatioClick = useCallback((ratio: ResponsibleRatio, categoryName: string) => {
     // Find the full ratio data from frontRatios or sideRatios
     const fullRatio = allRatios.find(
       (r) => r.name === ratio.ratioName || r.id === ratio.ratioId
@@ -600,7 +366,7 @@ export function OverviewTab() {
   return (
     <TabContent
       title="Overview"
-      subtitle="Your complete facial harmony analysis"
+      subtitle="Your facial harmony analysis"
       rightContent={
         <div className="flex items-center gap-2">
           <ShareButton score={overallScore} frontScore={frontScore} sideScore={sideScore} />
@@ -608,88 +374,67 @@ export function OverviewTab() {
         </div>
       }
     >
-      {/* Main content with ID for export */}
-      <div id="results-overview">
-        {/* Harmony Score */}
-        <div className="mb-8">
-          <HarmonyScoreDisplay />
+      {/* Bento Grid Layout */}
+      <div id="results-overview" className="space-y-4">
+        {/* Row 1: Hero Score + Radar Chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-3">
+            <HeroScoreCard />
+          </div>
+          <div className="lg:col-span-2">
+            <RadarCard />
+          </div>
         </div>
 
-        {/* Profile Scores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Row 2: Profile Cards */}
+        <div className="grid grid-cols-2 gap-3">
           <ProfileScoreCard
-            title="Front Profile"
+            title="Front"
             score={frontScore}
-            icon={<User size={24} className="text-neutral-600" />}
+            icon={<User size={20} className="text-neutral-600" />}
             photo={frontPhoto}
             ratioCount={frontRatios.length}
             onClick={() => setActiveTab('front-ratios')}
           />
           <ProfileScoreCard
-            title="Side Profile"
+            title="Side"
             score={sideScore}
-            icon={<ScanFace size={24} className="text-neutral-600" />}
+            icon={<ScanFace size={20} className="text-neutral-600" />}
             photo={sidePhoto || undefined}
             ratioCount={sideRatios.length}
             onClick={() => setActiveTab('side-ratios')}
           />
         </div>
 
-        {/* PSL Preview Card */}
-        <div className="mb-8">
-          <PSLPreviewCard
-            score={pslPreviewData.score}
-            tier={pslPreviewData.tier}
-            tierColor={pslPreviewData.tierColor}
-            hasHeight={pslPreviewData.hasHeight}
+        {/* Row 3: Quick Stats */}
+        <div className="bg-neutral-900/40 border border-neutral-800/50 rounded-2xl p-4">
+          <QuickStatsRow
+            topMetrics={topMetrics}
+            bottomMetrics={bottomMetrics}
+            onViewDetails={() => setActiveTab('front-ratios')}
+          />
+        </div>
+
+        {/* Row 4: Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* PSL Card */}
+          <motion.button
             onClick={() => setActiveTab('psl')}
-          />
-        </div>
-
-        {/* Quick Insights - Top/Bottom Metrics with Advice (from looksmax_engine.py) */}
-        <QuickInsightsSection topMetrics={topMetrics} bottomMetrics={bottomMetrics} />
-
-        {/* AI Qualitative Insights Section */}
-        <div className="mb-8">
-          <VisionInsightsCard />
-        </div>
-
-        {/* Strengths & Flaws Grid - Harmony Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-          {/* Key Strengths */}
-          <KeyStrengthsSection
-            strengths={strengths}
-            onRatioClick={handleRatioClick}
-            initialShowCount={3}
-          />
-
-          {/* Areas of Improvement */}
-          <AreasOfImprovementSection
-            flaws={flaws}
-            onRatioClick={handleRatioClick}
-            initialShowCount={3}
-          />
-        </div>
-
-        {/* Call to Action */}
-        <motion.div
-          className="bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 rounded-xl p-6 flex items-center justify-between"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-              <Sparkles size={24} className="text-cyan-400" />
+            className="group flex items-center gap-4 p-4 bg-neutral-900/60 border border-neutral-800/50 rounded-2xl hover:border-purple-500/30 transition-all text-left"
+            whileHover={{ y: -2 }}
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Eye size={18} className="text-purple-400" />
             </div>
-            <div>
-              <h3 className="font-semibold text-white">Unlock Your Potential</h3>
-              <p className="text-sm text-neutral-400">
-                See personalized recommendations to improve your harmony score
-              </p>
+            <div className="flex-1">
+              <p className="text-xs text-neutral-500 uppercase tracking-wider">PSL Rating</p>
+              <p className="text-sm font-medium text-white">View detailed breakdown</p>
             </div>
-          </div>
-          <button
+            <ChevronRight size={16} className="text-neutral-700 group-hover:text-purple-400" />
+          </motion.button>
+
+          {/* Plan Card */}
+          <motion.button
             onClick={() => {
               if (isUnlocked) {
                 setActiveTab('plan');
@@ -697,13 +442,22 @@ export function OverviewTab() {
                 openPricingModal('overview_cta');
               }
             }}
-            className="px-4 py-2 bg-cyan-500 text-black font-medium rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2"
+            className="group flex items-center gap-4 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl hover:border-cyan-500/40 transition-all text-left"
+            whileHover={{ y: -2 }}
           >
-            {isUnlocked ? 'View Plan' : 'Unlock Now'}
-            <ChevronRight size={16} />
-          </button>
-        </motion.div>
-      </div>{/* End of results-overview */}
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+              <Zap size={18} className="text-cyan-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-neutral-500 uppercase tracking-wider">Your Plan</p>
+              <p className="text-sm font-medium text-white">
+                {isUnlocked ? 'View recommendations' : 'Unlock your potential'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-neutral-700 group-hover:text-cyan-400" />
+          </motion.button>
+        </div>
+      </div>
 
       {/* Ratio Detail Modal */}
       <RatioDetailModal

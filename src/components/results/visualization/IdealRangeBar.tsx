@@ -35,7 +35,8 @@ export function IdealRangeBar({
   const markerColor = getScoreColor(score);
   const isInIdealRange = value >= idealMin && value <= idealMax;
 
-  const formatValue = (v: number) => {
+  const formatValue = (v: number | string | undefined) => {
+    if (typeof v !== 'number' || isNaN(v)) return '-';
     if (unit === '%' || unit === '°') return v.toFixed(1);
     return v.toFixed(2);
   };
@@ -138,7 +139,7 @@ export function IdealRangeBar({
           className="text-sm font-medium"
           style={{ color: markerColor }}
         >
-          Score: {score.toFixed(2)}/10
+          Score: {typeof score === 'number' ? score.toFixed(2) : score}/10
           {isInIdealRange && (
             <span className="ml-2 text-cyan-400">In ideal range</span>
           )}

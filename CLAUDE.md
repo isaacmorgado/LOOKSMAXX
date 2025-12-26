@@ -244,19 +244,21 @@ See `docs/PRODUCT_GUIDES_IMPLEMENTATION.md` for full implementation plan.
 
 | Component | File | Details |
 |-----------|------|---------|
-| **GuidesTab** | `src/components/results/tabs/GuidesTab.tsx` | Full guide browsing UI |
-| **GuideStatsCard** | `src/components/results/tabs/GuidesTab.tsx` | Shows 9 guides, 95 min reading time |
+| **GuidesTab** | `src/components/results/tabs/GuidesTab.tsx` | Full guide browsing UI with gender filtering |
+| **GuideStatsCard** | `src/components/results/tabs/GuidesTab.tsx` | Shows 27 guides, 346 min reading time |
 | **GuideCard** | `src/components/results/tabs/GuidesTab.tsx` | Individual guide display with hover effects |
-| **CategorySection** | `src/components/results/tabs/GuidesTab.tsx` | Color-coded category grouping |
+| **CategorySection** | `src/components/results/tabs/GuidesTab.tsx` | Color-coded category grouping with gender awareness |
 | **SearchBar** | `src/components/results/tabs/GuidesTab.tsx` | Real-time guide search |
 | **Tab Integration** | `src/components/results/Results.tsx` | Wired into results page navigation |
 
 **Features:**
-- 3 color-coded categories (cyan/purple/amber)
+- 7 color-coded categories (cyan/purple/amber/pink/emerald/red)
+- **Gender-specific filtering**: Male users see male guides, female users see female guides
 - Search by title, description, subtitle, tags
 - Guide cards with: icon, title, subtitle, description, sections, products, read time
 - Responsive grid (1 col mobile, 2 cols desktop)
 - Smooth hover animations
+- Constrained media sizing (max-h-400px)
 
 ### Phase 5: Media & Conversion Features - COMPLETE (2025-12-26)
 
@@ -304,17 +306,20 @@ See `docs/PRODUCT_GUIDES_IMPLEMENTATION.md` for full implementation plan.
    - Phase 6-7: Polish, QA, and Launch
 
 ### Completed
-4. Forum link to main navigation ✅
-5. Product Guides Phase 0-5 ✅ (Types, Products, Content, UI, Media/Conversions)
-6. Auth endpoints verified working ✅ (23/23 API tests pass)
-7. Score clamping bug fixed ✅ (scores now always 0-10)
-8. Side profile orientation bug fixed ✅ (2025-12-26) - Landmarks no longer stick to left side
-9. Image downsampling for performance ✅ (2025-12-26) - 4-9x faster detection
-10. Leaderboard UI enhanced ✅ (2025-12-26) - Shows photos, strengths, improvements
-11. Guide media support ✅ (2025-12-26) - GIFs, images, captions, placements
-12. ProductCallout component ✅ (2025-12-26) - Region-aware affiliate CTAs
-13. Forum discussion links ✅ (2025-12-26) - Guides link to forum categories
-14. Fix Your Weak Points Flow ✅ (2025-12-26) - YourPhaseCard, WeakPointCard, ProgressComparisonCard, ProductBundleCard
+- Forum link to main navigation ✅
+- Product Guides Phase 0-5 ✅ (Types, Products, Content, UI, Media/Conversions)
+- Auth endpoints verified working ✅ (23/23 API tests pass)
+- Score clamping bug fixed ✅ (scores now always 0-10)
+- Side profile orientation bug fixed ✅ (2025-12-26)
+- Image downsampling for performance ✅ (2025-12-26) - 4-9x faster detection
+- Leaderboard UI enhanced ✅ (2025-12-26)
+- Guide media support ✅ (2025-12-26) - GIFs, images, captions, placements
+- ProductCallout component ✅ (2025-12-26) - Region-aware affiliate CTAs
+- Forum discussion links ✅ (2025-12-26)
+- Fix Your Weak Points Flow ✅ (2025-12-26)
+- v.toFixed TypeError fixed ✅ (2025-12-26) - Type guards in IdealRangeBar/GradientRangeBar
+- Guide image sizing fixed ✅ (2025-12-26) - Constrained to max-h-400px
+- Gender-specific guide filtering ✅ (2025-12-26) - Male/female guides filtered by user gender
 
 ## Performance Optimizations (2025-12-26) ✅
 
@@ -330,6 +335,9 @@ See `docs/PRODUCT_GUIDES_IMPLEMENTATION.md` for full implementation plan.
 |-----|------|-----|
 | **Side profile orientation inverted** | `src/lib/sideProfileDetection.ts:199` | Changed `faceOnLeft ? 'right' : 'left'` to `faceOnLeft ? 'left' : 'right'` |
 | **Landmarks sticking to left side** | Same as above | Edge detection now correctly identifies which side the face is on |
+| **v.toFixed TypeError** | `src/components/results/visualization/IdealRangeBar.tsx`, `GradientRangeBar.tsx` | Added type guards: `if (typeof v !== 'number' \|\| isNaN(v)) return '-'` |
+| **Guide images too large** | `src/components/results/tabs/GuidesTab.tsx` | Added `max-h-[400px] object-contain` to constrain media height |
+| **Gender guides not filtered** | `src/components/results/tabs/GuidesTab.tsx` | Added `getGuidesByGender()` filtering using ResultsContext gender |
 
 ## Fix Your Weak Points Flow (2025-12-26) ✅
 

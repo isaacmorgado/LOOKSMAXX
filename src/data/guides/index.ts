@@ -1,6 +1,7 @@
 /**
  * Guides Data Index
  * Central export for all guide-related data
+ * 27 Guides across 7 categories
  */
 
 import { Guide, GuideCategory } from '@/types/guides';
@@ -19,7 +20,7 @@ export {
   getCategoryDisplayInfo,
 } from './products-registry';
 
-// Individual Guides
+// Individual Guides - Original 9
 export { mindsetGuide } from './mindset';
 export { maintenanceGuide } from './maintenance';
 export { bodyFatGuide } from './body-fat';
@@ -29,6 +30,32 @@ export { coreNeckGuide } from './core-neck';
 export { cardioGuide } from './cardio';
 export { dietGuide } from './diet';
 export { skincareGuide } from './skincare';
+
+// Male-Specific Guides (5)
+export { hairLossGuide } from './hair-loss';
+export { beardGrowthGuide } from './beard-growth';
+export { mewingJawlineGuide } from './mewing-jawline';
+export { gynecomastiaGuide } from './gynecomastia';
+export { neckTrainingGuide } from './neck-training';
+
+// Female-Specific Guides (6)
+export { antiAgingWomenGuide } from './anti-aging-women';
+export { glassSkinGuide } from './glass-skin';
+export { hormonalSkinGuide } from './hormonal-skin';
+export { bodyContouringWomenGuide } from './body-contouring-women';
+export { postpartumRecoveryGuide } from './postpartum-recovery';
+export { feminineFeaturesGuide } from './feminine-features';
+
+// Surgery Guides (4)
+export { rhinoplastyGuide } from './rhinoplasty';
+export { jawSurgeryGuide } from './jaw-surgery';
+export { facialProceduresGuide } from './facial-procedures';
+export { bodySurgeryGuide } from './body-surgery';
+
+// Unisex Guides (3)
+export { teethSmileGuide } from './teeth-smile';
+export { fillerBotoxGuide } from './filler-botox';
+export { accutaneGuide } from './accutane';
 
 // ============================================
 // GUIDE REGISTRY
@@ -44,10 +71,37 @@ import { cardioGuide } from './cardio';
 import { dietGuide } from './diet';
 import { skincareGuide } from './skincare';
 
+// Male-Specific
+import { hairLossGuide } from './hair-loss';
+import { beardGrowthGuide } from './beard-growth';
+import { mewingJawlineGuide } from './mewing-jawline';
+import { gynecomastiaGuide } from './gynecomastia';
+import { neckTrainingGuide } from './neck-training';
+
+// Female-Specific
+import { antiAgingWomenGuide } from './anti-aging-women';
+import { glassSkinGuide } from './glass-skin';
+import { hormonalSkinGuide } from './hormonal-skin';
+import { bodyContouringWomenGuide } from './body-contouring-women';
+import { postpartumRecoveryGuide } from './postpartum-recovery';
+import { feminineFeaturesGuide } from './feminine-features';
+
+// Surgery
+import { rhinoplastyGuide } from './rhinoplasty';
+import { jawSurgeryGuide } from './jaw-surgery';
+import { facialProceduresGuide } from './facial-procedures';
+import { bodySurgeryGuide } from './body-surgery';
+
+// Unisex
+import { teethSmileGuide } from './teeth-smile';
+import { fillerBotoxGuide } from './filler-botox';
+import { accutaneGuide } from './accutane';
+
 /**
  * All guides in display order
  */
 export const ALL_GUIDES: Guide[] = [
+  // Original 9
   mindsetGuide,
   maintenanceGuide,
   bodyFatGuide,
@@ -57,6 +111,28 @@ export const ALL_GUIDES: Guide[] = [
   cardioGuide,
   dietGuide,
   skincareGuide,
+  // Male-Specific
+  hairLossGuide,
+  beardGrowthGuide,
+  mewingJawlineGuide,
+  gynecomastiaGuide,
+  neckTrainingGuide,
+  // Female-Specific
+  antiAgingWomenGuide,
+  glassSkinGuide,
+  hormonalSkinGuide,
+  bodyContouringWomenGuide,
+  postpartumRecoveryGuide,
+  feminineFeaturesGuide,
+  // Surgery
+  rhinoplastyGuide,
+  jawSurgeryGuide,
+  facialProceduresGuide,
+  bodySurgeryGuide,
+  // Unisex
+  teethSmileGuide,
+  fillerBotoxGuide,
+  accutaneGuide,
 ].sort((a, b) => a.order - b.order);
 
 /**
@@ -100,7 +176,7 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
     description: 'Build the body that commands respect.',
     icon: 'Dumbbell',
     color: 'purple',
-    guideIds: ['v-taper', 'training', 'core-neck', 'cardio'],
+    guideIds: ['v-taper', 'training', 'core-neck', 'cardio', 'neck-training'],
   },
   {
     id: 'appearance',
@@ -108,7 +184,39 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
     description: 'Dial in the details that matter.',
     icon: 'Sparkles',
     color: 'amber',
-    guideIds: ['diet', 'skincare'],
+    guideIds: ['diet', 'skincare', 'teeth-smile', 'accutane'],
+  },
+  {
+    id: 'male',
+    name: 'Male-Specific',
+    description: 'Guides tailored for men.',
+    icon: 'User',
+    color: 'cyan',
+    guideIds: ['hair-loss', 'beard-growth', 'mewing-jawline', 'gynecomastia'],
+  },
+  {
+    id: 'female',
+    name: 'Female-Specific',
+    description: 'Guides tailored for women.',
+    icon: 'Heart',
+    color: 'pink',
+    guideIds: ['anti-aging-women', 'glass-skin', 'hormonal-skin', 'body-contouring-women', 'postpartum-recovery', 'feminine-features'],
+  },
+  {
+    id: 'procedures',
+    name: 'Non-Surgical',
+    description: 'Injectables, lasers, and non-invasive procedures.',
+    icon: 'Syringe',
+    color: 'emerald',
+    guideIds: ['filler-botox'],
+  },
+  {
+    id: 'surgery',
+    name: 'Surgery',
+    description: 'When you want permanent change.',
+    icon: 'Stethoscope',
+    color: 'red',
+    guideIds: ['rhinoplasty', 'jaw-surgery', 'facial-procedures', 'body-surgery'],
   },
 ];
 
@@ -192,4 +300,20 @@ export function getAllGuideProductIds(): string[] {
     });
   });
   return Array.from(ids);
+}
+
+/**
+ * Get guides by gender filter
+ */
+export function getGuidesByGender(gender: 'male' | 'female' | 'all'): Guide[] {
+  if (gender === 'all') return ALL_GUIDES;
+
+  const maleGuideIds = ['hair-loss', 'beard-growth', 'mewing-jawline', 'gynecomastia', 'neck-training'];
+  const femaleGuideIds = ['anti-aging-women', 'glass-skin', 'hormonal-skin', 'body-contouring-women', 'postpartum-recovery', 'feminine-features'];
+
+  if (gender === 'male') {
+    return ALL_GUIDES.filter(g => !femaleGuideIds.includes(g.id));
+  } else {
+    return ALL_GUIDES.filter(g => !maleGuideIds.includes(g.id));
+  }
 }

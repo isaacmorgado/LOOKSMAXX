@@ -85,7 +85,13 @@ export type ProductCategory =
   | 'grooming'
   | 'skincare'
   | 'miscellaneous'
-  | 'supplements';
+  | 'supplements'
+  | 'hair'
+  | 'beard'
+  | 'teeth'
+  | 'kbeauty'
+  | 'hormonal'
+  | 'surgery';
 
 export interface ProductRegionLinks {
   us?: string;
@@ -150,6 +156,8 @@ export interface GuideSection {
   media?: GuideMedia[];  // GIFs, images, videos for this section
 }
 
+export type GenderTarget = 'male' | 'female' | 'all';
+
 export interface Guide {
   id: string;
   slug: string;
@@ -166,6 +174,7 @@ export interface Guide {
   order: number;  // Display order
   heroMedia?: GuideMedia;  // Hero image/GIF for the guide
   forumCategory?: string;  // Forum category slug for "Discuss in Forum"
+  genderTarget?: GenderTarget;  // 'male' | 'female' | 'all' (default: 'all')
 }
 
 // ============================================

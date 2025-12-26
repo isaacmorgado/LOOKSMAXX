@@ -32,11 +32,12 @@ import {
   getGuidesByCategory,
   getTotalGuideCount,
   getTotalReadTime,
-  searchGuides,
   getGuideProductById,
+  getGuidesByGender,
 } from '@/data/guides';
 import { Guide, GuideCategory, GuideMedia } from '@/types/guides';
 import { useRegion } from '@/contexts/RegionContext';
+import { useResults } from '@/contexts/ResultsContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -137,7 +138,7 @@ function MediaRenderer({ media }: MediaRendererProps) {
           <img
             src={media.url}
             alt={media.alt}
-            className={`w-full h-auto transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`w-full h-auto max-h-[400px] object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
             loading="lazy"
             onError={handleError}
             onLoad={handleLoad}
@@ -148,7 +149,7 @@ function MediaRenderer({ media }: MediaRendererProps) {
             alt={media.alt}
             width={media.width || 800}
             height={media.height || 450}
-            className={`w-full h-auto transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`w-full h-auto max-h-[400px] object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
             onError={handleError}
             onLoad={handleLoad}
           />
@@ -320,8 +321,10 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
 
   if (!section) return null;
 
-  // Calculate reading progress
-  const progress = ((currentSection + 1) / guide.sections.length) * 100;
+  // Calculate reading progress (0% at start, 100% at last section)
+  const progress = guide.sections.length > 1
+    ? (currentSection / (guide.sections.length - 1)) * 100
+    : 100;
 
   return (
     <motion.div
@@ -384,8 +387,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
             border-r border-neutral-900
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            lg:flex lg:flex-col
-            overflow-hidden
+            flex flex-col
           `}
         >
           {/* Sidebar Header */}
@@ -498,7 +500,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto">
-          <article className="max-w-3xl mx-auto px-6 py-10 lg:py-16">
+          <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-16">
             {/* Hero Media (only on first section) */}
             {guide.heroMedia && currentSection === 0 && (
               <div className="mb-10">
@@ -533,8 +535,8 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Section Title */}
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-4 border-b border-neutral-900">
+                {/* Section Title - Largest heading in section content */}
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 pb-4 border-b border-neutral-900">
                   {section.title}
                 </h2>
 
@@ -592,21 +594,21 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                           {children}
                         </p>
                       ),
-                      // Headers with clear hierarchy
+                      // Headers with clear hierarchy (smaller than section title)
                       h1: ({ children }) => (
-                        <h1 className="text-2xl font-bold text-white mt-12 mb-6">
-                          {children}
-                        </h1>
-                      ),
-                      h2: ({ children }) => (
-                        <h2 className="text-xl font-bold text-white mt-10 mb-5 pb-3 border-b border-neutral-800">
-                          {children}
-                        </h2>
-                      ),
-                      h3: ({ children }) => (
-                        <h3 className="text-lg font-semibold text-white mt-8 mb-4">
+                        <h3 className="text-2xl md:text-3xl font-bold text-white mt-12 mb-6">
                           {children}
                         </h3>
+                      ),
+                      h2: ({ children }) => (
+                        <h4 className="text-xl md:text-2xl font-bold text-white mt-10 mb-5 pb-3 border-b border-neutral-800">
+                          {children}
+                        </h4>
+                      ),
+                      h3: ({ children }) => (
+                        <h5 className="text-lg md:text-xl font-semibold text-white mt-8 mb-4">
+                          {children}
+                        </h5>
                       ),
                       // Strong text
                       strong: ({ children }) => (
@@ -875,16 +877,25 @@ function GuideCard({ guide, index, onOpen }: GuideCardProps) {
 interface CategorySectionProps {
   category: GuideCategory;
   onOpenGuide: (guide: Guide) => void;
+  gender: 'male' | 'female';
 }
 
-function CategorySection({ category, onOpenGuide }: CategorySectionProps) {
+function CategorySection({ category, onOpenGuide, gender }: CategorySectionProps) {
+  // Skip gender-specific categories for the opposite gender
+  if (category.id === 'male' && gender === 'female') return null;
+  if (category.id === 'female' && gender === 'male') return null;
+
   const guides = getGuidesByCategory(category.id);
 
   if (guides.length === 0) return null;
 
-  const colorClasses = {
+  const colorClasses: Record<string, string> = {
     blue: 'text-cyan-400 bg-cyan-500/10',
     purple: 'text-purple-400 bg-purple-500/10',
+    pink: 'text-pink-400 bg-pink-500/10',
+    cyan: 'text-cyan-400 bg-cyan-500/10',
+    emerald: 'text-emerald-400 bg-emerald-500/10',
+    red: 'text-red-400 bg-red-500/10',
     amber: 'text-amber-400 bg-amber-500/10',
   };
 
@@ -940,9 +951,18 @@ function SearchBar({ query, onQueryChange }: SearchBarProps) {
 export function GuidesTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+  const { gender } = useResults();
+
+  // Filter guides by gender (excludes opposite gender's specific guides)
+  const genderFilteredGuides = getGuidesByGender(gender);
 
   const filteredGuides = searchQuery.trim()
-    ? searchGuides(searchQuery)
+    ? genderFilteredGuides.filter(g =>
+        g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (g.subtitle && g.subtitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (g.tags && g.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      )
     : null;
 
   const handleOpenGuide = (guide: Guide) => {
@@ -988,7 +1008,7 @@ export function GuidesTab() {
             // Category View
             <div>
               {GUIDE_CATEGORIES.map(category => (
-                <CategorySection key={category.id} category={category} onOpenGuide={handleOpenGuide} />
+                <CategorySection key={category.id} category={category} onOpenGuide={handleOpenGuide} gender={gender} />
               ))}
             </div>
           )}

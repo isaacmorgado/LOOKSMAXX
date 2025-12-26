@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown, AlertCircle } from 'lucide-react';
 import { SubForum } from '@/types/forum';
 
 interface CreatePostFormProps {
@@ -52,40 +53,38 @@ export function CreatePostForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Topic selector */}
       <div>
-        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
-          Choose a topic
+        <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3">
+          Choose a Topic
         </label>
         {subForums.length === 0 ? (
-          <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-4 py-2">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <AlertCircle size={16} />
             No topics available for this community.
-          </p>
+          </div>
         ) : (
-          <select
-            value={subForumId}
-            onChange={(e) => setSubForumId(e.target.value)}
-            className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-2.5 text-[#d7dadc] text-sm focus:border-[#d7dadc] focus:outline-none appearance-none cursor-pointer"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23818384'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 12px center',
-              backgroundSize: '16px',
-            }}
-          >
-            {subForums.map((sf) => (
-              <option key={sf.id} value={sf.id}>
-                {sf.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={subForumId}
+              onChange={(e) => setSubForumId(e.target.value)}
+              className="w-full bg-neutral-900/50 border border-white/10 rounded-xl px-5 py-3.5 text-white text-sm focus:border-cyan-500/50 focus:outline-none appearance-none cursor-pointer hover:border-white/20 transition-colors"
+            >
+              {subForums.map((sf) => (
+                <option key={sf.id} value={sf.id} className="bg-neutral-900">
+                  {sf.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none" />
+          </div>
         )}
       </div>
 
       {/* Title */}
       <div>
-        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
+        <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3">
           Title
         </label>
         <input
@@ -94,17 +93,17 @@ export function CreatePostForm({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="An interesting title"
           maxLength={200}
-          className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-2.5 text-[#d7dadc] text-sm placeholder-[#818384] focus:border-[#d7dadc] focus:outline-none"
+          className="w-full bg-neutral-900/50 border border-white/10 rounded-xl px-5 py-3.5 text-white text-sm placeholder-neutral-600 focus:border-cyan-500/50 focus:outline-none hover:border-white/20 transition-colors"
         />
-        <div className="text-xs text-[#818384] mt-1 text-right">
+        <div className="text-[10px] text-neutral-600 mt-2 text-right font-medium">
           {title.length}/200
         </div>
       </div>
 
       {/* Content */}
       <div>
-        <label className="block text-xs font-bold text-[#818384] uppercase tracking-wide mb-2">
-          Text
+        <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3">
+          Content
         </label>
         <textarea
           value={content}
@@ -112,33 +111,34 @@ export function CreatePostForm({
           placeholder="Share your experience, ask a question, or start a discussion..."
           rows={8}
           maxLength={10000}
-          className="w-full bg-[#272729] border border-[#343536] rounded px-4 py-3 text-[#d7dadc] text-sm placeholder-[#818384] focus:border-[#d7dadc] focus:outline-none resize-y min-h-[120px]"
+          className="w-full bg-neutral-900/50 border border-white/10 rounded-xl px-5 py-4 text-white text-sm placeholder-neutral-600 focus:border-cyan-500/50 focus:outline-none resize-y min-h-[150px] hover:border-white/20 transition-colors"
         />
-        <div className="text-xs text-[#818384] mt-1 text-right">
+        <div className="text-[10px] text-neutral-600 mt-2 text-right font-medium">
           {content.length}/10000
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-4 py-2">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <AlertCircle size={16} />
           {error}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-2 border-t border-[#343536]">
+      <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-1.5 text-sm font-bold text-neutral-400 border border-neutral-600 rounded-full hover:bg-neutral-800 transition-colors"
+          className="px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 border border-white/10 rounded-xl hover:bg-white/5 hover:text-white transition-all"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !title.trim() || !content.trim() || !subForumId}
-          className="px-6 py-1.5 bg-[#00f3ff] text-black text-sm font-bold rounded-full hover:bg-[#00d4e6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-8 py-2.5 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20"
         >
           {isSubmitting ? 'Posting...' : 'Post'}
         </button>

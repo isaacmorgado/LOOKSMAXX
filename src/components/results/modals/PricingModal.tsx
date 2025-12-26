@@ -1,27 +1,57 @@
 'use client';
 
 import React from 'react';
-import { X, Check, Flame, Crown, Zap, Loader2 } from 'lucide-react';
+import { X, Check, Zap, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface PricingModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
-    const [selectedPlan, setSelectedPlan] = React.useState<'weekly' | 'pro' | 'action'>('weekly');
-    const [isProcessing, setIsProcessing] = React.useState(false);
+type PlanId = 'weekly' | 'action';
 
-    if (!isOpen) return null;
+const plans: { id: PlanId; name: string; price: string; period: string; description: string; tag: string; features: string[] }[] = [
+    {
+        id: 'weekly',
+        name: 'FaceIQ Pro',
+        price: '6.99',
+        period: 'Weekly',
+        description: 'Billed weekly. Cancel anytime.',
+        tag: 'Scientific Choice',
+        features: [
+            "PSL God-Tier Rank Calculation",
+            "Unlock 60+ Hidden Ratios",
+            "Detailed Analysis PDF",
+            "Growth Potential Mapping"
+        ]
+    },
+    {
+        id: 'action',
+        name: 'Advanced Plus',
+        price: '49.99',
+        period: 'One-Time',
+        description: 'Lifetime Priority Access',
+        tag: 'Maximum Value',
+        features: [
+            "Universal Metric Access",
+            "12-Week Aesthetic Strategy",
+            "VIP Operational Support",
+            "Early Access to Lab Tools"
+        ]
+    }
+];
+
+const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
+    const [selectedPlan, setSelectedPlan] = React.useState<PlanId>('weekly');
+    const [isProcessing, setIsProcessing] = React.useState(false);
 
     const handlePayment = async () => {
         setIsProcessing(true);
-        // Simulate API call for checkout
         try {
-            // In a real app, we'd call api.createCheckout(selectedPlan === 'weekly' ? 'basic' : 'pro')
             await new Promise(resolve => setTimeout(resolve, 1500));
-            alert(`Redirecting to payment for ${selectedPlan} plan... (Simulated)`);
-            onClose();
+            // Simulated redirect
+            window.location.href = `/checkout?plan=${selectedPlan}`;
         } catch (error) {
             console.error('Payment error:', error);
         } finally {
@@ -30,129 +60,159 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-                {/* Close Button */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors"
-                >
-                    <X size={24} />
-                </button>
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+                    />
 
-                <div className="flex flex-col md:flex-row">
-                    {/* Left Side: Benefits */}
-                    <div className="flex-1 p-8 bg-gradient-to-b from-blue-600/10 to-transparent">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold mb-6">
-                            <Crown size={12} />
-                            SYMMETRY PRO
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="relative w-full max-w-4xl bg-[#050505] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col md:flex-row"
+                    >
+                        {/* Decorative background glow */}
+                        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+                            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/20 blur-[120px] rounded-full" />
+                            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 blur-[120px] rounded-full" />
                         </div>
 
-                        <h2 className="text-3xl font-black text-white mb-4 leading-none">
-                            UNLOCK YOUR <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-                                FULL POTENTIAL
-                            </span>
-                        </h2>
+                        {/* Left Side: Cinematic Promo */}
+                        <div className="flex-1 p-12 relative overflow-hidden flex flex-col">
+                            <button
+                                onClick={onClose}
+                                className="md:hidden absolute top-6 right-6 p-2 text-white/30 hover:text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
 
-                        <ul className="space-y-4 mb-8">
-                            {[
-                                "Detailed AI Skin & Hair Analysis",
-                                "PSL God-Tier Rank Calculation",
-                                "Unlock All Hidden Ratios",
-                                "Custom 12-Week Glow Up Plan",
-                                "Ad-Free Premium Experience"
-                            ].map((benefit, i) => (
-                                <li key={i} className="flex items-start gap-3 text-white/70">
-                                    <div className="mt-1 p-0.5 rounded-full bg-green-500/20 text-green-400">
-                                        <Check size={14} />
-                                    </div>
-                                    <span className="text-sm">{benefit}</span>
-                                </li>
-                            ))}
-                        </ul>
+                            <div className="mb-auto">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                                    <Sparkles size={10} />
+                                    Phase 2: Ascension
+                                </div>
 
-                        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Flame className="text-orange-500" size={20} />
-                                <span className="text-sm font-bold text-white">Join 45,000+ Moggers</span>
+                                <h2 className="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter leading-[0.9] mb-6">
+                                    Evolve Beyond <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-indigo-400">
+                                        The Average
+                                    </span>
+                                </h2>
+
+                                <div className="space-y-6">
+                                    {plans.find(p => p.id === selectedPlan)?.features.map((feature, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: i * 0.1 }}
+                                            className="flex items-center gap-4 group"
+                                        >
+                                            <div className="w-6 h-6 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center shrink-0 group-hover:border-cyan-500/50 transition-colors">
+                                                <Check size={12} className="text-cyan-400" />
+                                            </div>
+                                            <span className="text-sm font-bold text-neutral-400 tracking-tight group-hover:text-neutral-200 transition-colors">{feature}</span>
+                                        </motion.div>
+                                    ))}
+                                </div>
                             </div>
-                            <p className="text-xs text-white/40 italic">&ldquo;The analysis was frighteningly accurate. It pointed out flaws I never even noticed.&rdquo;</p>
-                        </div>
-                    </div>
 
-                    {/* Right Side: Plans */}
-                    <div className="w-full md:w-[320px] p-8 border-t md:border-t-0 md:border-l border-white/10 bg-white/[0.02]">
-                        <h3 className="text-sm font-bold text-white/60 mb-6 uppercase tracking-widest">Select Plan</h3>
-
-                        <div className="space-y-4">
-                            {/* Weekly Plan */}
-                            <button
-                                onClick={() => setSelectedPlan('weekly')}
-                                className={`relative w-full p-4 rounded-xl border-2 transition-all text-left group ${selectedPlan === 'weekly' ? 'border-blue-500 bg-blue-500/5' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
-                                    }`}
-                            >
-                                {selectedPlan === 'weekly' && (
-                                    <div className="absolute -top-3 left-4 px-2 py-0.5 bg-blue-500 text-[10px] font-black text-white rounded uppercase">
-                                        Best Value
+                            <div className="mt-12 pt-8 border-t border-white/5">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="w-8 h-8 rounded-full border-2 border-black bg-neutral-800" />
+                                        ))}
                                     </div>
-                                )}
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-bold text-white">Weekly Access</span>
-                                    <span className="text-xl font-black text-white">$6.99</span>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                                        <span className="text-white">45,000+</span> Analyses Completed
+                                    </div>
                                 </div>
-                                <div className="text-[10px] text-white/50 uppercase font-bold">Billed weekly. Cancel anytime.</div>
-                            </button>
-
-                            {/* Monthly Plan */}
-                            <button
-                                onClick={() => setSelectedPlan('pro')}
-                                className={`w-full p-4 rounded-xl border transition-all text-left ${selectedPlan === 'pro' ? 'border-blue-500 bg-blue-500/5' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
-                                    }`}
-                            >
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-bold text-white">Pro Pass</span>
-                                    <span className="text-xl font-black text-white">$19.99</span>
-                                </div>
-                                <div className="text-[10px] text-white/50 uppercase font-bold">One month of full access.</div>
-                            </button>
-
-                            {/* Lifetime / Pro Action Plan */}
-                            <button
-                                onClick={() => setSelectedPlan('action')}
-                                className={`w-full p-4 rounded-xl border transition-all text-left ${selectedPlan === 'action' ? 'border-blue-500 bg-blue-500/5' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
-                                    }`}
-                            >
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-bold text-white">Pro Action Plan</span>
-                                    <span className="text-xl font-black text-white">$49.99</span>
-                                </div>
-                                <div className="text-[10px] text-white/50 uppercase font-bold">Full unlock + Course + VIP Support.</div>
-                            </button>
+                            </div>
                         </div>
 
-                        <button
-                            onClick={handlePayment}
-                            disabled={isProcessing}
-                            className="w-full mt-8 py-4 px-6 bg-white text-black font-black rounded-xl hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isProcessing ? (
-                                <Loader2 className="animate-spin" size={18} />
-                            ) : (
-                                <>
-                                    CONTINUE TO PAYMENT
-                                    <Zap size={18} className="fill-current" />
-                                </>
-                            )}
-                        </button>
+                        {/* Right Side: Selection & Checkout */}
+                        <div className="w-full md:w-[380px] p-8 md:p-12 bg-white/[0.01] border-t md:border-t-0 md:border-l border-white/5 relative flex flex-col">
+                            <button
+                                onClick={onClose}
+                                className="hidden md:block absolute top-6 right-6 p-2 text-white/20 hover:text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
 
-                        <p className="mt-4 text-[10px] text-center text-white/30 uppercase font-bold">
-                            Secure Checkout · Encrypted Payment
-                        </p>
-                    </div>
+                            <h3 className="text-[10px] font-black text-neutral-500 mb-8 uppercase tracking-[0.3em]">Operational Access</h3>
+
+                            <div className="space-y-4 mb-8">
+                                {plans.map((plan) => (
+                                    <button
+                                        key={plan.id}
+                                        onClick={() => setSelectedPlan(plan.id)}
+                                        className={`relative w-full p-6 rounded-[2rem] border-2 transition-all text-left ${selectedPlan === plan.id
+                                                ? 'border-cyan-500 bg-cyan-500/5'
+                                                : 'border-white/5 bg-transparent hover:border-white/10'
+                                            }`}
+                                    >
+                                        {plan.id === 'weekly' && (
+                                            <div className="absolute -top-3 right-8 px-3 py-1 bg-cyan-500 text-[8px] font-black text-black uppercase tracking-widest rounded-full">
+                                                Most Popular
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">
+                                                    {plan.tag}
+                                                </div>
+                                                <div className="text-lg font-black text-white italic uppercase">{plan.name}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-2xl font-black text-white">${plan.price}</div>
+                                                <div className="text-[10px] font-bold text-neutral-500 uppercase">{plan.period}</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="mt-auto space-y-4">
+                                <button
+                                    onClick={handlePayment}
+                                    disabled={isProcessing}
+                                    className="w-full py-5 bg-white text-black font-black italic uppercase tracking-widest rounded-2xl hover:bg-cyan-400 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                >
+                                    {isProcessing ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        <>
+                                            Execute Upgrade
+                                            <Zap size={18} className="fill-current" />
+                                        </>
+                                    )}
+                                </button>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-center gap-4 opacity-40 grayscale contrast-200">
+                                        {/* Mock security icons */}
+                                        <ShieldCheck size={14} className="text-white" />
+                                        <div className="text-[8px] font-black uppercase tracking-widest text-white">SSL SECURE PORTAL</div>
+                                        <div className="w-4 h-4 rounded bg-white/20" />
+                                        <div className="w-4 h-4 rounded-full bg-white/20" />
+                                    </div>
+                                    <p className="text-[8px] text-center font-bold text-neutral-500 uppercase tracking-widest">
+                                        7-Day Satisfaction Guarantee • Cancel Anytime
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
-            </div>
-        </div>
+            )}
+        </AnimatePresence>
     );
 };
 

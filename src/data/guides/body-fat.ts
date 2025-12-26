@@ -438,6 +438,152 @@ Give yourself a 2-3% buffer for life fluctuations.
 Make leanness part of your identity, not a phase.`,
     },
     {
+      id: 'face-fat-timeline',
+      title: 'Face Fat Timeline by Body Fat %',
+      humorLevel: 'medium-high',
+      content: `When does the face actually lean out? Here's the brutal truth by body fat percentage:
+
+**The Face Fat Timeline:**
+
+| Body Fat % | Face Status | What You See |
+|------------|-------------|--------------|
+| **25%+** | Maximum bloat | Round face, double chin likely, jaw completely hidden |
+| **22-25%** | Soft face | Face is round, no definition, chipmunk mode |
+| **18-22%** | Still soft | Jaw exists but is soft, some face fat visible |
+| **15-18%** | Improving | Jaw becoming defined, some cheek fat remaining |
+| **12-15%** | Good definition | Jaw pops, cheekbones starting to show, face leaning out |
+| **10-12%** | Excellent | Hollow cheeks appearing, strong jaw, model tier face |
+| **8-10%** | Maximum definition | Chiseled, veins in face possible, not sustainable |
+
+**The Critical Threshold:**
+For most men, facial definition really kicks in between **12-15%**. If you're 18% and wondering why your face still looks soft despite visible abs in good lighting—this is why.
+
+**Why Your Face Is Last:**
+Your body prioritizes fat storage in the face and midsection for protection and hormone regulation. These are the "safe" areas to store reserves. When cutting, your body pulls from "easy" areas first (arms, calves) and face fat last.
+
+**The Individual Factor:**
+Some guys have lean faces at 16%. Others need to hit 11% before the jaw pops. This is genetics—work with what you have, not against it.
+
+**The Math:**
+If your face doesn't lean out until 12%, and you're currently 20%, that's roughly **16 weeks of cutting** at 0.5% body fat loss per week. Set your expectations accordingly.`,
+      media: [
+        {
+          id: 'bf-face-progression',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?w=800&q=80',
+          alt: 'Lean face definition example',
+          caption: 'The same bone structure reveals itself at lower body fat',
+          placement: 'inline',
+        },
+      ],
+    },
+    {
+      id: 'fat-loss-order',
+      title: 'Where Fat Disappears First (Gender Differences)',
+      humorLevel: 'medium',
+      content: `Fat loss order is largely genetic, but there are predictable patterns by gender:
+
+**Men's Fat Loss Order:**
+
+| Order | Area | When It Goes |
+|-------|------|--------------|
+| 1st | Arms, shoulders | First few weeks |
+| 2nd | Upper back | Early cut |
+| 3rd | Chest | Mid cut |
+| 4th | Upper abdomen | Mid-late cut |
+| 5th | Lower abdomen | Late cut |
+| 6th | Love handles | Very late |
+| 7th | **Face, chin** | Often LAST |
+
+Men typically store fat in the midsection (visceral) and face. The lower belly and face are usually the final bastions.
+
+**Women's Fat Loss Order:**
+
+| Order | Area | When It Goes |
+|-------|------|--------------|
+| 1st | Upper body, arms | Early |
+| 2nd | Back | Early-mid |
+| 3rd | Face | Often earlier than men |
+| 4th | Upper legs | Mid cut |
+| 5th | Hips, butt | Late |
+| 6th | Lower belly | Very late |
+| 7th | Inner thighs | Often LAST |
+
+Women store fat in hips, thighs, and butt for reproductive reasons. These areas are hormonally protected and go last.
+
+**The Implications:**
+- **Men:** Your face may stay soft until you're quite lean overall. Keep going.
+- **Women:** Your face often leans out faster, but lower body holds on longer.
+
+**Stubborn Fat Science:**
+"Stubborn" fat areas have more alpha-2 receptors, which resist fat release. These areas also have poor blood flow. This is why targeted fat loss ("spot reduction") doesn't work—you can't force fat cells to release based on where you exercise.
+
+The only solution is overall fat loss until you reach your stubborn areas.`,
+    },
+    {
+      id: 'stubborn-fat-solutions',
+      title: 'Stubborn Fat Solutions (When Diet Isn\'t Enough)',
+      humorLevel: 'medium',
+      content: `What if you're lean everywhere except one problem area? Here are the options:
+
+**First: Are You Actually Lean?**
+Be honest. Most people who think they have "stubborn fat" are just not lean enough yet. Get to 10-12% body fat (men) or 18-20% (women) before considering other options.
+
+**If You're Genuinely Lean but Have Stubborn Areas:**
+
+**Option 1: Fasted Cardio + Yohimbine (Budget)**
+- Fasted morning cardio can preferentially target stubborn fat
+- Yohimbine HCL blocks alpha-2 receptors
+- Take 0.2mg/kg bodyweight before fasted cardio
+- Must be in a fasted state (no insulin present)
+- Stimulant—not for everyone
+
+**Option 2: CoolSculpting / Cryolipolysis ($$$)**
+- Freezes and kills fat cells
+- 20-25% fat reduction per session
+- Multiple sessions needed
+- Cost: $600-1,200 per area
+- Results in 2-3 months
+- Non-invasive
+
+**Option 3: Kybella (Chin Fat Specifically) ($$)**
+- Injectable for submental fat (double chin)
+- Dissolves fat cells permanently
+- 2-4 sessions needed
+- Cost: $600-1,200 per session
+- Swelling for 1-2 weeks post-treatment
+
+**Option 4: Liposuction (Permanent, $$$$)**
+
+The nuclear option for stubborn fat. Here's what you need to know:
+
+| Factor | Details |
+|--------|---------|
+| **Best For** | Localized fat deposits that don't respond to diet |
+| **Common Areas** | Chin, love handles, lower abs, inner thighs |
+| **Cost** | $3,000-$10,000+ per area (USA) |
+| **Recovery** | 1-2 weeks off work, 4-6 weeks to see results |
+| **Results** | Permanent fat cell removal (cells can't return) |
+| **Caveat** | You can still gain fat in remaining cells |
+
+**Types of Liposuction:**
+- **Traditional:** Suction through cannula
+- **VASER:** Ultrasound-assisted, less bruising
+- **SmartLipo:** Laser-assisted, tighter skin
+- **AirSculpt:** Minimal downtime, premium cost
+
+**Critical Point:**
+Liposuction is NOT a weight loss procedure. It's for body contouring when you're already lean. If you're 20%+ body fat, diet first.
+
+**Medical Tourism:**
+Many people get lipo abroad at 30-60% lower cost. Popular destinations: Mexico, Turkey, Colombia. Research your surgeon thoroughly.`,
+      warnings: [
+        'Liposuction at high body fat % leads to uneven results',
+        'Fat can redistribute to other areas if you gain weight post-lipo',
+        'Always verify surgeon credentials and see real before/afters'
+      ],
+    },
+    {
       id: 'common-mistakes',
       title: 'Common Cutting Mistakes',
       humorLevel: 'high',

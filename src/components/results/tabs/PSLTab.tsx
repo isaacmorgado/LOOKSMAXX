@@ -8,7 +8,6 @@ import {
   Info,
   TrendingUp,
   Calculator,
-  AlertCircle,
   Dumbbell,
   Camera,
   Percent,
@@ -102,146 +101,134 @@ function HeightInputPrompt({ onHeightSet }: { onHeightSet: (cm: number) => void 
   );
 }
 
-// Tier comparison visualization
+// Tier comparison - compact horizontal
 function TierComparisonChart({ currentTier, currentScore }: { currentTier: string; currentScore: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleTiers = expanded ? TIER_DEFINITIONS.slice().reverse() : TIER_DEFINITIONS.slice().reverse().slice(0, 4);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2 }}
-      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+      className="bg-neutral-900/50 rounded-xl p-4 border border-neutral-800"
     >
-      <h3 className="font-semibold text-white mb-4">Tier Distribution</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium text-neutral-400">Tier Ladder</h3>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-xs text-neutral-500 hover:text-white transition-colors"
+        >
+          {expanded ? 'Show less' : 'Show all'}
+        </button>
+      </div>
 
-      <div className="space-y-3">
-        {TIER_DEFINITIONS.slice().reverse().map((tier) => {
+      <div className="space-y-2">
+        {visibleTiers.map((tier) => {
           const isCurrentTier = tier.name === currentTier;
           const isPassed = currentScore >= tier.minScore;
 
           return (
-            <div key={tier.name} className="flex items-center gap-3">
+            <div
+              key={tier.name}
+              className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                isCurrentTier ? 'bg-neutral-800 border border-neutral-700' : ''
+              }`}
+            >
               <div
-                className={`w-24 text-xs font-medium truncate ${
-                  isCurrentTier ? 'text-white' : 'text-neutral-500'
-                }`}
-              >
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: isPassed ? tier.color : `${tier.color}40` }}
+              />
+              <div className={`flex-1 text-xs ${isCurrentTier ? 'text-white font-medium' : 'text-neutral-500'}`}>
                 {tier.name}
               </div>
-
-              <div className="flex-1 h-3 bg-neutral-800 rounded-full overflow-hidden relative">
-                {/* Tier range */}
+              <div className="flex-1 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
                 <div
-                  className="absolute inset-y-0 rounded-full transition-all"
+                  className="h-full rounded-full"
                   style={{
-                    left: `${(tier.minScore / 10) * 100}%`,
-                    right: `${100 - (tier.maxScore / 10) * 100}%`,
-                    backgroundColor: isPassed ? tier.color : `${tier.color}40`,
+                    width: `${((currentScore - tier.minScore) / (tier.maxScore - tier.minScore)) * 100}%`,
+                    backgroundColor: isCurrentTier ? tier.color : 'transparent',
+                    maxWidth: isCurrentTier ? '100%' : '0%',
                   }}
                 />
-
-                {/* Current score marker */}
-                {isCurrentTier && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 shadow-lg"
-                    style={{
-                      left: `${(currentScore / 10) * 100}%`,
-                      borderColor: tier.color,
-                      transform: 'translateX(-50%) translateY(-50%)',
-                    }}
-                  />
-                )}
               </div>
-
-              <div className={`w-16 text-right text-xs ${
-                isCurrentTier ? 'text-white font-semibold' : 'text-neutral-500'
-              }`}>
-                {tier.minScore.toFixed(1)} - {tier.maxScore.toFixed(1)}
+              <div className={`text-xs w-14 text-right ${isCurrentTier ? 'text-white' : 'text-neutral-600'}`}>
+                {tier.minScore.toFixed(1)}-{tier.maxScore.toFixed(1)}
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Score scale */}
-      <div className="flex justify-between mt-4 text-xs text-neutral-500">
-        <span>0</span>
-        <span>2</span>
-        <span>4</span>
-        <span>6</span>
-        <span>8</span>
-        <span>10</span>
-      </div>
     </motion.div>
   );
 }
 
-// PSL Formula explanation
-function PSLFormulaExplainer({ bodyMethod }: { bodyMethod?: 'ffmi' | 'table' | 'default' }) {
-  const bodyDescription = bodyMethod === 'ffmi'
-    ? 'Body composition via FFMI (5% weight) - calculated from your height, weight, and body fat'
-    : bodyMethod === 'table'
-    ? 'Body composition (5% weight) - based on body fat % and muscle level'
-    : 'Body composition (5% weight) - defaults to 5/10 without physique data';
+// PSL Formula explanation - collapsible
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function PSLFormulaExplainer({ bodyMethod: _bodyMethod }: { bodyMethod?: 'ffmi' | 'table' | 'default' }) {
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3 }}
-      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+      className="bg-neutral-900/50 rounded-xl border border-neutral-800 overflow-hidden"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Calculator className="w-5 h-5 text-cyan-400" />
-        <h3 className="font-semibold text-white">How PSL is Calculated</h3>
-      </div>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-4 hover:bg-neutral-800/30 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Calculator className="w-4 h-4 text-cyan-400" />
+          <span className="text-sm font-medium text-white">How PSL is Calculated</span>
+        </div>
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <TrendingUp className={`w-4 h-4 ${expanded ? 'text-cyan-400' : 'text-neutral-500'}`} />
+        </motion.div>
+      </button>
 
-      <div className="bg-neutral-800/50 rounded-lg p-4 mb-4 font-mono text-sm">
-        <span className="text-cyan-400">PSL</span>
-        <span className="text-neutral-400"> = </span>
-        <span className="text-purple-400">(Face × 0.75)</span>
-        <span className="text-neutral-400"> + </span>
-        <span className="text-green-400">(Height × 0.20)</span>
-        <span className="text-neutral-400"> + </span>
-        <span className="text-orange-400">(Body × 0.05)</span>
-        <span className="text-neutral-400"> + </span>
-        <span className="text-yellow-400">Bonuses</span>
-      </div>
+      {expanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          className="px-4 pb-4"
+        >
+          {/* Formula */}
+          <div className="bg-neutral-800/50 rounded-lg p-3 mb-3 font-mono text-xs">
+            <span className="text-cyan-400">PSL</span>
+            <span className="text-neutral-400"> = </span>
+            <span className="text-purple-400">Face×0.75</span>
+            <span className="text-neutral-400"> + </span>
+            <span className="text-green-400">Height×0.20</span>
+            <span className="text-neutral-400"> + </span>
+            <span className="text-orange-400">Body×0.05</span>
+          </div>
 
-      <div className="space-y-3 text-sm">
-        <div className="flex items-start gap-2">
-          <span className="text-purple-400 font-semibold w-16">Face</span>
-          <span className="text-neutral-400">
-            Your facial harmony score (75% weight) - the primary driver of attractiveness
-          </span>
-        </div>
-        <div className="flex items-start gap-2">
-          <span className="text-green-400 font-semibold w-16">Height</span>
-          <span className="text-neutral-400">
-            Your height rating (20% weight) - varies by gender
-          </span>
-        </div>
-        <div className="flex items-start gap-2">
-          <span className="text-orange-400 font-semibold w-16">Body</span>
-          <span className="text-neutral-400">
-            {bodyDescription}
-          </span>
-        </div>
-        <div className="flex items-start gap-2">
-          <span className="text-yellow-400 font-semibold w-16">Bonuses</span>
-          <span className="text-neutral-400">
-            Threshold (+0.1-0.3) and synergy (+0.05-0.35) bonuses for elite scores (≥8.5)
-          </span>
-        </div>
-      </div>
+          {/* Quick explanation */}
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+              <div className="text-purple-400 font-medium">75%</div>
+              <div className="text-neutral-500">Face</div>
+            </div>
+            <div className="p-2 bg-green-500/10 rounded-lg">
+              <div className="text-green-400 font-medium">20%</div>
+              <div className="text-neutral-500">Height</div>
+            </div>
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <div className="text-orange-400 font-medium">5%</div>
+              <div className="text-neutral-500">Body</div>
+            </div>
+          </div>
 
-      <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-start gap-2">
-        <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-200">
-          Height ≥8.0 rating is required to reach Gigachad tier. Major facial flaws cap your tier regardless of score.
-        </p>
-      </div>
+          <p className="mt-3 text-xs text-neutral-500">
+            Elite scores (≥8.5) earn bonuses. Height ≥8.0 required for top tiers.
+          </p>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

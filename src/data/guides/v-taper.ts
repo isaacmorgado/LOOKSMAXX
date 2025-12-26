@@ -286,6 +286,77 @@ Patience. Consistency. Progressive overload. That's the formula.`,
       products: ['creatine_mono'],
     },
     {
+      id: 'female-v-taper',
+      title: 'Female V-Taper: Building the Hourglass',
+      humorLevel: 'medium',
+      content: `The V-taper isn't just for men. For women, the principles create the hourglass figure—wide shoulders and back that make the waist look smaller.
+
+**Why Women Should Train for Width:**
+- Creates the hourglass illusion
+- Makes waist look smaller by comparison
+- Improves posture and presence
+- Balanced physique > skinny-fat
+
+**The Female Aesthetic Goal:**
+Instead of "V-shape," think "X-shape"—developed shoulders AND developed glutes with a tight waist in the middle.
+
+**Key Differences from Male Training:**
+
+| Aspect | Men | Women |
+|--------|-----|-------|
+| **Goal** | Wide shoulders, narrow waist | Shoulders + glutes, small waist |
+| **Shoulder development** | Maximum width | Moderate width, cap shape |
+| **Lat development** | Maximum width | Moderate—avoid "too wide" look |
+| **Trap development** | Can go heavy | Keep minimal (can look masculine) |
+| **Waist work** | Avoid obliques | Avoid obliques even more |
+
+**Female V-Taper Priorities:**
+
+**1. Capped Shoulders (Not Massive)**
+- Lateral raises: 3-4 sets of 15-20 reps, 2-3x/week
+- Light weight, high control
+- Creates the "shoulder pad" effect naturally
+- Makes waist look smaller
+
+**2. Lat Development (Moderate)**
+- Pull-ups/lat pulldowns: 3-4 sets of 8-12 reps
+- Creates the taper from armpit to waist
+- Don't go too wide—you're not trying to look like a bodybuilder
+
+**3. Rear Delts (Essential)**
+- Face pulls and reverse flies
+- Improves posture (shoulders back, chest up)
+- Creates 3D shoulder look from side
+
+**4. Waist Management:**
+- Stomach vacuums (same as men)
+- AVOID weighted oblique work
+- Core stability over core building
+
+**5. Glute Development (The Other Half):**
+- Hip thrusts, RDLs, Bulgarian split squats
+- The "X" shape requires both top AND bottom development
+- Wider hips + developed glutes + small waist = hourglass
+
+**Sample Female V-Taper Day:**
+- Lat Pulldowns: 3x10-12
+- Lateral Raises: 4x15-20
+- Face Pulls: 3x15-20
+- Rear Delt Flies: 3x15-20
+- Stomach Vacuums: 3x30sec holds
+
+**The Fear Factor:**
+"But I don't want to get bulky!"
+You won't. Women don't have the testosterone to build massive muscles accidentally. What you'll get is shape, definition, and the illusion of a smaller waist.
+
+We'll have a full body contouring guide for women coming soon covering glute development, waist training reality, and the full hourglass protocol.`,
+      tips: [
+        'Women can train shoulders 3-4x/week without getting bulky',
+        "The hourglass is built from both ends—don't skip glutes",
+        'Posture improvements from back training alone can transform your silhouette'
+      ],
+    },
+    {
       id: 'common-mistakes',
       title: 'Common V-Taper Mistakes',
       humorLevel: 'medium-high',

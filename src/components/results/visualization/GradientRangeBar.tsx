@@ -83,7 +83,8 @@ export function GradientRangeBar({
   const markerPos = Math.max(0, Math.min(100, ((value - rangeMin) / totalRange) * 100));
 
   // Format value with unit
-  const formatUnit = (v: number) => {
+  const formatUnit = (v: number | string | undefined) => {
+    if (typeof v !== 'number' || isNaN(v)) return '-';
     const formatted = v.toFixed(unit === 'percent' || unit === '%' ? 1 : 2);
     const suffix = unit === 'percent' ? ' %' : unit === 'degrees' ? '°' : unit === 'x' || unit === 'ratio' ? ' x' : unit === 'mm' ? ' mm' : '';
     return `${formatted}${suffix}`;

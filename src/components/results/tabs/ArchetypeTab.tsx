@@ -38,7 +38,7 @@ import {
 import { api, ArchetypeForumRecommendation } from '@/lib/api';
 
 // ============================================
-// ALL SCORES BREAKDOWN
+// ALL SCORES - COMPACT GRID
 // ============================================
 
 function AllArchetypeScores({
@@ -53,46 +53,48 @@ function AllArchetypeScores({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2 }}
-      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+      className="bg-neutral-900/50 rounded-xl p-4 border border-neutral-800"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Target className="w-5 h-5 text-cyan-400" />
-        <h3 className="font-semibold text-white">All Category Scores</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium text-neutral-400">All Category Matches</h3>
       </div>
 
-      <p className="text-sm text-neutral-400 mb-4">
-        Your match percentage across all archetype categories
-      </p>
-
-      <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
         {sortedScores.map((score, index) => {
           const colors = ARCHETYPE_COLORS[score.category as ArchetypeCategory];
           const isPrimary = index === 0;
 
           return (
-            <div key={score.category} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {isPrimary && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                      Primary
-                    </span>
-                  )}
-                  <span className={`font-medium ${isPrimary ? 'text-white' : 'text-neutral-400'}`}>
-                    {score.category}
-                  </span>
+            <div
+              key={score.category}
+              className={`relative p-3 rounded-lg border transition-all ${
+                isPrimary
+                  ? 'bg-neutral-800 border-cyan-500/30'
+                  : 'bg-neutral-800/50 border-neutral-700/50 hover:border-neutral-600'
+              }`}
+            >
+              {isPrimary && (
+                <div className="absolute -top-2 left-2 px-1.5 py-0.5 bg-cyan-500 rounded text-[9px] font-medium text-black">
+                  PRIMARY
                 </div>
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: colors?.primary || '#6b7280' }}
-                >
-                  {score.score}%
-                </span>
+              )}
+              <div
+                className="text-2xl font-bold mb-0.5"
+                style={{ color: colors?.primary || '#6b7280' }}
+              >
+                {score.score}%
               </div>
-              <ConfidenceBar
-                confidence={score.confidence}
-                color={colors?.primary}
-              />
+              <div className="text-[10px] text-neutral-500 truncate">{score.category}</div>
+              {/* Mini bar */}
+              <div className="mt-2 h-1 bg-neutral-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${score.score}%`,
+                    backgroundColor: colors?.primary || '#6b7280',
+                  }}
+                />
+              </div>
             </div>
           );
         })}
@@ -102,7 +104,7 @@ function AllArchetypeScores({
 }
 
 // ============================================
-// STYLE RECOMMENDATIONS
+// STYLE RECOMMENDATIONS - COMPACT CARDS
 // ============================================
 
 function StyleRecommendations({
@@ -118,70 +120,59 @@ function StyleRecommendations({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3 }}
-      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+      className="bg-neutral-900/50 rounded-xl p-4 border border-neutral-800"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Palette className="w-5 h-5 text-purple-400" />
-        <h3 className="font-semibold text-white">{primary.subArchetype} Style Guide</h3>
+      <div className="flex items-center gap-2 mb-3">
+        <Palette className="w-4 h-4 text-purple-400" />
+        <h3 className="text-sm font-medium text-white">{primary.subArchetype} Style Guide</h3>
       </div>
 
-      <p className="text-sm text-neutral-400 mb-6">
-        Recommended style elements based on your archetype classification
-      </p>
-
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-3">
         {/* Clothing */}
-        <div>
-          <h4
-            className="text-sm font-medium mb-3 flex items-center gap-2"
-            style={{ color: colors.primary }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colors.primary }} />
+        <div className="bg-neutral-800/50 rounded-lg p-3">
+          <h4 className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider mb-2">
             Clothing
           </h4>
-          <ul className="space-y-2">
-            {styleGuide.clothing.map((item) => (
-              <li key={item} className="text-sm text-neutral-300 flex items-start gap-2">
-                <span className="text-neutral-600 mt-1">-</span>
+          <div className="flex flex-wrap gap-1">
+            {styleGuide.clothing.slice(0, 3).map((item) => (
+              <span
+                key={item}
+                className="text-[11px] px-2 py-1 rounded bg-neutral-700/50 text-neutral-300"
+              >
                 {item}
-              </li>
+              </span>
             ))}
-          </ul>
+          </div>
         </div>
 
         {/* Hair */}
-        <div>
-          <h4
-            className="text-sm font-medium mb-3 flex items-center gap-2"
-            style={{ color: colors.primary }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colors.primary }} />
+        <div className="bg-neutral-800/50 rounded-lg p-3">
+          <h4 className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider mb-2">
             Hair
           </h4>
-          <ul className="space-y-2">
-            {styleGuide.hair.map((item) => (
-              <li key={item} className="text-sm text-neutral-300 flex items-start gap-2">
-                <span className="text-neutral-600 mt-1">-</span>
+          <div className="flex flex-wrap gap-1">
+            {styleGuide.hair.slice(0, 3).map((item) => (
+              <span
+                key={item}
+                className="text-[11px] px-2 py-1 rounded bg-neutral-700/50 text-neutral-300"
+              >
                 {item}
-              </li>
+              </span>
             ))}
-          </ul>
+          </div>
         </div>
 
         {/* Colors */}
-        <div>
-          <h4
-            className="text-sm font-medium mb-3 flex items-center gap-2"
-            style={{ color: colors.primary }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colors.primary }} />
-            Color Palette
+        <div className="bg-neutral-800/50 rounded-lg p-3">
+          <h4 className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider mb-2">
+            Colors
           </h4>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1">
             {styleGuide.colors.map((color) => (
               <span
                 key={color}
-                className="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300 text-sm border border-neutral-700"
+                className="text-[11px] px-2 py-1 rounded border border-neutral-600 text-neutral-300"
+                style={{ borderColor: `${colors.primary}40` }}
               >
                 {color}
               </span>

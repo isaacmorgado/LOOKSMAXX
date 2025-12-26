@@ -261,6 +261,103 @@ One quality fragrance beats five cheap ones. Bleu de Chanel or similar safe bet.
       ],
     },
     {
+      id: 'hair-thinning',
+      title: 'Hair Maintenance for Thinning Hair',
+      humorLevel: 'medium',
+      content: `If you're noticing recession or thinning, you've got two choices: treat it or accept it. There's no middle ground of denial.
+
+**Recognize the Signs Early:**
+- Hairline moving back at temples (receding)
+- Crown getting thinner (you can't see it, but others can)
+- More hair in the drain/pillow
+- Scalp visible under bright lights
+
+**The Treatment Stack (The "Big 3"):**
+
+| Treatment | What It Does | Cost |
+|-----------|--------------|------|
+| **Minoxidil 5%** | Stimulates follicles, extends growth phase | $20-40/6 months |
+| **Finasteride 1mg** | Blocks DHT, stops progression | $10-30/month |
+| **Ketoconazole Shampoo** | Anti-inflammatory, mild DHT blocker | $15/bottle |
+
+**Timeline:**
+- Months 1-3: Possible shedding (normal, it's working)
+- Months 4-6: Stabilization, slowed loss
+- Months 6-12: Regrowth begins for responders
+- Year 1+: Maintenance mode
+
+**The Decision:**
+If you're going to treat, start NOW. The earlier you start, the more hair you save. Once a follicle is dead, it's gone.
+
+**The Alternative:**
+If treatment isn't for you, own the look:
+- Buzz it short or shave clean
+- Grow a beard if you can (bald + beard is a classic look)
+- Get lean—face definition matters more when hair is gone
+- Confidence > coping
+
+We'll have a full hair loss guide coming soon. For now, don't wait—decide early.`,
+      tips: [
+        'Minoxidil can cause initial shedding—this is normal and temporary',
+        'Apply minoxidil to DRY scalp, not wet',
+        'Finasteride side effects are rare (1-2%) but discuss with doctor'
+      ],
+      warnings: [
+        "Don't waste money on 'hair growth' supplements—most don't work",
+        "Comb-overs fool nobody. Either treat it or embrace it."
+      ],
+    },
+    {
+      id: 'beard-maintenance',
+      title: 'Beard Maintenance & Growth',
+      humorLevel: 'medium-high',
+      content: `Whether you're trying to grow a beard or maintain one, here's what actually matters:
+
+**If You Can Grow One:**
+
+**Stubble (1-5mm):**
+- Trim every 2-3 days
+- This is often the most attractive option for most faces
+- Clean neckline 2 fingers above Adam's apple
+- Edge cheek line naturally
+
+**Short Beard (5-10mm):**
+- Trim weekly with guard
+- Use beard oil after showering
+- Keep edges sharp
+
+**Full Beard (10mm+):**
+- Wash with beard shampoo
+- Apply beard oil or balm daily
+- Comb/brush to train direction
+- Trim every 1-2 weeks for shape
+- Consider a barber for initial shaping
+
+**If You CAN'T Grow One (Yet):**
+
+The Minoxidil beard protocol works for many guys:
+1. Apply minoxidil 5% to cheeks 2x daily
+2. Wait 6-24 months (yes, it takes time)
+3. Vellus hairs → Terminal hairs
+4. Once terminal, effects are permanent
+5. Add dermarolling 0.5mm weekly for better absorption
+
+**Important:** This is off-label use. Results vary. Most guys see significant improvement, but genetics still matter.
+
+**Patchy Beard Solutions:**
+- Let it grow longer—length hides patches
+- Strategic trimming to balance density
+- Focus on stubble length if very patchy
+- Some patches fill in over time (give it 3-6 months)
+
+We'll have a full beard growth guide with protocols coming soon.`,
+      tips: [
+        'Beard growth often improves into your 30s',
+        'Minoxidil on beard can cause dryness—moisturize',
+        "Don't compare your beard at 22 to someone's at 32"
+      ],
+    },
+    {
       id: 'checklist',
       title: 'The Weekly Checklist',
       humorLevel: 'medium',

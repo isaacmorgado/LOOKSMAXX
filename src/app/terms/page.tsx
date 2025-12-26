@@ -1,204 +1,117 @@
+'use client';
+
+import Link from 'next/link';
+import { ArrowLeft, ShieldAlert, Scale, Gavel } from 'lucide-react';
+
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Terms & Conditions</h1>
+    <main className="min-h-screen bg-black text-white selection:bg-cyan-500/30">
+      <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+        <Link href="/" className="inline-flex items-center gap-2 text-neutral-500 hover:text-cyan-400 text-xs font-black uppercase tracking-widest mb-12 transition-colors">
+          <ArrowLeft size={14} />
+          Back to Labs
+        </Link>
 
-        <div className="prose prose-invert prose-neutral max-w-none space-y-6 text-neutral-300">
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h2>
-            <p>
-              By creating an account on LOOKSMAXX, you agree to be bound by these Terms & Conditions.
-              If you do not agree to all of these terms, you may not use our service.
+        <header className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-5xl font-black tracking-tighter italic uppercase mb-2">
+                Terms of <span className="text-cyan-400">Operation</span>
+              </h1>
+              <p className="text-neutral-500 font-medium max-w-md uppercase text-xs tracking-[0.2em]">
+                Legal Framework & User Agreement • Version 2025.A
+              </p>
+            </div>
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-700 border border-neutral-900 px-3 py-1 rounded-full">
+              EST. READ TIME: 4m
+            </div>
+          </div>
+        </header>
+
+        <section className="mb-16 p-8 rounded-3xl bg-neutral-900/60 border border-white/5">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-cyan-500 mb-4">Executive Summary (TL;DR)</h2>
+          <ul className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <li className="text-[10px] font-bold text-neutral-400 uppercase leading-relaxed">
+              <span className="text-white block mb-1">NOT MEDICAL</span> Educational analysis only. Consult pros before surgery.
+            </li>
+            <li className="text-[10px] font-bold text-neutral-400 uppercase leading-relaxed">
+              <span className="text-white block mb-1">AGE 18+</span> Restricted to adults. No minor usage permitted.
+            </li>
+            <li className="text-[10px] font-bold text-neutral-400 uppercase leading-relaxed">
+              <span className="text-white block mb-1">OWNERSHIP</span> You own your data. We provide the processing tools.
+            </li>
+            <li className="text-[10px] font-bold text-neutral-400 uppercase leading-relaxed">
+              <span className="text-white block mb-1">LIABILITY</span> Use at your own risk. Scores are based on AI models.
+            </li>
+          </ul>
+        </section>
+
+        <div className="space-y-12 text-neutral-400 font-medium leading-relaxed">
+          <section className="p-10 rounded-[2.5rem] bg-red-950/10 border border-red-500/20 mb-16">
+            <div className="flex items-center gap-3 text-red-400 mb-6">
+              <ShieldAlert size={24} />
+              <h2 className="text-xl font-black italic uppercase">Critical Disclaimer: NOT MEDICAL ADVICE</h2>
+            </div>
+            <p className="text-sm leading-relaxed mb-4">
+              LOOKSMAXX LABS IS A BIOMETRIC SOFTWARE SUITE FOR AESTHETIC ANALYSIS. IT IS NOT A MEDICAL DEVICE.
+            </p>
+            <p className="text-xs opacity-70">
+              All analysis results, scores, potential vectors, and treatment simulations are strictly for educational and entertainment purposes. We do not provide medical diagnoses or surgical recommendations. Consult with a board-certified plastic surgeon before any physical intervention.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">2. Age Requirement</h2>
-            <p>
-              You must be at least 18 years old to use this service. By creating an account,
-              you confirm that you meet this age requirement.
-            </p>
+          <div className="grid md:grid-cols-2 gap-12">
+            <section>
+              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white mb-6 flex items-center gap-3">
+                <Scale size={14} className="text-cyan-400" />
+                01. Acceptance
+              </h3>
+              <p className="text-sm">
+                Accessing our portal constitutes a binding agreement to these terms. If you do not agree to the quantum of these protocols, immediate cessation of service use is required.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white mb-6 flex items-center gap-3">
+                <Gavel size={14} className="text-cyan-400" />
+                02. Eligibility
+              </h3>
+              <p className="text-sm">
+                The platform is restricted to individuals aged 18 and older. Use by minors is strictly prohibited due to the psychological nature of aesthetic validation.
+              </p>
+            </section>
+          </div>
+
+          <div className="h-px bg-neutral-900 my-12" />
+
+          <section className="space-y-8">
+            <div>
+              <h3 className="text-white font-black italic uppercase mb-4">03. AI Analysis Limitations</h3>
+              <p className="text-sm">
+                Our AI models generate scores based on pixel data and probabilistic archetypes. These scores reflect mathematical symmetry, not absolute beauty or personal worth. Accuracy is contingent on lighting, camera focal length, and landmark detection precision.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-white font-black italic uppercase mb-4">04. Limitation of Liability</h3>
+              <p className="text-sm">
+                LOOKSMAXX LABS assumes zero liability for emotional responses, financial expenditures on recommended treatments, or surgical outcomes. Your aesthetic evolution is your own sovereign responsibility.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-white font-black italic uppercase mb-4">05. Data Sovereignty</h3>
+              <p className="text-sm">
+                You grant us a license to process your biometric data for the purpose of analysis. We do not own your face. You may trigger a &ldquo;Hard Clear&rdquo; command in settings to remove all files from our active buffers at any time.
+              </p>
+            </div>
           </section>
 
-          <section className="bg-neutral-900/50 border border-neutral-700 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-red-400 mb-3">3. NOT MEDICAL ADVICE</h2>
-            <p className="font-medium">
-              LOOKSMAXX IS NOT MEDICAL ADVICE AND SHOULD NEVER BE TREATED AS SUCH.
-            </p>
-            <p className="mt-2">
-              All facial analysis results, scores, treatment options, procedure recommendations,
-              and any other information provided by this service are strictly for educational and
-              entertainment purposes only. This information does not constitute medical advice,
-              diagnosis, or treatment recommendations.
-            </p>
-            <p className="mt-2">
-              You must consult with qualified medical professionals, including board-certified
-              plastic surgeons, dermatologists, or other relevant healthcare providers before
-              making any decisions about cosmetic or surgical procedures. Never disregard
-              professional medical advice or delay seeking it based on information from this service.
-            </p>
-          </section>
-
-          <section className="bg-neutral-900/50 border border-neutral-700 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-amber-400 mb-3">4. AI Analysis Limitations</h2>
-            <p>
-              All analysis results are generated by algorithms and artificial intelligence. These results:
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Do NOT constitute professional opinions or diagnoses</li>
-              <li>Do NOT guarantee accuracy or completeness</li>
-              <li>Are NOT objective measures of attractiveness or beauty</li>
-              <li>Should be viewed as informational guidance only</li>
-            </ul>
-            <p className="mt-2">
-              Beauty inherently contains subjective elements that cannot be fully captured by
-              any algorithm. Our analysis provides one perspective based on mathematical
-              measurements and should never be interpreted as absolute truth or fact about
-              your appearance.
-            </p>
-          </section>
-
-          <section className="bg-neutral-900/50 border border-neutral-700 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-amber-400 mb-3">5. Accuracy Depends on Input</h2>
-            <p>
-              The accuracy of analysis results depends entirely on the quality of photos provided
-              and the accuracy of facial landmark detection. Factors that may affect results include:
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Photo lighting, angle, and quality</li>
-              <li>Facial expressions</li>
-              <li>Camera distortion</li>
-              <li>Automated landmark detection errors</li>
-            </ul>
-            <p className="mt-2">
-              Inaccurate input may result in incorrect calculations and potentially misleading
-              treatment suggestions. You acknowledge that results may vary based on these factors.
-            </p>
-          </section>
-
-          <section className="bg-neutral-900/50 border border-neutral-700 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-red-400 mb-3">6. Limitation of Liability</h2>
-            <p>
-              LOOKSMAXX and its operators assume NO LIABILITY for:
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Any emotional distress, psychological impact, or mental health effects resulting from viewing analysis results</li>
-              <li>Any decisions you make based on analysis results or treatment recommendations</li>
-              <li>Any cosmetic or medical procedures you choose to undergo</li>
-              <li>Any outcomes, complications, or results from following suggested treatment options</li>
-              <li>Any financial losses related to pursuing recommended procedures</li>
-              <li>Any third-party services, practitioners, or products you engage with</li>
-            </ul>
-            <p className="mt-2 font-medium">
-              YOU USE THIS SERVICE ENTIRELY AT YOUR OWN RISK.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">7. Entertainment Purpose</h2>
-            <p>
-              This service is provided strictly for entertainment and informational purposes.
-              Analysis results do not represent objective beauty assessments, factual statements
-              about your appearance, or professional evaluations. Scores and rankings are
-              algorithmic outputs that should be interpreted as entertainment, not as meaningful
-              assessments of personal worth or attractiveness.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">8. Privacy & Data Usage</h2>
-            <p>
-              Your facial analysis data and photos are processed to provide our service.
-              Photos are used solely for analysis purposes and are handled according to our
-              Privacy Policy. We do not sell your personal data to third parties.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">9. Leaderboard Participation</h2>
-            <p>
-              By creating an account, you consent to having your analysis score displayed on the
-              public leaderboard under your chosen username. Your face photo may be visible to
-              other users on the leaderboard. You can choose to hide your photo in your settings.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">10. Username Policy</h2>
-            <p>
-              You must choose a unique username that will be displayed publicly. Usernames must
-              be 3-30 characters and contain only letters, numbers, and underscores. Usernames
-              that are offensive, impersonate others, or violate our community standards may be
-              removed without notice.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">11. No Harassment</h2>
-            <p>
-              Users agree not to use information from the leaderboard to harass, bully, demean,
-              or target other users. Any form of harassment based on facial analysis results or
-              leaderboard rankings is strictly prohibited and may result in immediate account
-              termination.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">12. No Guarantees</h2>
-            <p>
-              We make no guarantees regarding:
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>The accuracy of facial measurements or scores</li>
-              <li>The effectiveness of any suggested treatments or procedures</li>
-              <li>Potential improvement predictions or estimates</li>
-              <li>Service availability or uptime</li>
-            </ul>
-            <p className="mt-2">
-              All features are provided &quot;as is&quot; without warranty of any kind.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">13. Account Termination</h2>
-            <p>
-              We reserve the right to terminate accounts that violate these terms, engage in
-              abusive behavior, or misuse the platform. Users may also delete their account
-              at any time through their settings.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">14. Service Modifications</h2>
-            <p>
-              We reserve the right to modify, suspend, or discontinue any part of the service
-              at any time. We will make reasonable efforts to notify users of significant changes.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">15. Indemnification</h2>
-            <p>
-              You agree to indemnify and hold harmless LOOKSMAXX, its operators, affiliates,
-              and employees from any claims, damages, losses, or expenses arising from your
-              use of the service, violation of these terms, or any actions you take based on
-              information provided by the service.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">16. Contact</h2>
-            <p>
-              For questions about these terms, please contact us at support@looksmaxx.app
-            </p>
-          </section>
-
-          <p className="text-neutral-500 text-sm mt-8">
-            Last updated: December 2024
-          </p>
+          <footer className="mt-32 pt-12 border-t border-neutral-900 text-center font-mono text-[10px] text-neutral-700">
+            LAST LOG UPDATE: 2025.12.23 // LOC: GLOBAL_FEDERATION
+          </footer>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
