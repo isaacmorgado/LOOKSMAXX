@@ -43,13 +43,14 @@ export default function HeightPage() {
   };
 
   const handleInchesChange = (delta: number) => {
-    let newInches = localInches + delta;
+    // Use 0.5 inch increments
+    let newInches = localInches + delta * 0.5;
     let newFeet = localFeet;
 
     if (newInches < 0) {
-      newInches = 11;
+      newInches = 11.5;
       newFeet = Math.max(4, localFeet - 1);
-    } else if (newInches > 11) {
+    } else if (newInches >= 12) {
       newInches = 0;
       newFeet = Math.min(7, localFeet + 1);
     }
@@ -90,6 +91,11 @@ export default function HeightPage() {
     return 'Very Short';
   };
 
+  // Format inches display (show .5 for half inches, otherwise whole number)
+  const formatInchesDisplay = (inches: number): string => {
+    return Number.isInteger(inches) ? inches.toString() : inches.toFixed(1);
+  };
+
   // Number spinner component
   const NumberSpinner = ({
     value,
@@ -97,12 +103,14 @@ export default function HeightPage() {
     onDecrease,
     label,
     suffix,
+    isDecimal = false,
   }: {
     value: number;
     onIncrease: () => void;
     onDecrease: () => void;
     label: string;
     suffix: string;
+    isDecimal?: boolean;
   }) => (
     <div className="flex flex-col items-center">
       <span className="text-xs text-neutral-500 mb-2">{label}</span>
@@ -114,7 +122,9 @@ export default function HeightPage() {
           <ChevronUp className="w-6 h-6 text-neutral-400" />
         </button>
         <div className="flex items-baseline py-3">
-          <span className="text-4xl font-bold text-white tabular-nums">{value}</span>
+          <span className="text-4xl font-bold text-white tabular-nums">
+            {isDecimal ? formatInchesDisplay(value) : value}
+          </span>
           <span className="text-lg text-neutral-500 ml-1">{suffix}</span>
         </div>
         <button
@@ -197,6 +207,7 @@ export default function HeightPage() {
                 onDecrease={() => handleInchesChange(-1)}
                 label="INCHES"
                 suffix='"'
+                isDecimal={true}
               />
             </>
           ) : (
@@ -216,7 +227,7 @@ export default function HeightPage() {
             <span className="text-sm text-neutral-400">Height Rating</span>
             <span className="text-sm text-neutral-500">
               {inputMode === 'imperial'
-                ? `${localFeet}'${localInches}" (${currentHeightCm}cm)`
+                ? `${localFeet}'${formatInchesDisplay(localInches)}" (${currentHeightCm}cm)`
                 : `${localCm}cm`}
             </span>
           </div>

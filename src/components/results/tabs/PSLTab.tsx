@@ -436,6 +436,11 @@ export function PSLTab() {
   const heightRating = heightCm ? getHeightRating(heightCm, gender || 'male') : null;
   const heightDisplay = heightCm ? cmToFeetInches(heightCm) : null;
 
+  // Format inches for display (show .5 for half inches, otherwise whole number)
+  const formatInches = (inches: number): string => {
+    return Number.isInteger(inches) ? inches.toString() : inches.toFixed(1);
+  };
+
   return (
     <TabContent
       title="PSL Rating"
@@ -472,8 +477,8 @@ export function PSLTab() {
                       <p className="text-sm text-neutral-400">Your Height</p>
                       <p className="text-lg font-semibold text-white">
                         {heightInputMode === 'imperial'
-                          ? `${heightDisplay.feet}'${heightDisplay.inches}" (${heightCm}cm)`
-                          : `${heightCm}cm (${heightDisplay.feet}'${heightDisplay.inches}")`}
+                          ? `${heightDisplay.feet}'${formatInches(heightDisplay.inches)}" (${heightCm}cm)`
+                          : `${heightCm}cm (${heightDisplay.feet}'${formatInches(heightDisplay.inches)}")`}
                       </p>
                     </div>
                   </div>

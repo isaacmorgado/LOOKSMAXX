@@ -18,9 +18,11 @@ npm run lint && npx tsc --noEmit
 | Component | Count | File | Details |
 |-----------|-------|------|---------|
 | **Bezier Curves** | 67 | `src/lib/bezier-curves.ts` | Complete cubic Bezier interpolation with 10-15 control points each |
-| **Decay Rates** | 80+ | `src/lib/data/metric-configs.ts` | 0.08-0.30 range (3-210x improvement from original 0.5-31.6) |
-| **Ethnicity Overrides** | 16 | `src/lib/data/demographic-overrides.ts` | 8 male + 8 female with 130+ override entries |
-| **Severity Tiers** | 5 | `src/lib/insights-engine.ts` | Z-score based: Ideal/Good/Fair/Moderate/Severe |
+| **Decay Rates** | 80+ | `src/lib/data/metric-configs.ts` | 0.08-1.0 range (ratios: 0.08-0.30, angles: 0.5-1.0) |
+| **Ethnicity Overrides** | 16 demographics | `src/lib/data/demographic-overrides.ts` | 8 ethnicities × 2 genders = 16 combos with 130+ metric overrides |
+| **Severity Tiers (Raw)** | 6 | `src/lib/scoring/types.ts` | extremely_severe/severe/major/moderate/minor/optimal |
+| **Severity Tiers (Insights)** | 5 | `src/lib/insights-engine.ts` | Z-score based: ideal/good/fair/moderate/severe |
+| **Quality Tiers** | 4 | `src/lib/scoring/types.ts` | ideal/excellent/good/below_average |
 | **PSL Rating** | 10 tiers | `src/lib/psl-calculator.ts` | 1-10 scale with percentile mapping |
 | **Total Metrics** | 80+ | `src/lib/data/metric-configs.ts` | Front + side profile measurements |
 
@@ -45,12 +47,18 @@ All metrics use custom cubic Bezier interpolation:
 - Nasal features: nasalIndex, nasolabialAngle, nasalProjection
 
 #### Decay Rate Calibration
-Original values were 3-210x too harsh. Fixed mappings:
+Original values were 3-210x too harsh. Now calibrated by metric type:
+
+**Ratios/Proportions (0.08-0.30)** - Lenient scoring:
 - `faceWidthToHeight`: 0.12 (was 6.4 - 53x reduction)
 - `midfaceRatio`: 0.15 (was 31.6 - 210x reduction)
 - `totalFacialWidthToHeight`: 0.15 (was 13.2 - 88x reduction)
-- `nasalIndex`: 0.25
-- `gonialAngle`: 0.20
+- `nasalIndex`: 0.25, `gonialAngle`: 0.08
+
+**Angles/Positions (0.5-1.0)** - Stricter scoring:
+- `earProtrusionAngle`: 1.0
+- `burstoneUpperLip/LowerLip`: 1.0
+- `bigonialWidth`: 0.9, `jawSlope`: 0.8
 
 #### Ethnicity Overrides (8 Ethnicities x 2 Genders)
 1. White (Neoclassical standard)

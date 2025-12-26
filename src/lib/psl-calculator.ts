@@ -411,13 +411,19 @@ export function feetInchesToCm(feet: number, inches: number): number {
 }
 
 /**
- * Convert height from cm to feet/inches
+ * Convert height from cm to feet/inches (supports half-inch precision)
  */
 export function cmToFeetInches(cm: number): { feet: number; inches: number } {
   const totalInches = cm / 2.54;
   const feet = Math.floor(totalInches / 12);
-  const inches = Math.round(totalInches % 12);
-  return { feet, inches: inches === 12 ? 0 : inches };
+  // Round to nearest 0.5 inch
+  const rawInches = totalInches % 12;
+  const inches = Math.round(rawInches * 2) / 2;
+  // Handle case where rounding pushes to 12
+  if (inches >= 12) {
+    return { feet: feet + 1, inches: 0 };
+  }
+  return { feet, inches };
 }
 
 /**

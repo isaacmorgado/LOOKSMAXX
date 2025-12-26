@@ -27,12 +27,18 @@ const HeightContext = createContext<HeightContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'looksmaxx_height';
 
-// Convert cm to feet and inches
+// Convert cm to feet and inches (supports half-inch precision)
 function cmToImperial(cm: number): { feet: number; inches: number } {
   const totalInches = cm / 2.54;
   const feet = Math.floor(totalInches / 12);
-  const inches = Math.round(totalInches % 12);
-  return { feet, inches: inches === 12 ? 0 : inches };
+  // Round to nearest 0.5 inch
+  const rawInches = totalInches % 12;
+  const inches = Math.round(rawInches * 2) / 2;
+  // Handle case where rounding pushes to 12
+  if (inches >= 12) {
+    return { feet: feet + 1, inches: 0 };
+  }
+  return { feet, inches };
 }
 
 // Convert feet and inches to cm
@@ -41,13 +47,15 @@ function imperialToCm(feet: number, inches: number): number {
   return Math.round(totalInches * 2.54);
 }
 
-// Format display string
+// Format display string (supports half-inch display like 5'10.5")
 function formatHeight(cm: number, mode: InputMode): string {
   if (mode === 'metric') {
     return `${cm} cm`;
   }
   const { feet, inches } = cmToImperial(cm);
-  return `${feet}'${inches}"`;
+  // Display as integer if whole number, otherwise show .5
+  const inchesDisplay = Number.isInteger(inches) ? inches.toString() : inches.toFixed(1);
+  return `${feet}'${inchesDisplay}"`;
 }
 
 export function HeightProvider({ children }: { children: ReactNode }) {
