@@ -4,6 +4,226 @@
  */
 
 import { Plan } from '@/components/results/cards/PlanActionCard';
+import type { ExclusiveCategory } from './recommendations/types';
+
+// ============================================
+// TREATMENT EXCLUSIVITY RULES
+// ============================================
+
+/**
+ * Treatment exclusivity configuration
+ * Based on FaceIQ logic for mutually exclusive procedures
+ */
+export interface TreatmentExclusivity {
+  exclusiveCategory?: ExclusiveCategory;
+  exclusiveWith?: string[];  // Specific treatment IDs that conflict
+}
+
+/**
+ * Mapping of treatment IDs to their exclusivity rules
+ */
+export const TREATMENT_EXCLUSIVITY: Record<string, TreatmentExclusivity> = {
+  // ============================================
+  // JAW AUGMENTATION vs REDUCTION
+  // Cannot combine augmentation with reduction
+  // ============================================
+  'jaw_fillers': {
+    exclusiveCategory: 'jaw_augmentation',
+    exclusiveWith: ['jaw_reduction', 'masseter_botox']
+  },
+  'jaw_implants': {
+    exclusiveCategory: 'jaw_augmentation',
+    exclusiveWith: ['jaw_reduction', 'masseter_botox']
+  },
+  'jaw_reduction': {
+    exclusiveCategory: 'jaw_reduction',
+    exclusiveWith: ['jaw_fillers', 'jaw_implants']
+  },
+  'masseter_botox': {
+    exclusiveCategory: 'jaw_reduction',
+    exclusiveWith: ['jaw_fillers', 'jaw_implants']
+  },
+
+  // ============================================
+  // CHIN AUGMENTATION - Pick ONE
+  // Chin implants, genioplasty, fat grafting to chin
+  // ============================================
+  'chin_implant': {
+    exclusiveCategory: 'chin_augmentation',
+    exclusiveWith: ['genioplasty', 'chin_filler', 'fat_grafting']
+  },
+  'genioplasty': {
+    exclusiveCategory: 'chin_augmentation',
+    exclusiveWith: ['chin_implant', 'chin_filler', 'fat_grafting']
+  },
+  'chin_filler': {
+    exclusiveCategory: 'chin_augmentation',
+    exclusiveWith: ['chin_implant', 'genioplasty', 'fat_grafting']
+  },
+
+  // ============================================
+  // CHEEKBONE AUGMENTATION - Pick ONE
+  // Fillers vs implants
+  // ============================================
+  'cheekbone_fillers': {
+    exclusiveCategory: 'cheekbone_augmentation',
+    exclusiveWith: ['midface_implants']
+  },
+  'midface_implants': {
+    exclusiveCategory: 'cheekbone_augmentation',
+    exclusiveWith: ['cheekbone_fillers']
+  },
+
+  // ============================================
+  // LIP AUGMENTATION vs REDUCTION
+  // ============================================
+  'lip_filler': {
+    exclusiveCategory: 'lip_augmentation',
+    exclusiveWith: ['lip_reduction']
+  },
+  'lip_reduction': {
+    exclusiveCategory: 'lip_reduction',
+    exclusiveWith: ['lip_filler']
+  },
+
+  // ============================================
+  // SUBMENTAL/NECK FAT REMOVAL - Pick ONE
+  // Kybella, cryolipolysis, submental liposuction
+  // ============================================
+  'kybella': {
+    exclusiveCategory: 'submental_fat_removal',
+    exclusiveWith: ['cryolipolysis', 'submental_liposuction']
+  },
+  'cryolipolysis': {
+    exclusiveCategory: 'submental_fat_removal',
+    exclusiveWith: ['kybella', 'submental_liposuction']
+  },
+  'submental_liposuction': {
+    exclusiveCategory: 'submental_fat_removal',
+    exclusiveWith: ['kybella', 'cryolipolysis']
+  },
+
+  // ============================================
+  // NECK PROCEDURES - Overlapping
+  // Neck lift supersedes submentoplasty
+  // ============================================
+  'neck_lift': {
+    exclusiveCategory: 'neck_procedures',
+    exclusiveWith: ['submentoplasty']  // Neck lift includes submentoplasty
+  },
+  'submentoplasty': {
+    exclusiveCategory: 'neck_procedures',
+    exclusiveWith: ['neck_lift']  // If getting neck lift, don't need separate submentoplasty
+  },
+
+  // ============================================
+  // EYE LATERAL CANTHUS - Pick ONE
+  // Canthoplasty vs canthopexy
+  // ============================================
+  'canthoplasty': {
+    exclusiveCategory: 'eye_lateral_canthus',
+    exclusiveWith: ['canthopexy']
+  },
+  'canthopexy': {
+    exclusiveCategory: 'eye_lateral_canthus',
+    exclusiveWith: ['canthoplasty']
+  },
+
+  // ============================================
+  // MAXILLARY SURGERY - Comprehensive
+  // Bimaxillary osteotomy supersedes many other procedures
+  // ============================================
+  'bimaxillary_osteotomy': {
+    exclusiveCategory: 'maxillary_surgery',
+    exclusiveWith: [
+      'genioplasty',        // Chin is repositioned in bimax
+      'chin_implant',       // Redundant after bimax
+      'jaw_implants',       // Jaw position changed
+      'jaw_fillers',        // Temporary vs permanent bone change
+      'rhinoplasty'         // Often combined but distinct - may need sequencing
+    ]
+  }
+};
+
+/**
+ * Get exclusivity data for a treatment
+ */
+export function getTreatmentExclusivity(treatmentId: string): TreatmentExclusivity | undefined {
+  return TREATMENT_EXCLUSIVITY[treatmentId];
+}
+
+/**
+ * Check if two treatments conflict
+ */
+export function treatmentsConflict(treatmentId1: string, treatmentId2: string): boolean {
+  const exclusivity1 = TREATMENT_EXCLUSIVITY[treatmentId1];
+  const exclusivity2 = TREATMENT_EXCLUSIVITY[treatmentId2];
+
+  // Check direct exclusivity via IDs
+  if (exclusivity1?.exclusiveWith?.includes(treatmentId2)) {
+    return true;
+  }
+  if (exclusivity2?.exclusiveWith?.includes(treatmentId1)) {
+    return true;
+  }
+
+  // Check category-based exclusivity (same category = mutually exclusive)
+  if (
+    exclusivity1?.exclusiveCategory &&
+    exclusivity2?.exclusiveCategory &&
+    exclusivity1.exclusiveCategory === exclusivity2.exclusiveCategory
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Get all treatments that conflict with a given treatment
+ */
+export function getConflictingTreatments(treatmentId: string): string[] {
+  const conflicts: string[] = [];
+  const exclusivity = TREATMENT_EXCLUSIVITY[treatmentId];
+
+  if (!exclusivity) {
+    return conflicts;
+  }
+
+  // Add direct exclusions
+  if (exclusivity.exclusiveWith) {
+    conflicts.push(...exclusivity.exclusiveWith);
+  }
+
+  // Add treatments from same exclusive category
+  if (exclusivity.exclusiveCategory) {
+    for (const [id, data] of Object.entries(TREATMENT_EXCLUSIVITY)) {
+      if (id !== treatmentId && data.exclusiveCategory === exclusivity.exclusiveCategory) {
+        if (!conflicts.includes(id)) {
+          conflicts.push(id);
+        }
+      }
+    }
+  }
+
+  return conflicts;
+}
+
+/**
+ * Human-readable descriptions of why treatments conflict
+ */
+export const CONFLICT_REASONS: Record<ExclusiveCategory, string> = {
+  'jaw_augmentation': 'Jaw augmentation procedures conflict with jaw reduction procedures. Choose one approach.',
+  'jaw_reduction': 'Jaw reduction procedures conflict with jaw augmentation procedures. Choose one approach.',
+  'chin_augmentation': 'Choose one chin augmentation method. Combining implants, genioplasty, or fillers is not recommended.',
+  'cheekbone_augmentation': 'Choose either fillers or implants for cheekbone augmentation, not both.',
+  'lip_augmentation': 'Lip augmentation conflicts with lip reduction. Choose one approach for lip volume.',
+  'lip_reduction': 'Lip reduction conflicts with lip augmentation. Choose one approach for lip volume.',
+  'submental_fat_removal': 'Choose one submental fat removal method. Multiple procedures to the same area increase complication risk.',
+  'neck_procedures': 'Neck lift includes submentoplasty. Having both is redundant and increases risk.',
+  'eye_lateral_canthus': 'Choose either canthoplasty or canthopexy for lateral canthus modification, not both.',
+  'maxillary_surgery': 'Bimaxillary osteotomy is comprehensive and may make other jaw/chin procedures redundant.'
+};
 
 // ============================================
 // TYPES

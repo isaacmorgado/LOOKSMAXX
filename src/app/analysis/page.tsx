@@ -129,7 +129,7 @@ export default function AnalysisPage() {
           </p>
           <button
             onClick={() => router.push('/upload')}
-            className="h-12 px-8 rounded-xl bg-[#00f3ff] text-black font-medium hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+            className="h-12 px-8 rounded-xl bg-cyan-400 text-black font-medium hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all"
           >
             Go to Upload
           </button>
@@ -201,7 +201,7 @@ export default function AnalysisPage() {
 
           {(physiqueStatus === 'uploading' || physiqueStatus === 'analyzing' || physiqueStatus === 'idle') && (
             <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 border-4 border-[#00f3ff] border-t-transparent rounded-full animate-spin" />
+              <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
               <p className="text-neutral-400">
                 {physiqueStatus === 'uploading' && 'Uploading your physique photos...'}
                 {physiqueStatus === 'analyzing' && 'AI is analyzing your body composition...'}
@@ -220,7 +220,7 @@ export default function AnalysisPage() {
               <p className="text-neutral-400">Body composition analysis complete!</p>
               <button
                 onClick={() => navigateToResults(frontLandmarks, sideLandmarks)}
-                className="h-12 px-8 rounded-xl bg-[#00f3ff] text-black font-medium hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+                className="h-12 px-8 rounded-xl bg-cyan-400 text-black font-medium hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all"
               >
                 View Results
               </button>
@@ -238,7 +238,7 @@ export default function AnalysisPage() {
               <p className="text-neutral-500 text-sm">Body analysis failed, but you can still see your face analysis results.</p>
               <button
                 onClick={() => navigateToResults(frontLandmarks, sideLandmarks)}
-                className="h-12 px-8 rounded-xl bg-[#00f3ff] text-black font-medium hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+                className="h-12 px-8 rounded-xl bg-cyan-400 text-black font-medium hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all"
               >
                 Continue to Results
               </button>

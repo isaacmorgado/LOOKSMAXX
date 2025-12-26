@@ -2,6 +2,11 @@
  * Unified Face Detection Service
  * Uses MediaPipe Tasks Vision for optimal performance
  * Singleton pattern with preloading and warmup support
+ *
+ * Performance optimizations:
+ * - GPU delegation for WASM acceleration
+ * - Image downsampling before inference (reduces computation 4x)
+ * - Preloading and warmup for instant detection
  */
 
 import { FaceLandmarker, FilesetResolver, FaceLandmarkerResult } from '@mediapipe/tasks-vision';
@@ -10,6 +15,9 @@ const CONFIG = {
   // Self-hosted for better reliability
   MODEL_URL: '/wasm/face_landmarker.task',
   WASM_URL: '/wasm',
+  // Maximum image dimension for detection (larger images are downsampled)
+  // 640px gives good accuracy while reducing computation by 4x for 1280px images
+  MAX_DETECTION_SIZE: 640,
 };
 
 class FaceDetectionService {
@@ -60,7 +68,47 @@ class FaceDetectionService {
 
   async detect(image: HTMLImageElement | HTMLCanvasElement): Promise<FaceLandmarkerResult> {
     const landmarker = await this.initialize();
-    return landmarker.detect(image);
+
+    // Downsample large images for faster detection
+    const processedImage = this.downsampleImage(image);
+
+    return landmarker.detect(processedImage);
+  }
+
+  /**
+   * Downsample image if it exceeds MAX_DETECTION_SIZE
+   * Reduces computation time significantly for high-resolution images
+   * Landmarks are returned in normalized 0-1 coordinates, so no rescaling needed
+   */
+  private downsampleImage(image: HTMLImageElement | HTMLCanvasElement): HTMLCanvasElement | HTMLImageElement {
+    const width = image instanceof HTMLImageElement ? image.naturalWidth : image.width;
+    const height = image instanceof HTMLImageElement ? image.naturalHeight : image.height;
+
+    // If image is already small enough, return as-is
+    const maxDim = Math.max(width, height);
+    if (maxDim <= CONFIG.MAX_DETECTION_SIZE) {
+      return image;
+    }
+
+    // Calculate scale factor
+    const scale = CONFIG.MAX_DETECTION_SIZE / maxDim;
+    const newWidth = Math.round(width * scale);
+    const newHeight = Math.round(height * scale);
+
+    // Create downsampled canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return image;
+
+    // Use high-quality downsampling
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(image, 0, 0, newWidth, newHeight);
+
+    return canvas;
   }
 
   isReady(): boolean {

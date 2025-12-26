@@ -18,6 +18,7 @@ export const coreNeckGuide: Guide = {
   tags: ['core', 'neck', 'posture', 'training', 'aesthetics'],
   relatedGuides: ['training', 'v-taper', 'body-fat'],
   productIds: ['creatine_mono'],
+  forumCategory: 'height-frame',
   sections: [
     {
       id: 'intro',

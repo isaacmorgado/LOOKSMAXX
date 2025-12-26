@@ -18,6 +18,14 @@ export const mindsetGuide: Guide = {
   tags: ['mindset', 'beginners', 'fundamentals'],
   relatedGuides: ['maintenance', 'body-fat'],
   productIds: [],
+  forumCategory: 'anxiety',
+  heroMedia: {
+    id: 'mindset-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80',
+    alt: 'Focused mindset and determination',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',
@@ -34,6 +42,16 @@ They're either:
 - Looking for shortcuts (spoiler: there aren't any)
 
 This guide is about fixing that before you waste months spinning your wheels.`,
+      media: [
+        {
+          id: 'mindset-intro',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80',
+          alt: 'Man focused on goals',
+          caption: 'The mindset game starts before everything else',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'mistake-1-perfectionism',
@@ -52,6 +70,16 @@ Here's the brutal truth: a mediocre plan executed consistently beats a perfect p
         'Done is better than perfect',
         'Consistency beats intensity every single time',
         'Start before you feel ready'
+      ],
+      media: [
+        {
+          id: 'perfectionism-trap',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&q=80',
+          alt: 'Planning and action',
+          caption: 'Stop planning, start doing',
+          placement: 'inline',
+        },
       ],
     },
     {
@@ -195,6 +223,16 @@ Add one new thing every 4-6 weeks. Not five things at once. You need to know wha
         'Progress compounds over time',
         'Small daily actions beat occasional big efforts',
         'Document everything so you can see the change'
+      ],
+      media: [
+        {
+          id: 'strategy-visual',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1434596922112-19c563067271?w=800&q=80',
+          alt: 'Progress and tracking',
+          caption: 'Track ruthlessly, iterate slowly',
+          placement: 'inline',
+        },
       ],
     },
     {

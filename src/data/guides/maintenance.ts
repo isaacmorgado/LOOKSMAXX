@@ -26,6 +26,14 @@ export const maintenanceGuide: Guide = {
     'aquaphor_lip',
     'cologne_bleu',
   ],
+  forumCategory: 'fashion',
+  heroMedia: {
+    id: 'maintenance-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1200&q=80',
+    alt: 'Clean, well-groomed appearance',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',
@@ -62,6 +70,16 @@ Everything here is simple. Nothing is expensive. No excuses.`,
         'Scrape tongue BEFORE brushing, not after',
         'Replace toothbrush head every 3 months',
         'Mouthwash is optional but flossing is mandatory'
+      ],
+      media: [
+        {
+          id: 'tongue-scraping',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&q=80',
+          alt: 'Oral hygiene and dental care products',
+          caption: 'Oral hygiene: brush, floss, scrape',
+          placement: 'inline',
+        },
       ],
     },
     {

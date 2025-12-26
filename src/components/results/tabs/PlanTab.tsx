@@ -12,19 +12,42 @@ import {
   CheckCircle,
   AlertCircle,
   CheckCircle2,
+  Scale,
+  Dumbbell,
+  Salad,
+  ArrowDown,
+  ArrowUp,
+  Minus,
+  Package,
+  ShoppingCart,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePricing } from '@/contexts/PricingContext';
+import { usePhysiqueOptional } from '@/contexts/PhysiqueContext';
 import { TabContent } from '../ResultsLayout';
 import { EnhancedRecommendationCard } from '../cards/EnhancedRecommendationCard';
 import { ScoreCircle, PhaseBadge } from '../shared';
 import { BeforeAfterPreview } from '../visualization/BeforeAfterPreview';
+import { FaceMorphing } from '../visualization/FaceMorphing';
 import { TreatmentTimeline } from '../visualization/TreatmentTimeline';
-import { RecommendationPhase } from '@/types/results';
+import { RecommendationPhase, ProductRecommendation } from '@/types/results';
 import { DailyStackCard } from '../cards/DailyStackCard';
 import { ProductCard } from '../cards/ProductCard';
+import { WeakPointCard } from '../cards/WeakPointCard';
+import { ProgressComparisonCard } from '../cards/ProgressComparisonCard';
+import { MedicalPrescriptionCard } from '../cards/MedicalPrescriptionCard';
 import { generateDailyStack } from '@/lib/daily-stack';
 import { getProductRecommendations } from '@/lib/product-recommendations';
+import { SUPPLEMENTS } from '@/lib/recommendations/supplements';
+import {
+  TreatmentConflictList,
+  SelectionWarningModal,
+} from '../cards/TreatmentConflictWarning';
+import {
+  findTreatmentConflicts,
+  type TreatmentConflict,
+} from '@/lib/recommendations/engine';
 
 // ============================================
 // POTENTIAL SCORE CARD
@@ -32,15 +55,16 @@ import { getProductRecommendations } from '@/lib/product-recommendations';
 
 function PotentialScoreCard() {
   const { overallScore, recommendations } = useResults();
+  const numericScore = typeof overallScore === 'number' ? overallScore : 0;
 
   // Calculate potential improvement
   const potentialImprovement = useMemo(() => {
     if (recommendations.length === 0) return 0;
-    const totalImpact = recommendations.slice(0, 5).reduce((sum, r) => sum + r.impact, 0);
-    return Math.min(totalImpact * 1.5, 10 - overallScore);
-  }, [recommendations, overallScore]);
+    const totalImpact = recommendations.slice(0, 5).reduce((sum, r) => sum + (r.impact || 0), 0);
+    return Math.min(totalImpact * 1.5, 10 - numericScore);
+  }, [recommendations, numericScore]);
 
-  const potentialScore = Math.min(10, overallScore + potentialImprovement);
+  const potentialScore = Math.min(10, numericScore + potentialImprovement);
 
   return (
     <motion.div
@@ -103,11 +127,10 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
     <div className="flex flex-wrap gap-2">
       <button
         onClick={() => onSelect(null)}
-        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-          selectedPhase === null
-            ? 'bg-cyan-500 text-black'
-            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-        }`}
+        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedPhase === null
+          ? 'bg-cyan-500 text-black'
+          : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+          }`}
       >
         All ({Object.values(counts).reduce((a, b) => a + b, 0)})
       </button>
@@ -115,11 +138,10 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
         <button
           key={phase}
           onClick={() => onSelect(phase)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-            selectedPhase === phase
-              ? 'bg-neutral-700 text-white'
-              : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-          }`}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${selectedPhase === phase
+            ? 'bg-neutral-700 text-white'
+            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+            }`}
         >
           <PhaseBadge phase={phase} size="sm" />
           ({counts[phase] || 0})
@@ -130,30 +152,89 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
 }
 
 // ============================================
-// BEFORE/AFTER PREVIEW SECTION
+// BEFORE/AFTER PREVIEW SECTION WITH MORPHING
 // ============================================
 
+type PreviewMode = 'static' | 'morphing';
+
 function BeforeAfterPreviewSection() {
-  const { frontPhoto, overallScore, recommendations } = useResults();
+  const { frontPhoto, overallScore, recommendations, frontLandmarks } = useResults();
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('morphing');
+  const numericScore = typeof overallScore === 'number' ? overallScore : 0;
 
   // Calculate potential improvement
   const potentialImprovement = useMemo(() => {
     if (recommendations.length === 0) return 0;
     const totalImpact = recommendations.slice(0, 5).reduce((sum, r) => sum + r.impact, 0);
-    return Math.min(totalImpact * 1.5, 10 - overallScore);
-  }, [recommendations, overallScore]);
+    return Math.min(totalImpact * 1.5, 10 - numericScore);
+  }, [recommendations, numericScore]);
 
-  const potentialScore = Math.min(10, overallScore + potentialImprovement);
+  const potentialScore = Math.min(10, numericScore + potentialImprovement);
 
   if (!frontPhoto) return null;
 
   return (
-    <BeforeAfterPreview
-      photo={frontPhoto}
-      currentScore={overallScore}
-      potentialScore={potentialScore}
-      recommendations={recommendations}
-    />
+    <div className="space-y-3">
+      {/* Mode Toggle */}
+      <div className="flex items-center justify-center gap-1 p-1 bg-black/40 rounded-lg border border-white/10">
+        <button
+          onClick={() => setPreviewMode('morphing')}
+          className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            previewMode === 'morphing'
+              ? 'bg-cyan-500/20 text-cyan-400'
+              : 'text-neutral-500 hover:text-white'
+          }`}
+        >
+          Face Morphing
+        </button>
+        <button
+          onClick={() => setPreviewMode('static')}
+          className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            previewMode === 'static'
+              ? 'bg-neutral-700 text-white'
+              : 'text-neutral-500 hover:text-white'
+          }`}
+        >
+          Static Preview
+        </button>
+      </div>
+
+      {/* Preview Component */}
+      <AnimatePresence mode="wait">
+        {previewMode === 'morphing' && frontLandmarks.length > 0 ? (
+          <motion.div
+            key="morphing"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FaceMorphing
+              photo={frontPhoto}
+              frontLandmarks={frontLandmarks}
+              currentScore={numericScore}
+              potentialScore={potentialScore}
+              recommendations={recommendations}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="static"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <BeforeAfterPreview
+              photo={frontPhoto}
+              currentScore={numericScore}
+              potentialScore={potentialScore}
+              recommendations={recommendations}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -202,19 +283,238 @@ function OrderOfOperations() {
 }
 
 // ============================================
+// YOUR PHASE CARD (Body Composition Phase)
+// ============================================
+
+type BodyPhase = 'bulk' | 'cut' | 'maintain';
+
+interface YourPhaseCardProps {
+  bodyFatPercent?: number;
+  gender: 'male' | 'female';
+}
+
+function YourPhaseCard({ bodyFatPercent, gender }: YourPhaseCardProps) {
+  // Determine phase based on body fat and gender
+  const getPhase = (): { phase: BodyPhase; message: string; color: string; icon: React.ReactNode } => {
+    if (!bodyFatPercent) {
+      return {
+        phase: 'maintain',
+        message: 'Complete your physique analysis to get personalized phase recommendations.',
+        color: 'from-neutral-700 to-neutral-800',
+        icon: <Scale size={24} className="text-neutral-400" />,
+      };
+    }
+
+    // Male thresholds: <12% = bulk, 12-18% = maintain, >18% = cut
+    // Female thresholds: <18% = bulk, 18-25% = maintain, >25% = cut
+    const bulkThreshold = gender === 'male' ? 12 : 18;
+    const cutThreshold = gender === 'male' ? 18 : 25;
+
+    if (bodyFatPercent < bulkThreshold) {
+      return {
+        phase: 'bulk',
+        message: `At ${bodyFatPercent.toFixed(1)}% body fat, you're lean enough to build muscle. Focus on a slight caloric surplus with progressive overload.`,
+        color: 'from-green-600 to-emerald-700',
+        icon: <Dumbbell size={24} className="text-white" />,
+      };
+    } else if (bodyFatPercent > cutThreshold) {
+      return {
+        phase: 'cut',
+        message: `At ${bodyFatPercent.toFixed(1)}% body fat, prioritize fat loss. A moderate caloric deficit with high protein will reveal your facial structure.`,
+        color: 'from-orange-600 to-red-700',
+        icon: <Salad size={24} className="text-white" />,
+      };
+    } else {
+      return {
+        phase: 'maintain',
+        message: `At ${bodyFatPercent.toFixed(1)}% body fat, you're in the optimal range. Focus on body recomposition to build muscle while staying lean.`,
+        color: 'from-blue-600 to-cyan-700',
+        icon: <Scale size={24} className="text-white" />,
+      };
+    }
+  };
+
+  const { phase, message, color, icon } = getPhase();
+  const phaseLabels: Record<BodyPhase, string> = {
+    bulk: 'Lean Bulk Phase',
+    cut: 'Cutting Phase',
+    maintain: 'Maintenance Phase',
+  };
+
+  return (
+    <motion.div
+      className={`bg-gradient-to-br ${color} rounded-2xl p-6 border border-white/10`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-white text-lg">Your Phase</h3>
+            <div className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium text-white">
+              {phaseLabels[phase]}
+            </div>
+          </div>
+          <p className="text-sm text-white/80 mb-4">{message}</p>
+
+          {/* Phase-specific tips */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-black/20 rounded-lg p-2 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                {phase === 'bulk' ? (
+                  <ArrowUp size={12} className="text-green-300" />
+                ) : phase === 'cut' ? (
+                  <ArrowDown size={12} className="text-orange-300" />
+                ) : (
+                  <Minus size={12} className="text-blue-300" />
+                )}
+                <span className="text-xs text-white/60">Calories</span>
+              </div>
+              <span className="text-sm font-medium text-white">
+                {phase === 'bulk' ? '+300' : phase === 'cut' ? '-500' : '±0'}
+              </span>
+            </div>
+            <div className="bg-black/20 rounded-lg p-2 text-center">
+              <span className="text-xs text-white/60 block mb-0.5">Protein</span>
+              <span className="text-sm font-medium text-white">
+                {phase === 'cut' ? '1.2g/lb' : '1g/lb'}
+              </span>
+            </div>
+            <div className="bg-black/20 rounded-lg p-2 text-center">
+              <span className="text-xs text-white/60 block mb-0.5">Cardio</span>
+              <span className="text-sm font-medium text-white">
+                {phase === 'bulk' ? 'Minimal' : phase === 'cut' ? '4-5x/wk' : '2-3x/wk'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================
+// PRODUCT BUNDLE CTA
+// ============================================
+
+interface ProductBundleCardProps {
+  products: ProductRecommendation[];
+  title?: string;
+}
+
+function ProductBundleCard({ products, title = 'Recommended Bundle' }: ProductBundleCardProps) {
+  // Get top 3 most important products
+  const bundleProducts = products.slice(0, 3);
+
+  // Calculate total cost
+  const totalCost = bundleProducts.reduce((sum, rec) => {
+    const supplement = SUPPLEMENTS.find(s => s.id === rec.product.supplementId);
+    return sum + (supplement?.costPerMonth.min || 0);
+  }, 0);
+
+  if (bundleProducts.length === 0) return null;
+
+  return (
+    <motion.div
+      className="bg-gradient-to-br from-purple-900/50 to-violet-950/50 border border-purple-500/30 rounded-2xl p-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Package size={20} className="text-purple-400" />
+        <h3 className="font-semibold text-white">{title}</h3>
+        <div className="ml-auto px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs font-medium rounded-full">
+          Save 15%
+        </div>
+      </div>
+
+      <p className="text-sm text-neutral-300 mb-4">
+        Your analysis recommends these {bundleProducts.length} supplements - optimized for your specific weak points.
+      </p>
+
+      {/* Bundle Items */}
+      <div className="space-y-2 mb-4">
+        {bundleProducts.map((rec, index) => (
+          <div
+            key={rec.product.id}
+            className="flex items-center gap-3 p-2 bg-black/20 rounded-lg"
+          >
+            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-bold text-purple-300">{index + 1}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{rec.product.name}</p>
+              <p className="text-xs text-neutral-400 truncate">Targets: {rec.targetMetric}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-sm text-white">
+                ${SUPPLEMENTS.find(s => s.id === rec.product.supplementId)?.costPerMonth.min || 0}/mo
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Total & CTA */}
+      <div className="border-t border-purple-500/20 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-neutral-400">Bundle Total</span>
+          <div className="text-right">
+            <span className="text-lg font-bold text-white">${totalCost}/mo</span>
+            <span className="text-xs text-neutral-500 ml-2 line-through">${Math.round(totalCost * 1.15)}/mo</span>
+          </div>
+        </div>
+        <button
+          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+        >
+          <ShoppingCart size={18} />
+          Get Your Bundle
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================
 // PLAN TAB
 // ============================================
 
 export function PlanTab() {
-  const { recommendations, flaws, gender, ethnicity, frontRatios, sideRatios } = useResults();
+  const { recommendations, flaws, gender, ethnicity, frontRatios, sideRatios, overallScore, frontPhoto, vision, isUnlocked } = useResults();
   const { user } = useAuth();
+  const physiqueContext = usePhysiqueOptional();
   const [selectedPhase, setSelectedPhase] = useState<RecommendationPhase | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [previousAnalysis, setPreviousAnalysis] = useState<{
+    date: string;
+    overallScore: number;
+    bodyFatPercent?: number;
+    frontPhotoUrl?: string;
+  } | null>(null);
+
+  // Treatment conflict state
+  const [dismissedConflicts, setDismissedConflicts] = useState<Set<string>>(new Set());
+  const [conflictModal, setConflictModal] = useState<{
+    isOpen: boolean;
+    conflict: TreatmentConflict | null;
+    newTreatmentId: string;
+  }>({ isOpen: false, conflict: null, newTreatmentId: '' });
+
+  const { openPricingModal } = usePricing();
+
+  // Convert to number for arithmetic operations
+  const numericOverallScore = typeof overallScore === 'number' ? overallScore : 0;
 
   // Check if user has a paid plan
   const hasPaidPlan = user?.plan === 'basic' || user?.plan === 'pro';
+
+  // Get body fat from physique analysis
+  const bodyFatPercent = physiqueContext?.physiqueAnalysis?.bodyFatPercent;
 
   // Generate Daily Stack for all users
   const dailyStack = useMemo(() => {
@@ -228,7 +528,7 @@ export function PlanTab() {
     const severityDict: Record<string, string> = {};
 
     [...frontRatios, ...sideRatios].forEach(ratio => {
-      metricsDict[ratio.name] = ratio.value;
+      metricsDict[ratio.name] = typeof ratio.value === 'number' ? ratio.value : 0;
       severityDict[ratio.name] = ratio.severity;
     });
 
@@ -241,6 +541,47 @@ export function PlanTab() {
     const ideal = productRecommendations.filter(r => r.state === 'ideal');
     return { flawProducts: flaw, idealProducts: ideal };
   }, [productRecommendations]);
+
+  // Map flaws to products and treatments
+  const flawsWithProducts = useMemo(() => {
+    return flaws.slice(0, 5).map(flaw => {
+      // Find products that target metrics related to this flaw
+      const relatedProducts = productRecommendations.filter(rec =>
+        flaw && flaw.responsibleRatios && flaw.responsibleRatios.some(ratio =>
+          rec.matchedMetrics.some(metric =>
+            metric.toLowerCase().includes(ratio.ratioName.toLowerCase()) ||
+            ratio.ratioName.toLowerCase().includes(metric.toLowerCase())
+          )
+        )
+      );
+
+      // Find treatments that match this flaw
+      const relatedTreatments = recommendations.filter(rec =>
+        rec.matchedFlaws.some(f => f.toLowerCase().includes(flaw.flawName.toLowerCase()))
+      );
+
+      return {
+        flaw,
+        products: relatedProducts.slice(0, 2),
+        treatments: relatedTreatments.slice(0, 3),
+      };
+    });
+  }, [flaws, productRecommendations, recommendations]);
+
+  // Handle progress photo upload
+  const handleProgressPhotoUpload = useCallback(async (file: File) => {
+    // Store current analysis as previous before re-analyzing
+    const numScore = typeof overallScore === 'number' ? overallScore : 0;
+    setPreviousAnalysis({
+      date: new Date().toISOString(),
+      overallScore: numScore,
+      bodyFatPercent,
+      frontPhotoUrl: frontPhoto || undefined,
+    });
+
+    // In a real implementation, this would upload to API and trigger re-analysis
+    console.log('Progress photo uploaded:', file.name);
+  }, [overallScore, bodyFatPercent, frontPhoto]);
 
   // Count recommendations by phase
   const phaseCounts = useMemo(() => {
@@ -267,6 +608,48 @@ export function PlanTab() {
   }, [recommendations, selectedPhase, removedIds]);
 
   const hasRecommendations = filteredRecommendations.length > 0;
+
+  // Detect treatment conflicts in current recommendations
+  const treatmentConflicts = useMemo(() => {
+    const selectedIds = filteredRecommendations.map(r => r.ref_id);
+    const nameMap = Object.fromEntries(
+      filteredRecommendations.map(r => [r.ref_id, r.name])
+    );
+    const conflicts = findTreatmentConflicts(selectedIds, nameMap);
+
+    // Filter out dismissed conflicts
+    return conflicts.filter(c => {
+      const conflictKey = `${c.treatment1Id}-${c.treatment2Id}`;
+      return !dismissedConflicts.has(conflictKey);
+    });
+  }, [filteredRecommendations, dismissedConflicts]);
+
+  // Handle dismissing a conflict
+  const handleDismissConflict = useCallback((conflict: TreatmentConflict) => {
+    const conflictKey = `${conflict.treatment1Id}-${conflict.treatment2Id}`;
+    setDismissedConflicts(prev => new Set(Array.from(prev).concat(conflictKey)));
+  }, []);
+
+  // Handle dismissing all conflicts
+  const handleDismissAllConflicts = useCallback(() => {
+    const allKeys = treatmentConflicts.map(
+      c => `${c.treatment1Id}-${c.treatment2Id}`
+    );
+    setDismissedConflicts(prev => new Set(Array.from(prev).concat(allKeys)));
+  }, [treatmentConflicts]);
+
+  // Handle conflict modal actions
+  const handleConflictProceed = useCallback(() => {
+    if (conflictModal.conflict) {
+      // Remove the lower priority (existing) treatment
+      setRemovedIds(prev => new Set(Array.from(prev).concat(conflictModal.conflict!.treatment1Id)));
+    }
+    setConflictModal({ isOpen: false, conflict: null, newTreatmentId: '' });
+  }, [conflictModal.conflict]);
+
+  const handleConflictCancel = useCallback(() => {
+    setConflictModal({ isOpen: false, conflict: null, newTreatmentId: '' });
+  }, []);
 
   // Handle mark complete
   const handleMarkComplete = useCallback((id: string) => {
@@ -301,19 +684,47 @@ export function PlanTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Your Phase Card - Body Composition Phase */}
+          <YourPhaseCard bodyFatPercent={bodyFatPercent} gender={gender} />
+
           {/* Daily Stack Card - Hero Element for ALL users */}
           {dailyStack && <DailyStackCard dailyStack={dailyStack} />}
 
           {/* Potential Score */}
           <PotentialScoreCard />
 
+          {/* Fix Your Weak Points Section */}
+          {flawsWithProducts.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle size={20} className="text-red-400" />
+                <h3 className="text-lg font-semibold text-white">Fix Your Weak Points</h3>
+                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                  {flawsWithProducts.length} Issues
+                </span>
+              </div>
+              <div className="space-y-3">
+                {flawsWithProducts.map((item, index) => (
+                  <WeakPointCard
+                    key={item.flaw.id}
+                    flaw={item.flaw}
+                    rank={index + 1}
+                    products={item.products}
+                    treatments={item.treatments}
+                    onViewTreatment={(treatment) => setExpandedId(treatment.ref_id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Targeted Product Recommendations - Corrective */}
           {flawProducts.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <AlertCircle size={20} className="text-red-400" />
-                <h3 className="text-lg font-semibold text-white">Fix These Areas</h3>
-                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                <Package size={20} className="text-cyan-400" />
+                <h3 className="text-lg font-semibold text-white">Recommended Products</h3>
+                <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-full border border-cyan-500/30">
                   Corrective
                 </span>
               </div>
@@ -346,6 +757,15 @@ export function PlanTab() {
           {/* Treatment Timeline */}
           {recommendations.length > 0 && (
             <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
+          )}
+
+          {/* Treatment Conflict Warnings */}
+          {treatmentConflicts.length > 0 && (
+            <TreatmentConflictList
+              conflicts={treatmentConflicts}
+              onDismiss={handleDismissConflict}
+              onDismissAll={handleDismissAllConflicts}
+            />
           )}
 
           {/* Phase Filter */}
@@ -398,6 +818,31 @@ export function PlanTab() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Medical Prescription Card (Dental) */}
+          {vision?.teeth && (
+            <MedicalPrescriptionCard vision={vision} isUnlocked={isUnlocked} />
+          )}
+
+          {/* Progress Comparison Card */}
+          <ProgressComparisonCard
+            currentAnalysis={{
+              date: new Date().toISOString(),
+              overallScore: numericOverallScore,
+              bodyFatPercent,
+              frontPhotoUrl: frontPhoto || undefined,
+            }}
+            previousAnalysis={previousAnalysis}
+            onUploadNewPhoto={handleProgressPhotoUpload}
+          />
+
+          {/* Product Bundle CTA */}
+          {flawProducts.length >= 3 && (
+            <ProductBundleCard
+              products={flawProducts}
+              title="Your Fix Bundle"
+            />
+          )}
+
           {/* Before/After Preview */}
           <BeforeAfterPreviewSection />
 
@@ -478,16 +923,31 @@ export function PlanTab() {
               <p className="text-xs text-neutral-400 mb-3">
                 Get detailed treatment guides, cost estimates, and provider recommendations.
               </p>
-              <a
-                href="/pricing"
+              <button
+                onClick={() => openPricingModal('plan_sidebar')}
                 className="block w-full py-2 bg-cyan-500 text-black text-sm font-medium rounded-lg text-center hover:bg-cyan-400 transition-colors"
               >
                 Upgrade Now
-              </a>
+              </button>
             </motion.div>
           )}
         </div>
       </div>
+
+      {/* Treatment Conflict Modal */}
+      <SelectionWarningModal
+        isOpen={conflictModal.isOpen}
+        onClose={handleConflictCancel}
+        conflict={conflictModal.conflict || {
+          treatment1Id: '',
+          treatment1Name: '',
+          treatment2Id: '',
+          treatment2Name: '',
+          reason: '',
+        }}
+        onProceed={handleConflictProceed}
+        onCancel={handleConflictCancel}
+      />
     </TabContent>
   );
 }

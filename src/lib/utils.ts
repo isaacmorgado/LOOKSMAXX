@@ -3,6 +3,13 @@
  */
 
 /**
+ * Merge class names conditionally
+ */
+export function cn(...classes: (string | undefined | false | null)[]): string {
+  return classes.filter(Boolean).join(' ');
+}
+
+/**
  * Format a date string to a human-readable "time ago" format
  */
 export function formatDistanceToNow(dateString: string): string {

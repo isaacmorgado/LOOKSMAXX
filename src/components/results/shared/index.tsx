@@ -130,7 +130,7 @@ export function PhaseBadge({ phase, size = 'md' }: PhaseBadgeProps) {
 // ============================================
 
 interface ScoreCircleProps {
-  score: number;
+  score: number | string;
   maxScore?: number;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showLabel?: boolean;
@@ -144,8 +144,9 @@ export function ScoreCircle({
   showLabel = true,
   animate = true,
 }: ScoreCircleProps) {
-  const color = getScoreColor(score);
-  const percentage = (score / maxScore) * 100;
+  const numericScore = typeof score === 'number' ? score : 0;
+  const color = getScoreColor(numericScore);
+  const percentage = (numericScore / maxScore) * 100;
 
   const sizeConfigs = {
     sm: { size: 48, stroke: 4, fontSize: 'text-sm' },
@@ -200,7 +201,7 @@ export function ScoreCircle({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            {score.toFixed(1)}
+            {typeof score === 'number' ? score.toFixed(1) : score}
           </motion.span>
           {size !== 'sm' && (
             <span className="text-xs text-neutral-500">/ {maxScore}</span>

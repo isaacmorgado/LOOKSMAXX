@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { api } from "@/lib/api";
 
 function LoaderIcon({ className }: { className?: string }) {
@@ -26,6 +27,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,8 +63,8 @@ export default function LoginPage() {
         {/* Logo and Header */}
         <div className="mb-10">
           <div className="flex justify-center mb-6">
-            <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-sm font-bold">L</span>
+            <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-sm font-bold">L</span>
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center text-white mb-2">
@@ -81,7 +83,7 @@ export default function LoginPage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
+              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-all"
               placeholder="you@example.com"
               required
             />
@@ -93,19 +95,28 @@ export default function LoginPage() {
               <label className="text-sm text-neutral-400">Password</label>
               <Link
                 href="/forgot-password"
-                className="text-xs text-[#00f3ff] hover:underline"
+                className="text-xs text-cyan-400 hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
-              placeholder="Enter your password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full h-11 px-3.5 pr-10 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-all"
+                placeholder="Enter your password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           {/* Error Message */}
@@ -119,7 +130,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+            className="w-full h-11 bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
@@ -154,7 +165,7 @@ export default function LoginPage() {
           {/* Create Account Link */}
           <p className="text-center text-neutral-500 text-sm pt-2">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#00f3ff] hover:underline">
+            <Link href="/signup" className="text-cyan-400 hover:underline">
               Sign up
             </Link>
           </p>

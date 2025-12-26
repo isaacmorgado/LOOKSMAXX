@@ -1230,3 +1230,126 @@ export const BEZIER_CURVES: Record<string, BezierCurveConfig> = {
   },
 
 };
+
+// ============================================
+// DUAL CURVE SYSTEM
+// ============================================
+
+/**
+ * Display curves for UI visualization.
+ * These are separate from scoring curves to allow different UX representations.
+ *
+ * Key differences from scoring curves:
+ * - Smoother transitions for better visual appeal
+ * - Wider "green zones" to feel more encouraging
+ * - Gentler falloffs to avoid harsh visual drops
+ *
+ * Only define display curves where needed - most metrics use the same curve for both.
+ */
+export const DISPLAY_CURVES: Record<string, BezierCurveConfig['points']> = {
+  // Example 1: faceWidthToHeight - Display curve is smoother with wider ideal zone
+  faceWidthToHeight: [
+    { x: 1.45, y: 0, leftHandleX: 1.40, leftHandleY: 0, rightHandleX: 1.50, rightHandleY: 0 },
+    { x: 1.65, y: 2, leftHandleX: 1.58, leftHandleY: 1, rightHandleX: 1.72, rightHandleY: 3 },
+    { x: 1.80, y: 6, leftHandleX: 1.74, leftHandleY: 4.5, rightHandleX: 1.86, rightHandleY: 7.5 },
+    { x: 1.92, y: 10, leftHandleX: 1.89, leftHandleY: 9, rightHandleX: 1.95, rightHandleY: 10, fixed: true },
+    { x: 2.04, y: 10, leftHandleX: 2.00, leftHandleY: 10, rightHandleX: 2.08, rightHandleY: 10 },
+    { x: 2.16, y: 6, leftHandleX: 2.10, leftHandleY: 7.5, rightHandleX: 2.22, rightHandleY: 4.5 },
+    { x: 2.31, y: 2, leftHandleX: 2.24, leftHandleY: 3, rightHandleX: 2.38, rightHandleY: 1 },
+    { x: 2.51, y: 0, leftHandleX: 2.45, leftHandleY: 0, rightHandleX: 2.56, rightHandleY: 0 },
+  ],
+
+  // Example 2: gonialAngle - Display curve is more forgiving in the "good" range
+  gonialAngle: [
+    { x: 100, y: 0, leftHandleX: 95, leftHandleY: 0, rightHandleX: 105, rightHandleY: 0 },
+    { x: 110, y: 3, leftHandleX: 106, leftHandleY: 1.5, rightHandleX: 114, rightHandleY: 4.5 },
+    { x: 120, y: 8, leftHandleX: 116, leftHandleY: 6, rightHandleX: 124, rightHandleY: 9.5 },
+    { x: 128, y: 10, leftHandleX: 126, leftHandleY: 10, rightHandleX: 130, rightHandleY: 10, fixed: true },
+    { x: 135, y: 10, leftHandleX: 132, leftHandleY: 10, rightHandleX: 138, rightHandleY: 10 },
+    { x: 145, y: 8, leftHandleX: 141, leftHandleY: 9.5, rightHandleX: 149, rightHandleY: 6 },
+    { x: 155, y: 3, leftHandleX: 151, leftHandleY: 4.5, rightHandleX: 159, rightHandleY: 1.5 },
+    { x: 165, y: 0, leftHandleX: 160, leftHandleY: 0, rightHandleX: 170, rightHandleY: 0 },
+  ],
+
+  // Example 3: lateralCanthalTilt - Display curve shows gentler decline for positive tilts
+  lateralCanthalTilt: [
+    { x: -5, y: 0, leftHandleX: -7, leftHandleY: 0, rightHandleX: -3, rightHandleY: 0.5 },
+    { x: 0, y: 3, leftHandleX: -1.5, leftHandleY: 2, rightHandleX: 1.5, rightHandleY: 4 },
+    { x: 4, y: 7, leftHandleX: 2.5, leftHandleY: 5.5, rightHandleX: 5.5, rightHandleY: 8.5 },
+    { x: 6.5, y: 10, leftHandleX: 6, leftHandleY: 9.5, rightHandleX: 7, rightHandleY: 10, fixed: true },
+    { x: 8.5, y: 10, leftHandleX: 8, leftHandleY: 10, rightHandleX: 9, rightHandleY: 10 },
+    { x: 11, y: 8, leftHandleX: 10, leftHandleY: 9, rightHandleX: 12, rightHandleY: 7 },
+    { x: 14, y: 5, leftHandleX: 13, leftHandleY: 6, rightHandleX: 15, rightHandleY: 4 },
+    { x: 18, y: 2, leftHandleX: 16, leftHandleY: 3, rightHandleX: 20, rightHandleY: 1 },
+  ],
+};
+
+// ============================================
+// DUAL CURVE HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Get the scoring curve for a metric.
+ * Always returns the `points` array (used for actual score calculation).
+ *
+ * @param metricId - The metric identifier
+ * @returns The scoring curve points, or undefined if no curve exists
+ */
+export function getScoringCurve(metricId: string): BezierCurveConfig['points'] | undefined {
+  const curve = BEZIER_CURVES[metricId];
+  return curve?.points;
+}
+
+/**
+ * Get the display curve for a metric.
+ * Returns `displayPoints` if available, otherwise falls back to `points`.
+ * This is used for UI visualization (charts, graphs, etc.).
+ *
+ * @param metricId - The metric identifier
+ * @returns The display curve points, or undefined if no curve exists
+ */
+export function getDisplayCurve(metricId: string): BezierCurveConfig['points'] | undefined {
+  // First check if there's a dedicated display curve
+  const displayCurve = DISPLAY_CURVES[metricId];
+  if (displayCurve) {
+    return displayCurve;
+  }
+
+  // Fall back to the scoring curve's displayPoints if defined
+  const curve = BEZIER_CURVES[metricId];
+  if (curve?.displayPoints) {
+    return curve.displayPoints;
+  }
+
+  // Default: use the scoring curve for display
+  return curve?.points;
+}
+
+/**
+ * Check if a metric has a separate display curve.
+ *
+ * @param metricId - The metric identifier
+ * @returns True if the metric has a dedicated display curve
+ */
+export function hasDisplayCurve(metricId: string): boolean {
+  return DISPLAY_CURVES[metricId] !== undefined ||
+         BEZIER_CURVES[metricId]?.displayPoints !== undefined;
+}
+
+/**
+ * Get both curves for a metric (useful for debugging/admin views).
+ *
+ * @param metricId - The metric identifier
+ * @returns Object with both scoring and display curves
+ */
+export function getDualCurves(metricId: string): {
+  scoring: BezierCurveConfig['points'] | undefined;
+  display: BezierCurveConfig['points'] | undefined;
+  hasSeparateDisplay: boolean;
+} {
+  return {
+    scoring: getScoringCurve(metricId),
+    display: getDisplayCurve(metricId),
+    hasSeparateDisplay: hasDisplayCurve(metricId),
+  };
+}

@@ -8,6 +8,7 @@ import { useHeightOptional } from '@/contexts/HeightContext';
 import { TabContent } from '../ResultsLayout';
 import { ScoreBar, AnimatedScore, ShareButton, ExportButton } from '../shared';
 import { KeyStrengthsSection, AreasOfImprovementSection } from '../cards/KeyStrengthsFlaws';
+import VisionInsightsCard from '../cards/VisionInsightsCard';
 import { FacialRadarChart } from '../visualization/FacialRadarChart';
 import { RatioDetailModal } from '../modals/RatioDetailModal';
 import { getScoreColor, ResponsibleRatio, Ratio } from '@/types/results';
@@ -15,6 +16,7 @@ import { MetricScoreResult } from '@/lib/harmony-scoring';
 import { RankedMetric, getWeightTierColor } from '@/lib/looksmax-scoring';
 import { calculatePSL, getTierColor } from '@/lib/psl-calculator';
 import { useState, useCallback, useMemo } from 'react';
+import { usePricing } from '@/contexts/PricingContext';
 
 // ============================================
 // SCORE SUMMARY CARDS
@@ -22,7 +24,7 @@ import { useState, useCallback, useMemo } from 'react';
 
 interface ProfileScoreCardProps {
   title: string;
-  score: number;
+  score: number | string;
   icon: React.ReactNode;
   photo?: string;
   ratioCount: number;
@@ -30,16 +32,17 @@ interface ProfileScoreCardProps {
 }
 
 function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: ProfileScoreCardProps) {
-  const color = getScoreColor(score);
+  const numericScore = typeof score === 'number' ? score : 0;
+  const color = getScoreColor(numericScore);
 
   return (
     <motion.button
       onClick={onClick}
-      className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition-all text-left w-full"
+      className="bg-neutral-900/80 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-all text-left w-full"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
         {/* Photo or icon */}
         <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
           {photo ? (
@@ -63,7 +66,7 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
           <h3 className="text-sm font-medium text-neutral-400 mb-1">{title}</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold" style={{ color }}>
-              {score.toFixed(2)}
+              {typeof score === 'number' ? score.toFixed(2) : score}
             </span>
             <span className="text-sm text-neutral-500">/ 10</span>
           </div>
@@ -76,7 +79,7 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
 
       {/* Score bar */}
       <div className="mt-3">
-        <ScoreBar score={score} height={6} />
+        <ScoreBar score={numericScore} height={6} />
       </div>
     </motion.button>
   );
@@ -171,17 +174,15 @@ function MetricInsightCard({ metric, type, index }: MetricInsightCardProps) {
 
   return (
     <motion.div
-      className={`bg-neutral-900/80 border rounded-xl p-4 ${
-        isStrength ? 'border-green-500/30' : 'border-orange-500/30'
-      }`}
+      className={`bg-neutral-900/80 border rounded-xl p-4 ${isStrength ? 'border-green-500/30' : 'border-orange-500/30'
+        }`}
       initial={{ opacity: 0, x: isStrength ? -20 : 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.1 * index }}
     >
       <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isStrength ? 'bg-green-500/20' : 'bg-orange-500/20'
-        }`}>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isStrength ? 'bg-green-500/20' : 'bg-orange-500/20'
+          }`}>
           {isStrength ? (
             <TrendingUp size={16} className="text-green-400" />
           ) : (
@@ -199,10 +200,10 @@ function MetricInsightCard({ metric, type, index }: MetricInsightCardProps) {
 
           <div className="flex items-center gap-3 mb-2">
             <span className="text-lg font-bold" style={{ color }}>
-              {metric.score.toFixed(1)}
+              {typeof metric.score === 'number' ? metric.score.toFixed(1) : metric.score}
             </span>
             <span className="text-xs text-neutral-500">
-              Ideal: {metric.idealMin.toFixed(1)} - {metric.idealMax.toFixed(1)}
+              Ideal: {typeof metric.idealMin === 'number' ? metric.idealMin.toFixed(1) : metric.idealMin} - {typeof metric.idealMax === 'number' ? metric.idealMax.toFixed(1) : metric.idealMax}
             </span>
           </div>
 
@@ -232,7 +233,7 @@ function QuickInsightsSection({ topMetrics, bottomMetrics }: QuickInsightsSectio
         Quick Insights
       </h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top 3 Strengths */}
         <div>
           <h4 className="text-sm font-medium text-green-400 mb-3 flex items-center gap-2">
@@ -466,7 +467,10 @@ export function OverviewTab() {
     topMetrics,
     bottomMetrics,
     setSelectedVisualizationMetric,
+    isUnlocked,
   } = useResults();
+
+  const { openPricingModal } = usePricing();
 
   const heightContext = useHeightOptional();
   const [selectedRatio, setSelectedRatio] = useState<MetricScoreResult | null>(null);
@@ -479,8 +483,9 @@ export function OverviewTab() {
       return { hasHeight: false, score: 0, tier: 'Unknown', tierColor: '#6b7280' };
     }
 
+    const numericScore = typeof overallScore === 'number' ? overallScore : 0;
     const pslResult = calculatePSL({
-      faceScore: overallScore,
+      faceScore: numericScore,
       heightCm,
       gender: gender || 'male',
     });
@@ -547,7 +552,7 @@ export function OverviewTab() {
         deviationDirection: 'within',
         unit: (ratio.unit as 'ratio' | 'percent' | 'degrees' | 'mm' | 'none') || 'ratio',
         category: ratio.category || categoryName,
-        qualityTier: ratio.score >= 8 ? 'ideal' : ratio.score >= 6 ? 'excellent' : ratio.score >= 4 ? 'good' : 'below_average',
+        qualityTier: (typeof ratio.score === 'number' ? ratio.score : 0) >= 8 ? 'ideal' : (typeof ratio.score === 'number' ? ratio.score : 0) >= 6 ? 'excellent' : (typeof ratio.score === 'number' ? ratio.score : 0) >= 4 ? 'good' : 'below_average',
         severity: 'optimal',
       } as MetricScoreResult);
     }
@@ -611,7 +616,7 @@ export function OverviewTab() {
         </div>
 
         {/* Profile Scores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <ProfileScoreCard
             title="Front Profile"
             score={frontScore}
@@ -644,8 +649,13 @@ export function OverviewTab() {
         {/* Quick Insights - Top/Bottom Metrics with Advice (from looksmax_engine.py) */}
         <QuickInsightsSection topMetrics={topMetrics} bottomMetrics={bottomMetrics} />
 
+        {/* AI Qualitative Insights Section */}
+        <div className="mb-8">
+          <VisionInsightsCard />
+        </div>
+
         {/* Strengths & Flaws Grid - Harmony Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
           {/* Key Strengths */}
           <KeyStrengthsSection
             strengths={strengths}
@@ -680,10 +690,16 @@ export function OverviewTab() {
             </div>
           </div>
           <button
-            onClick={() => setActiveTab('plan')}
+            onClick={() => {
+              if (isUnlocked) {
+                setActiveTab('plan');
+              } else {
+                openPricingModal('overview_cta');
+              }
+            }}
             className="px-4 py-2 bg-cyan-500 text-black font-medium rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2"
           >
-            View Plan
+            {isUnlocked ? 'View Plan' : 'Unlock Now'}
             <ChevronRight size={16} />
           </button>
         </motion.div>

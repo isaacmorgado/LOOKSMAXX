@@ -7,6 +7,7 @@ import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, ArrowRight, ArrowLeft, User, UserCircle, Check } from 'lucide-react';
 import { useUpload } from '@/contexts/UploadContext';
 import { preloadFaceDetection } from '@/lib/faceDetectionService';
+import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress';
 
 type UploadStep = 'front' | 'side';
 
@@ -85,10 +86,15 @@ export default function UploadPage() {
 
   return (
     <main className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12">
+      {/* Global Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 pt-4 px-4 bg-gradient-to-b from-black via-black/80 to-transparent pb-8 z-10">
+        <OnboardingProgress currentStep="photos" />
+      </div>
+
       {/* Back button */}
       <button
         onClick={handleBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"
+        className="fixed top-16 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm z-20"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -96,8 +102,8 @@ export default function UploadPage() {
 
       {/* Logo */}
       <div className="flex justify-center mb-8">
-        <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-          <span className="text-[#00f3ff] text-sm font-bold">L</span>
+        <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+          <span className="text-cyan-400 text-sm font-bold">L</span>
         </div>
       </div>
 
@@ -109,7 +115,7 @@ export default function UploadPage() {
             w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
             transition-all duration-200
             ${currentStep === 'front' || frontPhoto
-              ? 'bg-[#00f3ff] text-black'
+              ? 'bg-cyan-400 text-black'
               : 'bg-neutral-800 text-neutral-500'
             }
           `}>
@@ -121,7 +127,7 @@ export default function UploadPage() {
         </div>
 
         {/* Connector */}
-        <div className={`w-12 h-0.5 ${frontPhoto ? 'bg-[#00f3ff]' : 'bg-neutral-800'} transition-colors duration-200`} />
+        <div className={`w-12 h-0.5 ${frontPhoto ? 'bg-cyan-400' : 'bg-neutral-800'} transition-colors duration-200`} />
 
         {/* Step 2 */}
         <div className="flex items-center gap-2">
@@ -129,9 +135,9 @@ export default function UploadPage() {
             w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
             transition-all duration-200
             ${currentStep === 'side'
-              ? 'bg-[#00f3ff] text-black'
+              ? 'bg-cyan-400 text-black'
               : sidePhoto
-                ? 'bg-[#00f3ff] text-black'
+                ? 'bg-cyan-400 text-black'
                 : 'bg-neutral-800 text-neutral-500'
             }
           `}>
@@ -146,7 +152,7 @@ export default function UploadPage() {
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <StepIcon className="w-6 h-6 text-[#00f3ff]" />
+          <StepIcon className="w-6 h-6 text-cyan-400" />
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
             {config.title}
           </h1>
@@ -166,7 +172,7 @@ export default function UploadPage() {
               flex flex-col items-center justify-center gap-4
               cursor-pointer transition-all duration-200
               ${isDragActive
-                ? 'border-[#00f3ff] bg-[#00f3ff]/5'
+                ? 'border-cyan-400 bg-cyan-400/5'
                 : 'border-neutral-700 bg-neutral-900/50 hover:border-neutral-600 hover:bg-neutral-900'
               }
             `}
@@ -176,11 +182,11 @@ export default function UploadPage() {
             {/* Upload Icon */}
             <div className={`
               p-5 rounded-full transition-colors duration-200
-              ${isDragActive ? 'bg-[#00f3ff]/20' : 'bg-neutral-800'}
+              ${isDragActive ? 'bg-cyan-400/20' : 'bg-neutral-800'}
             `}>
               <Upload className={`
                 w-10 h-10 transition-colors duration-200
-                ${isDragActive ? 'text-[#00f3ff]' : 'text-neutral-500'}
+                ${isDragActive ? 'text-cyan-400' : 'text-neutral-500'}
               `} />
             </div>
 
@@ -188,7 +194,7 @@ export default function UploadPage() {
             <div className="text-center px-4">
               <p className={`
                 text-base font-medium transition-colors duration-200
-                ${isDragActive ? 'text-[#00f3ff]' : 'text-neutral-300'}
+                ${isDragActive ? 'text-cyan-400' : 'text-neutral-300'}
               `}>
                 {isDragActive ? 'Drop your image here' : 'Drag & drop your image here'}
               </p>
@@ -228,7 +234,7 @@ export default function UploadPage() {
             {/* Photo type badge */}
             <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-black/80 border border-neutral-700 z-10">
               <span className="text-white text-sm font-medium flex items-center gap-2">
-                <StepIcon className="w-4 h-4 text-[#00f3ff]" />
+                <StepIcon className="w-4 h-4 text-cyan-400" />
                 {currentStep === 'front' ? 'Front Photo' : 'Side Profile'}
               </span>
             </div>
@@ -249,7 +255,7 @@ export default function UploadPage() {
             {/* Upload status */}
             <div className="absolute bottom-4 left-4 right-4 px-4 py-3 rounded-lg bg-black/80 border border-neutral-700 z-10">
               <p className="text-white font-medium text-sm flex items-center gap-2">
-                <Check className="w-4 h-4 text-[#00f3ff]" />
+                <Check className="w-4 h-4 text-cyan-400" />
                 Photo uploaded successfully
               </p>
               <p className="text-neutral-500 text-xs mt-0.5">
@@ -260,8 +266,8 @@ export default function UploadPage() {
         )}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex items-center gap-4 mt-8">
+      {/* Navigation Buttons - Desktop */}
+      <div className="hidden md:flex items-center gap-4 mt-8">
         {/* Back Button */}
         <button
           onClick={handleBack}
@@ -280,7 +286,7 @@ export default function UploadPage() {
             flex items-center gap-2
             transition-all duration-200
             ${currentPhoto
-              ? 'bg-[#00f3ff] text-black hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] cursor-pointer'
+              ? 'bg-cyan-400 text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] cursor-pointer'
               : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
             }
           `}
@@ -290,12 +296,40 @@ export default function UploadPage() {
         </button>
       </div>
 
+      {/* Fixed Bottom Navigation - Mobile Only */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent md:hidden z-30">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleBack}
+            className="h-12 px-4 rounded-xl font-medium flex items-center gap-2 border border-neutral-700 bg-black text-white transition-all duration-200"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={!currentPhoto}
+            className={`
+              flex-1 h-12 rounded-xl font-medium text-sm
+              flex items-center justify-center gap-2
+              transition-all duration-200
+              ${currentPhoto
+                ? 'bg-cyan-400 text-black'
+                : 'bg-neutral-800 text-neutral-500'
+              }
+            `}
+          >
+            {currentStep === 'front' ? 'Next: Side Profile' : 'Start Analysis'}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
       {/* Thumbnails for both photos when on step 2 */}
       {currentStep === 'side' && frontPhoto && (
         <div className="mt-8 flex items-center gap-4">
           <span className="text-neutral-500 text-sm">Uploaded:</span>
           <button
-            className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-[#00f3ff] cursor-pointer hover:opacity-90 transition-opacity"
+            className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-cyan-400 cursor-pointer hover:opacity-90 transition-opacity"
             onClick={() => setCurrentStep('front')}
           >
             <Image
@@ -310,7 +344,7 @@ export default function UploadPage() {
             </div>
           </button>
           {sidePhoto && (
-            <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-[#00f3ff]">
+            <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-cyan-400">
               <Image
                 src={sidePhoto.preview}
                 alt="Side photo thumbnail"

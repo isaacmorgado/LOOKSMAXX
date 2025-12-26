@@ -639,7 +639,9 @@ export function generateStrengthsFromAnalysis(analysis: HarmonyAnalysis): Streng
     if (b.responsibleRatios.length !== a.responsibleRatios.length) {
       return b.responsibleRatios.length - a.responsibleRatios.length;
     }
-    return b.avgScore - a.avgScore;
+    const bScore = typeof b.avgScore === 'number' ? b.avgScore : 0;
+    const aScore = typeof a.avgScore === 'number' ? a.avgScore : 0;
+    return bScore - aScore;
   });
 }
 
@@ -771,7 +773,8 @@ export function calculateRelevanceScore(
 
   // Check metric ID match (highest priority)
   const metricId = flaw.responsibleRatios[0]?.ratioId || '';
-  const metricScore = flaw.responsibleRatios[0]?.score || 5;
+  const rawScore = flaw.responsibleRatios[0]?.score;
+  const metricScore = typeof rawScore === 'number' ? rawScore : 5;
 
   if (proc.targetMetrics.includes(metricId)) {
     // Base score for metric match
@@ -816,7 +819,7 @@ export function calculateRelevanceScore(
 
   // Check if procedure targets any below-average ratios directly
   const matchingRatios = allRatios.filter(r =>
-    proc.targetMetrics.includes(r.id) && r.score < 6
+    proc.targetMetrics.includes(r.id) && (typeof r.score === 'number' ? r.score : 0) < 6
   );
   score += matchingRatios.length * 8;
 
@@ -862,7 +865,7 @@ export function calculateExpectedImprovement(
     if (!config) return;
 
     // Current score from the ratio
-    const currentScore = ratio.score;
+    const currentScore = typeof ratio.score === 'number' ? ratio.score : 0;
 
     // Calculate ideal value (midpoint of ideal range)
     const idealValue = (config.idealMin + config.idealMax) / 2;
@@ -1005,18 +1008,19 @@ export function generateRecommendations(
     // Calculate direction for each affected ratio
     const ratiosImpacted = affectedRatios.map(r => {
       // Determine direction based on deviation
+      const numericValue = typeof r.value === 'number' ? r.value : 0;
       let direction: 'increase' | 'decrease' | 'both' = 'both';
-      if (r.value < r.idealMin) {
+      if (numericValue < r.idealMin) {
         direction = 'increase';
-      } else if (r.value > r.idealMax) {
+      } else if (numericValue > r.idealMax) {
         direction = 'decrease';
       }
 
       // Calculate percentage effect based on how far from ideal and procedure strength
-      const deviation = r.value < r.idealMin
-        ? r.idealMin - r.value
-        : r.value > r.idealMax
-          ? r.value - r.idealMax
+      const deviation = numericValue < r.idealMin
+        ? r.idealMin - numericValue
+        : numericValue > r.idealMax
+          ? numericValue - r.idealMax
           : 0;
       const normalizedDeviation = deviation / ((r.rangeMax - r.rangeMin) / 2);
       const percentageEffect = proc.baseImpact * Math.min(normalizedDeviation * 1.5, 1.5);

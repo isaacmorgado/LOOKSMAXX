@@ -18,6 +18,7 @@ import {
   Gauge,
   Shapes,
   BookOpen,
+  Gift,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
@@ -45,6 +46,7 @@ const TABS: TabConfig[] = [
   { id: 'plan', label: 'Your Plan', icon: <Sparkles size={18} /> },
   { id: 'guides', label: 'Guides', icon: <BookOpen size={18} /> },
   { id: 'community', label: 'Community', icon: <Users size={18} /> },
+  { id: 'referrals', label: 'Referrals', icon: <Gift size={18} /> },
   { id: 'options', label: 'Options', icon: <Settings size={18} /> },
   { id: 'support', label: 'Support', icon: <HelpCircle size={18} /> },
 ];
@@ -58,7 +60,7 @@ interface SidebarProps {
 }
 
 function Sidebar({ onClose }: SidebarProps) {
-  const { activeTab, setActiveTab, overallScore, frontPhoto } = useResults();
+  const { activeTab, setActiveTab, overallScore, frontPhoto, pslRating } = useResults();
 
   return (
     <div className="flex flex-col h-full bg-neutral-950 border-r border-neutral-800">
@@ -82,7 +84,7 @@ function Sidebar({ onClose }: SidebarProps) {
 
       {/* Profile Photo & Score */}
       <div className="p-4 border-b border-neutral-800">
-        <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-900 mb-3">
+        <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-900 mb-4">
           {frontPhoto ? (
             <Image
               src={frontPhoto}
@@ -101,12 +103,24 @@ function Sidebar({ onClose }: SidebarProps) {
             <ScoreCircle score={overallScore} size="sm" animate={false} />
           </div>
         </div>
-        <div className="text-center">
-          <p className="text-sm text-neutral-400">Harmony Score</p>
-          <p className="text-2xl font-bold text-white">{overallScore.toFixed(2)}</p>
-          <div className="mt-2">
-            <RankBadge size="md" alwaysShow showPercentile />
+
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="text-center">
+            <p className="text-xs text-neutral-500 mb-0.5">Harmony</p>
+            <p className="text-xl font-bold text-white">
+              {typeof overallScore === 'number' ? overallScore.toFixed(1) : overallScore}
+            </p>
           </div>
+          <div className="text-center border-l border-neutral-800">
+            <p className="text-xs text-neutral-500 mb-0.5">PSL</p>
+            <p className="text-xl font-bold text-cyan-400">
+              {pslRating?.psl ? pslRating.psl.toFixed(1) : '-'}
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <RankBadge size="md" alwaysShow showPercentile />
         </div>
       </div>
 
@@ -119,11 +133,10 @@ function Sidebar({ onClose }: SidebarProps) {
               setActiveTab(tab.id);
               onClose?.();
             }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all ${
-              activeTab === tab.id
-                ? 'bg-cyan-500/20 text-cyan-400'
-                : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all ${activeTab === tab.id
+              ? 'bg-cyan-500/20 text-cyan-400'
+              : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
+              }`}
           >
             {tab.icon}
             <span className="font-medium">{tab.label}</span>
@@ -136,7 +149,10 @@ function Sidebar({ onClose }: SidebarProps) {
 
       {/* Footer */}
       <div className="p-4 border-t border-neutral-800">
-        <button className="w-full py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all">
+        <button
+          onClick={() => window.location.href = '/gender'}
+          className="w-full py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all"
+        >
           New Analysis
         </button>
       </div>
@@ -227,7 +243,7 @@ function MobileHeader({ onMenuClick }: MobileHeaderProps) {
       <div className="flex items-center gap-2">
         <RankBadge size="sm" alwaysShow />
         <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
-          <span className="text-xs text-cyan-400 font-bold">{Math.round(overallScore)}</span>
+          <span className="text-xs text-cyan-400 font-bold">{typeof overallScore === 'number' ? Math.round(overallScore) : overallScore}</span>
         </div>
       </div>
     </header>
@@ -321,13 +337,13 @@ interface TabContentProps {
 
 export function TabContent({ title, subtitle, children, rightContent }: TabContentProps) {
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-5 md:p-8 lg:p-10 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-10">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">{title}</h1>
           {subtitle && (
-            <p className="text-neutral-400 mt-1">{subtitle}</p>
+            <p className="text-neutral-400 mt-2">{subtitle}</p>
           )}
         </div>
         {rightContent && (

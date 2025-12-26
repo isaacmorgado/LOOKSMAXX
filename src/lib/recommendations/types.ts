@@ -30,6 +30,22 @@ export type ProfileType = 'front' | 'side';
 // TREATMENT TYPES
 // ============================================
 
+/**
+ * Exclusive treatment category identifiers
+ * Used to group treatments that are mutually exclusive
+ */
+export type ExclusiveCategory =
+  | 'jaw_augmentation'      // Jaw implants, jaw fillers (cannot combine with jaw reduction)
+  | 'jaw_reduction'         // V-line surgery, masseter botox (cannot combine with jaw augmentation)
+  | 'chin_augmentation'     // Chin implants, genioplasty, chin filler, fat grafting to chin (pick ONE)
+  | 'cheekbone_augmentation' // Cheek fillers, cheek implants (pick ONE)
+  | 'lip_augmentation'      // Lip filler, lip fat grafting (cannot combine with lip reduction)
+  | 'lip_reduction'         // Lip reduction surgery (cannot combine with lip augmentation)
+  | 'submental_fat_removal' // Kybella, cryolipolysis, submental liposuction (pick ONE for submental)
+  | 'neck_procedures'       // Neck lift, submentoplasty (overlapping procedures)
+  | 'eye_lateral_canthus'   // Canthoplasty, canthopexy (pick ONE for lateral canthus)
+  | 'maxillary_surgery';    // Bimaxillary osteotomy, LeFort (comprehensive - supersedes others)
+
 export interface Treatment {
   id: string;
   name: string;
@@ -68,6 +84,10 @@ export interface Treatment {
   targetIssues: string[];
   genderSpecific?: Gender;
   ageRestrictions?: { min?: number; max?: number };
+
+  // Treatment exclusivity
+  exclusiveCategory?: ExclusiveCategory;  // Category this treatment belongs to
+  exclusiveWith?: string[];               // Specific treatment IDs that conflict
 
   // Additional info
   notes?: string[];

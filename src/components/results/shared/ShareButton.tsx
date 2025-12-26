@@ -11,9 +11,9 @@ import {
 } from '@/lib/shareResults';
 
 interface ShareButtonProps {
-  score: number;
-  frontScore?: number;
-  sideScore?: number;
+  score: number | string;
+  frontScore?: number | string;
+  sideScore?: number | string;
   variant?: 'button' | 'icon';
   className?: string;
 }

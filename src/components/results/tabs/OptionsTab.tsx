@@ -15,9 +15,16 @@ import {
   ChevronRight,
   CheckCircle,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 import { TabContent } from '../ResultsLayout';
 import { useResults } from '@/contexts/ResultsContext';
+import { usePricing } from '@/contexts/PricingContext';
+import { AchievementsShowcase } from '@/components/achievements';
+import { AnalysisReport } from '../reports/AnalysisReport';
+import { useQuota } from '@/hooks/useQuota';
+import { QuotaSummary } from '@/components/ui/QuotaDisplay';
+import { exportToPDF, exportToImage } from '@/lib/exportReport';
 
 // ============================================
 // SETTING ITEM
@@ -37,9 +44,8 @@ function SettingItem({ icon, title, description, children, onClick }: SettingIte
   return (
     <Wrapper
       onClick={onClick}
-      className={`w-full flex items-center gap-4 p-4 bg-neutral-900/60 border border-neutral-800 rounded-xl ${
-        onClick ? 'hover:border-neutral-700 transition-all cursor-pointer' : ''
-      }`}
+      className={`w-full flex items-center gap-4 p-4 bg-neutral-900/60 border border-neutral-800 rounded-xl ${onClick ? 'hover:border-neutral-700 transition-all cursor-pointer' : ''
+        }`}
     >
       <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center flex-shrink-0">
         {icon}
@@ -68,9 +74,8 @@ function ToggleSwitch({ enabled, onToggle }: ToggleSwitchProps) {
   return (
     <button
       onClick={onToggle}
-      className={`relative w-11 h-6 rounded-full transition-colors ${
-        enabled ? 'bg-cyan-500' : 'bg-neutral-700'
-      }`}
+      className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? 'bg-cyan-500' : 'bg-neutral-700'
+        }`}
     >
       <motion.div
         className="absolute top-1 w-4 h-4 bg-white rounded-full"
@@ -87,12 +92,44 @@ function ToggleSwitch({ enabled, onToggle }: ToggleSwitchProps) {
 
 export function OptionsTab() {
   const router = useRouter();
-  const { frontRatios, sideRatios, overallScore, pslRating } = useResults();
-  const [showLandmarks, setShowLandmarks] = useState(true);
+  const {
+    frontRatios,
+    sideRatios,
+    overallScore,
+    pslRating,
+    showLandmarkOverlay,
+    setShowLandmarkOverlay,
+  } = useResults();
+  const { openPricingModal } = usePricing();
+  const { analyses, downloads, forumPosts, plan } = useQuota();
+
+  // Mock achievement data based on PSL score
+  const pslScore = pslRating?.psl || 0;
+  const mockAchievements = {
+    unlockedIds: [
+      'first-analysis',
+      ...(pslScore >= 5.0 ? ['above-average'] : []),
+      ...(pslScore >= 6.0 ? ['top-tier'] : []),
+      ...(pslScore >= 7.0 ? ['elite'] : []),
+      ...(pslScore >= 7.5 ? ['top-model'] : []),
+    ],
+    progress: {
+      'analysis-veteran': 1,
+      'streak-3': 1,
+      'streak-7': 1,
+      'streak-30': 1,
+    },
+    totalXp: 50 +
+      (pslScore >= 5.0 ? 100 : 0) +
+      (pslScore >= 6.0 ? 250 : 0) +
+      (pslScore >= 7.0 ? 500 : 0) +
+      (pslScore >= 7.5 ? 1000 : 0),
+  };
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -100,54 +137,71 @@ export function OptionsTab() {
   }, []);
 
   const handleProfile = () => {
-    router.push('/profile');
+    // If we have an authentication system, this would go to profile
+    // For now, if no profile page exists, we show a toast or redirect to login/signup
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      showToast('Profile settings coming soon!');
+    } else {
+      router.push('/login');
+    }
   };
 
   const handlePrivacy = () => {
-    showToast('Privacy settings coming soon!');
+    router.push('/privacy');
   };
 
-  const handleExport = useCallback(() => {
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    showToast('Logged out successfully');
+    setShowLogoutConfirm(false);
+    setTimeout(() => router.push('/'), 1000);
+  };
+
+
+
+  // ... (inside component)
+
+  const handleExport = useCallback(async () => {
+    showToast('Generating PDF...', 'success');
     try {
-      const exportData = {
-        exportedAt: new Date().toISOString(),
-        overallScore,
-        pslRating,
-        frontRatios,
-        sideRatios,
-      };
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `looksmaxx-analysis-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('Analysis exported successfully!');
-    } catch {
-      showToast('Failed to export analysis', 'error');
+      // Use existing utility which handles html2canvas + jsPDF
+      const result = await exportToPDF('pdf-report-container', {
+        filename: `LooksMaxx_Report_${new Date().toISOString().split('T')[0]}`,
+        scale: 2 // High quality
+      });
+
+      if (result.success) {
+        showToast('PDF Exported Successfully!');
+      } else {
+        showToast('Failed to generate PDF', 'error');
+        console.error(result.error);
+      }
+    } catch (err) {
+      showToast('Failed to export', 'error');
     }
-  }, [frontRatios, sideRatios, overallScore, pslRating, showToast]);
+  }, [showToast]);
 
   const handleShare = useCallback(async () => {
+    showToast('Generating shareable card...', 'success');
     try {
-      const shareUrl = window.location.href;
-      if (navigator.share) {
-        await navigator.share({
-          title: 'My LOOKSMAXX Analysis',
-          text: `Check out my facial analysis results - PSL Rating: ${pslRating?.tier || 'N/A'}`,
-          url: shareUrl,
-        });
+      // Just export the same report as an image for now, or we could target a specific subsection
+      // Ideally we'd have a specific "SocialCard" element, but the report is good too.
+      const result = await exportToImage('pdf-report-container', {
+        filename: `LooksMaxx_Card_${new Date().toISOString().split('T')[0]}`,
+        scale: 2
+      });
+
+      if (result.success) {
+        showToast('Image saved! Ready to share.');
       } else {
-        await navigator.clipboard.writeText(shareUrl);
-        showToast('Link copied to clipboard!');
+        showToast('Failed to generate image', 'error');
       }
     } catch {
       showToast('Failed to share', 'error');
     }
-  }, [pslRating, showToast]);
+  }, [showToast]);
 
   const handleDeleteAnalysis = useCallback(() => {
     // Clear localStorage
@@ -171,11 +225,10 @@ export function OptionsTab() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
-              toast.type === 'success'
-                ? 'bg-neutral-800 border border-neutral-700'
-                : 'bg-red-900/80 border border-red-700'
-            }`}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${toast.type === 'success'
+              ? 'bg-neutral-800 border border-neutral-700'
+              : 'bg-red-900/80 border border-red-700'
+              }`}
           >
             {toast.type === 'success' ? (
               <CheckCircle size={16} className="text-cyan-400" />
@@ -183,6 +236,49 @@ export function OptionsTab() {
               <AlertTriangle size={16} className="text-red-400" />
             )}
             <span className="text-sm text-white">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Logout confirmation modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-sm w-full"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
+                  <LogOut size={20} className="text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Sign Out?</h3>
+              </div>
+              <p className="text-neutral-400 text-sm mb-6">
+                Are you sure you want to sign out of your account?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -231,6 +327,33 @@ export function OptionsTab() {
       </AnimatePresence>
 
       <div className="max-w-2xl space-y-6">
+        {/* Achievements Section */}
+        <div>
+          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+            Achievements
+          </h3>
+          <AchievementsShowcase
+            unlockedIds={mockAchievements.unlockedIds}
+            progress={mockAchievements.progress}
+            totalXp={mockAchievements.totalXp}
+            compact={true}
+          />
+        </div>
+
+        {/* Usage & Quota Section */}
+        <div>
+          <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
+            Usage & Quota
+          </h3>
+          <QuotaSummary
+            analyses={analyses}
+            downloads={downloads}
+            forumPosts={forumPosts}
+            plan={plan}
+            onUpgrade={openPricingModal}
+          />
+        </div>
+
         {/* Display Settings */}
         <div>
           <h3 className="text-sm font-medium text-neutral-400 mb-3 uppercase tracking-wider">
@@ -242,7 +365,7 @@ export function OptionsTab() {
               title="Show Landmarks"
               description="Display facial landmarks on photos"
             >
-              <ToggleSwitch enabled={showLandmarks} onToggle={() => setShowLandmarks(!showLandmarks)} />
+              <ToggleSwitch enabled={showLandmarkOverlay} onToggle={() => setShowLandmarkOverlay(!showLandmarkOverlay)} />
             </SettingItem>
           </div>
         </div>
@@ -270,9 +393,16 @@ export function OptionsTab() {
 
             <SettingItem
               icon={<Lock size={20} className="text-red-400" />}
-              title="Privacy Settings"
+              title="Privacy & Terms"
               description="Control how your data is used"
               onClick={handlePrivacy}
+            />
+
+            <SettingItem
+              icon={<LogOut size={20} className="text-neutral-400" />}
+              title="Sign Out"
+              description="Logout of your account"
+              onClick={() => setShowLogoutConfirm(true)}
             />
           </div>
         </div>
@@ -286,14 +416,14 @@ export function OptionsTab() {
             <SettingItem
               icon={<Download size={20} className="text-cyan-400" />}
               title="Export Analysis"
-              description="Download your results as PDF or JSON"
+              description="Download your results as PDF"
               onClick={handleExport}
             />
 
             <SettingItem
               icon={<Share2 size={20} className="text-blue-400" />}
               title="Share Results"
-              description="Generate a shareable link to your analysis"
+              description="Download shareable result card"
               onClick={handleShare}
             />
 
@@ -320,6 +450,39 @@ export function OptionsTab() {
               onClick={() => setShowDeleteConfirm(true)}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Hidden Report Container for Capture */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+        <div id="pdf-report-container">
+          <AnalysisReport
+            analysis={{
+              front_image_url: localStorage.getItem('looksmaxx_front_photo'),
+              side_image_url: localStorage.getItem('looksmaxx_side_photo'),
+              front_landmarks: (() => {
+                try {
+                  const results = JSON.parse(localStorage.getItem('looksmaxx_results') || '{}');
+                  return results?.analysis?.front_landmarks || [];
+                } catch { return []; }
+              })(),
+              side_landmarks: (() => {
+                try {
+                  const results = JSON.parse(localStorage.getItem('looksmaxx_results') || '{}');
+                  return results?.analysis?.side_landmarks || [];
+                } catch { return []; }
+              })(),
+              // @ts-ignore
+              scores: { masculinity: 50, femininity: 50, symmetry: 50, skinQuality: 50, aging: 25 },
+            }}
+            results={{ overallScore, pslRating, frontRatios, sideRatios }}
+            userName={(() => {
+              try {
+                return JSON.parse(localStorage.getItem('user') || '{}').username || 'User';
+              } catch { return 'User'; }
+            })()}
+            isUnlocked={plan === 'pro' || plan === 'plus'}
+          />
         </div>
       </div>
     </TabContent>

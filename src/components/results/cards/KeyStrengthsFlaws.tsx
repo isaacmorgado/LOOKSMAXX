@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Sparkles, AlertTriangle } from 'lucide-react';
 import { Strength, Flaw, ResponsibleRatio, Recommendation, getScoreColor } from '@/types/results';
 import { useResults } from '@/contexts/ResultsContext';
+import { ConfidenceLevel } from '@/lib/harmony-scoring';
 
 // ============================================
 // QUALITY BADGE COMPONENT (Light Theme)
@@ -130,6 +131,66 @@ function SeverityBadge({ severity }: { severity: SeverityLevel }) {
 }
 
 // ============================================
+// CONFIDENCE BADGES - Flaw Detection Certainty
+// ============================================
+
+interface ConfidenceConfig {
+  label: string;
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
+  icon: string;
+}
+
+const CONFIDENCE_CONFIGS: Record<ConfidenceLevel, ConfidenceConfig> = {
+  confirmed: {
+    label: 'Confirmed',
+    textColor: 'rgb(74, 222, 128)',     // green-400
+    bgColor: 'rgba(74, 222, 128, 0.1)', // green-400/10
+    borderColor: 'rgba(74, 222, 128, 0.3)', // green-400/30
+    icon: '\u2713',  // checkmark
+  },
+  likely: {
+    label: 'Likely',
+    textColor: 'rgb(96, 165, 250)',     // blue-400
+    bgColor: 'rgba(96, 165, 250, 0.1)', // blue-400/10
+    borderColor: 'rgba(96, 165, 250, 0.3)', // blue-400/30
+    icon: '\u2248',  // approximately equal
+  },
+  possible: {
+    label: 'Possible',
+    textColor: 'rgb(163, 163, 163)',    // neutral-400
+    bgColor: 'rgba(163, 163, 163, 0.1)', // neutral-400/10
+    borderColor: 'rgba(163, 163, 163, 0.3)', // neutral-400/30
+    icon: '?',
+  },
+};
+
+interface ConfidenceBadgeProps {
+  confidence: ConfidenceLevel;
+  showIcon?: boolean;
+}
+
+function ConfidenceBadge({ confidence, showIcon = true }: ConfidenceBadgeProps) {
+  const config = CONFIDENCE_CONFIGS[confidence] || CONFIDENCE_CONFIGS.possible;
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] font-medium tracking-wide whitespace-nowrap flex-shrink-0"
+      style={{
+        color: config.textColor,
+        backgroundColor: config.bgColor,
+        border: `1px solid ${config.borderColor}`,
+      }}
+      title={`Detection confidence: ${config.label}`}
+    >
+      {showIcon && <span className="text-[8px] sm:text-[9px]">{config.icon}</span>}
+      {config.label}
+    </span>
+  );
+}
+
+// ============================================
 // PROCEDURE PHASE BADGE
 // ============================================
 
@@ -181,7 +242,7 @@ function PhaseBadge({ phase }: { phase: ProcedurePhase }) {
 
 interface ContributingRatioButtonProps {
   ratioName: string;
-  score: number;
+  score: number | string;
   onClick: () => void;
   animationDelay?: number;
 }
@@ -192,7 +253,8 @@ function ContributingRatioButton({
   onClick,
   animationDelay = 0,
 }: ContributingRatioButtonProps) {
-  const color = getScoreColor(score);
+  const numericScore = typeof score === 'number' ? score : 0;
+  const color = getScoreColor(numericScore);
 
   return (
     <motion.button
@@ -206,8 +268,8 @@ function ContributingRatioButton({
         {ratioName}
       </span>
       <div className="flex items-baseline gap-0.5 sm:gap-1">
-        <span className="text-xs sm:text-sm font-semibold" style={{ color }}>
-          {score.toFixed(1)}
+        <span className="text-xs sm:text-sm font-semibold" style={{ color: typeof score === 'string' ? '#a3a3a3' : color }}>
+          {typeof score === 'number' ? score.toFixed(1) : score}
         </span>
         <span className="text-[10px] sm:text-xs text-neutral-500">/10</span>
       </div>
@@ -263,16 +325,16 @@ function KeyStrengthCard({
   onRatioClick,
   animationDelay = 0,
 }: KeyStrengthCardProps) {
-  const color = getScoreColor(strength.avgScore);
+  const score = typeof strength.avgScore === 'number' ? strength.avgScore : 0;
+  const color = getScoreColor(score);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
-      className={`rounded-xl bg-neutral-900/80 border overflow-hidden transition-all duration-200 ${
-        isExpanded ? 'border-cyan-500/30' : 'border-neutral-800 hover:border-neutral-700'
-      }`}
+      className={`rounded-xl bg-neutral-900/80 border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-cyan-500/30' : 'border-neutral-800 hover:border-neutral-700'
+        }`}
     >
       {/* Header Button */}
       <button
@@ -298,9 +360,9 @@ function KeyStrengthCard({
             <div className="text-right">
               <div
                 className="text-lg sm:text-xl font-semibold tracking-tight"
-                style={{ color }}
+                style={{ color: typeof strength.avgScore === 'string' ? '#a3a3a3' : color }}
               >
-                {strength.avgScore.toFixed(2)}
+                {typeof strength.avgScore === 'number' ? strength.avgScore.toFixed(2) : strength.avgScore}
               </div>
               <div className="text-[10px] sm:text-xs text-neutral-500 font-medium mt-0.5">avg /10</div>
             </div>
@@ -392,9 +454,8 @@ function AreaOfImprovementCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
-      className={`rounded-xl bg-neutral-900/80 border overflow-hidden transition-all duration-200 ${
-        isExpanded ? 'border-red-500/30' : 'border-neutral-800 hover:border-neutral-700'
-      }`}
+      className={`rounded-xl bg-neutral-900/80 border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-red-500/30' : 'border-neutral-800 hover:border-neutral-700'
+        }`}
     >
       {/* Header Button */}
       <button
@@ -402,9 +463,12 @@ function AreaOfImprovementCard({
         className="w-full p-4 sm:p-5 hover:bg-neutral-800/30 transition-colors duration-200 text-left"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-          {/* Left: Badge + Content */}
+          {/* Left: Badges + Content */}
           <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-            <SeverityBadge severity={severity} />
+            <div className="flex flex-col gap-1">
+              <SeverityBadge severity={severity} />
+              {flaw.confidence && <ConfidenceBadge confidence={flaw.confidence} />}
+            </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm sm:text-base font-semibold text-white mb-1 sm:mb-1.5 leading-snug">
                 {flaw.flawName}
@@ -428,10 +492,10 @@ function AreaOfImprovementCard({
               {flaw.rollingHarmonyPercentageLost !== undefined &&
                 typeof flaw.rollingHarmonyPercentageLost === 'number' &&
                 Number.isFinite(flaw.rollingHarmonyPercentageLost) && (
-                <div className="text-[10px] text-neutral-600 font-medium pt-0.5 border-t border-neutral-700 mt-1">
-                  Rolling: -{flaw.rollingHarmonyPercentageLost.toFixed(2)}
-                </div>
-              )}
+                  <div className="text-[10px] text-neutral-600 font-medium pt-0.5 border-t border-neutral-700 mt-1">
+                    Rolling: -{flaw.rollingHarmonyPercentageLost.toFixed(2)}
+                  </div>
+                )}
             </div>
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -527,7 +591,7 @@ export function KeyStrengthsSection({
       (s) => typeof s.avgScore === 'number' && Number.isFinite(s.avgScore)
     );
     if (validScores.length === 0) return 0;
-    return validScores.reduce((sum, s) => sum + s.avgScore, 0) / validScores.length;
+    return validScores.reduce((sum, s) => sum + (s.avgScore as number), 0) / validScores.length;
   }, [strengths]);
 
   return (

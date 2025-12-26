@@ -121,6 +121,24 @@ export interface GuideProduct {
 
 export type HumorLevel = 'low' | 'medium' | 'medium-high' | 'high';
 
+// ============================================
+// MEDIA TYPES
+// ============================================
+
+export type MediaType = 'gif' | 'image' | 'video';
+export type MediaPlacement = 'inline' | 'hero' | 'full-width';
+
+export interface GuideMedia {
+  id: string;
+  type: MediaType;
+  url: string;
+  alt: string;
+  caption?: string;
+  placement?: MediaPlacement;
+  width?: number;
+  height?: number;
+}
+
 export interface GuideSection {
   id: string;
   title: string;
@@ -129,6 +147,7 @@ export interface GuideSection {
   products?: string[];  // Product IDs referenced in this section
   tips?: string[];  // Quick tip callouts
   warnings?: string[];  // Important warnings
+  media?: GuideMedia[];  // GIFs, images, videos for this section
 }
 
 export interface Guide {
@@ -145,6 +164,8 @@ export interface Guide {
   productIds?: string[];  // All products mentioned
   tags?: string[];
   order: number;  // Display order
+  heroMedia?: GuideMedia;  // Hero image/GIF for the guide
+  forumCategory?: string;  // Forum category slug for "Discuss in Forum"
 }
 
 // ============================================

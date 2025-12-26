@@ -69,6 +69,11 @@ export function FaceOverlay({
   const [imageDimensions, setImageDimensions] = useState<ImageDimensions | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Sync state with prop if it changes (e.g. from global toggle)
+  useEffect(() => {
+    setShowAllLandmarks(initialShowAllLandmarks);
+  }, [initialShowAllLandmarks]);
+
   // Load image dimensions for proper aspect ratio handling
   useEffect(() => {
     const img = new window.Image();
@@ -261,11 +266,10 @@ export function FaceOverlay({
             {/* Landmark toggle */}
             <button
               onClick={() => setShowAllLandmarks(!showAllLandmarks)}
-              className={`p-1.5 rounded transition-colors ${
-                showAllLandmarks
+              className={`p-1.5 rounded transition-colors ${showAllLandmarks
                   ? 'bg-cyan-500/20 text-cyan-400'
                   : 'hover:bg-neutral-800 text-neutral-500'
-              }`}
+                }`}
               title={showAllLandmarks ? 'Hide all landmarks' : 'Show all landmarks'}
             >
               <Crosshair size={16} />
@@ -330,14 +334,14 @@ export function FaceOverlay({
             {/* Defs for filters and gradients */}
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
                 <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
               <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="0" stdDeviation="0.3" floodOpacity="0.8"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="0.3" floodOpacity="0.8" />
               </filter>
             </defs>
 
@@ -593,11 +597,11 @@ export function FaceOverlay({
             <div
               className="px-2 py-1 rounded text-sm font-bold"
               style={{
-                backgroundColor: `${getScoreColor(selectedRatio.score)}15`,
-                color: getScoreColor(selectedRatio.score),
+                backgroundColor: `${getScoreColor(typeof selectedRatio.score === 'number' ? selectedRatio.score : 0)}15`,
+                color: getScoreColor(typeof selectedRatio.score === 'number' ? selectedRatio.score : 0),
               }}
             >
-              {selectedRatio.score.toFixed(1)}
+              {typeof selectedRatio.score === 'number' ? selectedRatio.score.toFixed(1) : selectedRatio.score}
             </div>
           </div>
 
@@ -634,9 +638,9 @@ export function FaceOverlay({
           <span className="text-xs text-white truncate">{selectedRatio.name}</span>
           <span
             className="text-xs font-bold ml-2"
-            style={{ color: getScoreColor(selectedRatio.score) }}
+            style={{ color: getScoreColor(typeof selectedRatio.score === 'number' ? selectedRatio.score : 0) }}
           >
-            {selectedRatio.score.toFixed(1)}
+            {typeof selectedRatio.score === 'number' ? selectedRatio.score.toFixed(1) : selectedRatio.score}
           </span>
         </div>
       )}

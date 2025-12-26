@@ -22,6 +22,7 @@ import {
   BellCurveChart,
   HarmonyScoreDisplay,
 } from './BellCurveChart';
+import StreakCard from './results/cards/StreakCard';
 
 interface ResultsDashboardProps {
   frontLandmarks: LandmarkPoint[];
@@ -372,6 +373,11 @@ export function ResultsDashboard({
         <p className="text-neutral-400 mb-8">
           Based on {frontLandmarks.length + sideLandmarks.length} facial landmarks
         </p>
+
+        {/* Daily Streak Card */}
+        <div className="max-w-md mx-auto mb-8">
+          <StreakCard />
+        </div>
 
         {/* Main Harmony Score Display */}
         <HarmonyScoreDisplay

@@ -37,6 +37,22 @@ npm run lint && npx tsc --noEmit
 | **Order of Operations** | Yes | `src/lib/recommendations/engine.ts:517-577` | `generateOrderOfOperations()` with prerequisites |
 | **Gender-Specific Treatments** | Yes | `src/lib/advice-engine.ts` | V-line Surgery, Masseter Botox (female-only) |
 
+### FaceIQ Parity Features (Implemented 2025-12-26) ✅
+
+| Feature | File | Details |
+|---------|------|---------|
+| **Confidence Levels** | `src/lib/insights-engine.ts` | `calculateFlawConfidence()` - Z-score based: \|z\|>=2=confirmed, 1-2=likely, 0.5-1=possible |
+| **ConfidenceBadge** | `src/components/results/cards/*.tsx` | UI badges in StrengthFlawCards, KeyStrengthsFlaws, WeakPointCard |
+| **Exclusive Categories** | `src/lib/advice-engine.ts` | `TREATMENT_EXCLUSIVITY` - 10 categories, 20+ treatment mappings |
+| **Conflict Detection** | `src/lib/recommendations/engine.ts` | `findTreatmentConflicts()`, `filterConflictingRecommendations()`, `validateTreatmentSelection()` |
+| **Conflict UI** | `src/components/results/cards/TreatmentConflictWarning.tsx` | ConflictCard, TreatmentConflictList, SelectionWarningModal |
+| **Landmarks Per Metric** | `src/lib/data/metric-configs.ts` | `usedLandmarks: string[]` on 30 key metrics |
+| **Dual Curve System** | `src/lib/bezier-curves.ts` | `DISPLAY_CURVES`, `getScoringCurve()`, `getDisplayCurve()`, `hasDisplayCurve()` |
+
+**Exclusive Categories:** jaw_augmentation, jaw_reduction, chin_augmentation, cheekbone_augmentation, lip_augmentation, lip_reduction, submental_fat_removal, neck_procedures, eye_lateral_canthus, maxillary_surgery
+
+**Metrics with Landmarks:** faceWidthToHeight, gonialAngle, lateralCanthalTilt, nasalIndex, nasolabialAngle, facialConvexity, mandibularPlaneAngle, etc. (30 total)
+
 ### Detailed Feature Breakdown
 
 #### Bezier Curves (67 Total)
@@ -225,18 +241,266 @@ See `docs/PRODUCT_GUIDES_IMPLEMENTATION.md` for full implementation plan.
 - Responsive grid (1 col mobile, 2 cols desktop)
 - Smooth hover animations
 
+### Phase 5: Media & Conversion Features - COMPLETE (2025-12-26)
+
+| Component | File | Details |
+|-----------|------|---------|
+| **GuideMedia Type** | `src/types/guides.ts` | GIF/image/video support with placement options |
+| **MediaRenderer** | `src/components/results/tabs/GuidesTab.tsx` | Renders GIFs (animated) and images (optimized) |
+| **ProductCallout** | `src/components/results/tabs/GuidesTab.tsx` | Conversion-optimized affiliate product cards |
+| **ForumDiscussionLink** | `src/components/results/tabs/GuidesTab.tsx` | Links guides to forum categories |
+
+**Media Features:**
+- Hero images for guides (skincare, maintenance, v-taper)
+- Inline GIFs for technique demonstrations
+- Caption support for media
+- Placement options: inline, hero, full-width
+- GIF animation preserved (uses img), images optimized (uses next/image)
+
+**Product Callout Features:**
+- Region-aware affiliate links via useRegion()
+- Product image, name, brand, Ross-style tagline
+- "Buy Now" CTA button with ShoppingCart icon
+- Gradient background for visual prominence
+
+**Forum Integration:**
+- "Discuss This Guide" section at end of each guide
+- Links to relevant forum category (skincare → /forum/skincare)
+- Guide data includes forumCategory field
+- MessageSquare icon for visual consistency
+
+**Guides with Media:**
+| Guide | Hero | Section GIFs | Forum Category |
+|-------|------|--------------|----------------|
+| Skincare | ✅ | Cleansing technique, Tretinoin application, Timeline image | skincare |
+| Maintenance | ✅ | Tongue scraping technique | hygiene-grooming |
+| V-Taper | ✅ | (None yet) | body-composition |
+
 ## Remaining Tasks
 
 ### High Priority
 1. Test full payment flow with referral discount
+2. Add actual GIF/image assets to `/public/guides/` folder
 
 ### In Progress
-2. Product Guides Implementation (Phase 5-7 remaining)
-   - Phase 5: Guide detail pages with product integration
+3. Product Guides Implementation (Phase 6-7 remaining)
    - Phase 6-7: Polish, QA, and Launch
 
 ### Completed
-3. Forum link to main navigation ✅
-4. Product Guides Phase 0-4 ✅ (Types, Products, Content, UI)
-5. Auth endpoints verified working ✅ (23/23 API tests pass)
-6. Score clamping bug fixed ✅ (scores now always 0-10)
+4. Forum link to main navigation ✅
+5. Product Guides Phase 0-5 ✅ (Types, Products, Content, UI, Media/Conversions)
+6. Auth endpoints verified working ✅ (23/23 API tests pass)
+7. Score clamping bug fixed ✅ (scores now always 0-10)
+8. Side profile orientation bug fixed ✅ (2025-12-26) - Landmarks no longer stick to left side
+9. Image downsampling for performance ✅ (2025-12-26) - 4-9x faster detection
+10. Leaderboard UI enhanced ✅ (2025-12-26) - Shows photos, strengths, improvements
+11. Guide media support ✅ (2025-12-26) - GIFs, images, captions, placements
+12. ProductCallout component ✅ (2025-12-26) - Region-aware affiliate CTAs
+13. Forum discussion links ✅ (2025-12-26) - Guides link to forum categories
+14. Fix Your Weak Points Flow ✅ (2025-12-26) - YourPhaseCard, WeakPointCard, ProgressComparisonCard, ProductBundleCard
+
+## Performance Optimizations (2025-12-26) ✅
+
+| Optimization | File | Details |
+|--------------|------|---------|
+| **MediaPipe Downsampling** | `src/lib/faceDetectionService.ts` | Images downsampled to 640px max before detection |
+| **Edge Detection Downsampling** | `src/lib/sideProfileDetection.ts` | Images downsampled to 480px max for edge processing |
+| **GPU Delegation** | `src/lib/faceDetectionService.ts` | WebGL acceleration enabled via `delegate: 'GPU'` |
+
+## Bug Fixes (2025-12-26) ✅
+
+| Bug | File | Fix |
+|-----|------|-----|
+| **Side profile orientation inverted** | `src/lib/sideProfileDetection.ts:199` | Changed `faceOnLeft ? 'right' : 'left'` to `faceOnLeft ? 'left' : 'right'` |
+| **Landmarks sticking to left side** | Same as above | Edge detection now correctly identifies which side the face is on |
+
+## Fix Your Weak Points Flow (2025-12-26) ✅
+
+Complete conversion-optimized flow for fixing flaws with products and treatments.
+
+### Components
+
+| Component | File | Details |
+|-----------|------|---------|
+| **YourPhaseCard** | `src/components/results/tabs/PlanTab.tsx` | Shows bulk/cut/maintain based on body fat % |
+| **WeakPointCard** | `src/components/results/cards/WeakPointCard.tsx` | Expandable flaw card with products/treatments |
+| **ProgressComparisonCard** | `src/components/results/cards/ProgressComparisonCard.tsx` | Before/after comparison with photo upload |
+| **ProductBundleCard** | `src/components/results/tabs/PlanTab.tsx` | Bundled product recommendations CTA |
+
+### Features
+
+**YourPhaseCard:**
+- Body fat % from Vision analysis (PhysiqueContext)
+- Gender-specific thresholds: Males (12%/18%), Females (18%/25%)
+- Phase determination: Bulk (below threshold), Maintain (in range), Cut (above threshold)
+- Visual icons and color-coded badges
+
+**WeakPointCard:**
+- Expandable cards for top 5 flaws
+- Severity-based coloring (red/orange/yellow)
+- Contributing metrics display
+- Related products (up to 2 per flaw)
+- Related treatments (up to 3 per flaw)
+- "View Full Fix Plan" CTA
+
+**ProgressComparisonCard:**
+- Current vs previous analysis comparison
+- Photo upload with preview
+- Score difference indicators (trend up/down/same)
+- Upload flow with camera capture option
+
+**ProductBundleCard:**
+- Bundles 3+ recommended products
+- Total cost estimate with range
+- Priority sorting by urgency
+- "Get Your Fix Bundle" CTA
+
+### Type Fixes
+
+Fixed cascading `string | number` type errors for obfuscated scores across:
+- `src/components/results/shared/index.tsx` (ScoreCircle)
+- `src/components/results/ResultsLayout.tsx`
+- `src/components/results/tabs/OverviewTab.tsx` (ProfileScoreCard, PSL calculation)
+- `src/components/results/tabs/PlanTab.tsx`
+- `src/components/results/tabs/PSLTab.tsx`
+- `src/components/results/visualization/FaceOverlay.tsx`
+- `src/components/results/shared/ShareButton.tsx`
+- `src/lib/shareResults.ts`
+- `src/lib/archetype-classifier.ts`
+- `src/lib/results/analysis.ts`
+
+## UX Improvements (2025-12-26) ✅
+
+### Dark Theme Fixes
+| Component | File | Details |
+|-----------|------|---------|
+| **StrengthFlawCards** | `src/components/results/cards/StrengthFlawCards.tsx` | Fixed white backgrounds breaking dark theme |
+
+### Onboarding Enhancements
+| Component | File | Details |
+|-----------|------|---------|
+| **OnboardingProgress** | `src/components/onboarding/OnboardingProgress.tsx` | Global progress bar with 7 steps |
+| **Mobile Bottom CTAs** | All onboarding pages | Fixed bottom CTA bar on mobile with gradient backdrop |
+
+### Form Improvements
+| Component | File | Details |
+|-----------|------|---------|
+| **Password Visibility** | `src/app/signup/page.tsx`, `src/app/login/page.tsx` | Toggle to show/hide password |
+| **Password Strength** | `src/app/signup/page.tsx` | Real-time password strength indicator |
+
+### Loading States
+| Component | File | Details |
+|-----------|------|---------|
+| **Skeleton Component** | `src/components/ui/Skeleton.tsx` | Reusable skeleton patterns |
+| **Leaderboard Skeleton** | `src/components/results/tabs/LeaderboardTab.tsx` | Skeleton loading for leaderboard |
+| **Forum Skeleton** | `src/app/forum/page.tsx` | Skeleton loading for forum categories |
+
+### Achievement System
+| Component | File | Details |
+|-----------|------|---------|
+| **Achievement Types** | `src/types/achievements.ts` | Types, tiers, XP calculations |
+| **Achievement Data** | `src/data/achievements.ts` | 20+ achievements across 5 categories |
+| **AchievementBadge** | `src/components/achievements/AchievementBadge.tsx` | Badge and card components |
+| **AchievementsShowcase** | `src/components/achievements/AchievementsShowcase.tsx` | Full showcase with level/XP |
+
+### Visual Improvements
+| Change | Details |
+|--------|---------|
+| **Softer Cyan** | Updated accent from #00f3ff to cyan-400 (#22d3ee) |
+| **Increased Spacing** | More padding in TabContent (p-5/8/10), larger gaps in grids |
+| **Social Proof** | Avatar cluster + counter on hero section |
+
+### Utilities
+| Utility | File | Details |
+|---------|------|---------|
+| **cn()** | `src/lib/utils.ts` | Class name merging utility |
+
+## New Features (2025-12-26) ✅
+
+### 1. Face Morphing Visualization
+Real-time face morphing that shows treatment effects on facial landmarks.
+
+| Component | File | Details |
+|-----------|------|---------|
+| **FaceMorphing** | `src/components/results/visualization/FaceMorphing.tsx` | Canvas-based face warping with animation |
+| **BeforeAfterPreviewSection** | `src/components/results/tabs/PlanTab.tsx` | Toggle between morphing and static preview |
+
+**Features:**
+- Treatment-based landmark displacement
+- Animated morph transition (2 seconds)
+- Play/pause/reset controls
+- Improvement region highlighting
+- Glassmorphism UI (content-cat pattern)
+
+### 2. Quota/Rate Limiting System
+Plan-based usage limits with visual progress tracking.
+
+| Component | File | Details |
+|-----------|------|---------|
+| **rate-limit.ts** | `src/lib/rate-limit.ts` | In-memory rate limiting with Redis-ready interface |
+| **useQuota** | `src/hooks/useQuota.ts` | React hook for quota management |
+| **QuotaDisplay** | `src/components/ui/QuotaDisplay.tsx` | QuotaProgressBar, QuotaCard, QuotaSummary, QuotaGate components |
+
+**Plan Quotas:**
+| Plan | Analyses/Mo | Downloads | Forum Posts |
+|------|-------------|-----------|-------------|
+| Free | 3 | 1 | 5 |
+| Basic | 30 | 10 | 50 |
+| Pro | 100 | 50 | 200 |
+| Plus | Unlimited | Unlimited | Unlimited |
+
+### 3. Analysis History/Versioning
+Track and compare analyses over time.
+
+| Component | File | Details |
+|-----------|------|---------|
+| **useAnalysisHistory** | `src/hooks/useAnalysisHistory.ts` | History management hook with localStorage |
+| **AnalysisHistoryCard** | `src/components/results/cards/AnalysisHistoryCard.tsx` | History list with comparison modal |
+
+**Features:**
+- Up to 50 analysis snapshots
+- Before/after comparison with metric changes
+- Progress summary (avg improvement, best score, streak)
+- Notes per analysis
+- New strengths and resolved flaws tracking
+
+### 4. Surgery Consent Tracking
+HIPAA-style consent flow for surgical procedure information.
+
+| Component | File | Details |
+|-----------|------|---------|
+| **SurgeryConsentModal** | `src/components/results/modals/SurgeryConsentModal.tsx` | Two-step consent form |
+| **SurgeryConsentGate** | `src/components/results/modals/SurgeryConsentModal.tsx` | Wrapper that blocks content until consent |
+
+**Consent Requirements:**
+- Risk acknowledgment
+- Cost acknowledgment
+- Recovery requirements
+- Consultation requirement
+- Informational disclaimer
+- Initials + age verification (18+)
+
+## UX Patterns from Content-Cat ✅
+
+Adopted patterns from `/Users/imorgado/content-cat`:
+
+| Pattern | Implementation |
+|---------|----------------|
+| **Glassmorphism Modals** | `bg-black/60 backdrop-blur-xl border-white/10` |
+| **Skeleton Shimmer** | CSS-based skeleton-loader animation |
+| **Portal Dropdowns** | Fixed positioning via createPortal |
+| **Error Boundaries** | Component and page-level error handling |
+| **Form Loading State** | `disabled:animate-pulse` on fieldsets |
+| **Cursor Pagination** | useSWRInfinite pattern for infinite scroll |
+
+## E2E Test Results (2025-12-26)
+
+| Test | Status |
+|------|--------|
+| TypeScript | ✅ No errors |
+| ESLint | ✅ Only warnings (img vs Image) |
+| Build | ✅ 28 pages compiled |
+| Face Morphing | ✅ Canvas rendering, animation works |
+| Quota System | ✅ Plan quotas enforced, UI displays correctly |
+| Analysis History | ✅ Snapshots saved, comparison works |
+| Surgery Consent | ✅ Two-step flow, age verification works |

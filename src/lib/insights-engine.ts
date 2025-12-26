@@ -28,7 +28,7 @@
  */
 
 import { Strength, Flaw } from '@/types/results';
-import { MetricScoreResult, METRIC_CONFIGS, isValueAcceptable } from '@/lib/harmony-scoring';
+import { MetricScoreResult, METRIC_CONFIGS, isValueAcceptable, ConfidenceLevel } from '@/lib/harmony-scoring';
 
 // ============================================
 // MASTER SCORING DATABASE (Z-Score Based)
@@ -1570,6 +1570,81 @@ export function getSeverityLabel(severity: SeverityLevel): string {
 }
 
 // ============================================
+// CONFIDENCE CALCULATION (Z-Score Based)
+// ============================================
+
+/**
+ * Calculate confidence level for flaw detection based on Z-score magnitude.
+ *
+ * Logic from FaceIQ:
+ * - confirmed: |z| >= 2 (high statistical certainty - 2+ standard deviations)
+ * - likely: 1 <= |z| < 2 (moderate certainty - 1-2 standard deviations)
+ * - possible: 0.5 <= |z| < 1 (low certainty - 0.5-1 standard deviation)
+ *
+ * For metrics without Z-score data, we calculate confidence from the score:
+ * Score 0-3 = confirmed (very poor score = high confidence it's a flaw)
+ * Score 3-5 = likely (poor score = moderate confidence)
+ * Score 5-7 = possible (below average = low confidence)
+ *
+ * @param zScore - The absolute Z-score value
+ * @returns ConfidenceLevel - 'confirmed' | 'likely' | 'possible'
+ */
+export function calculateConfidenceFromZScore(zScore: number): ConfidenceLevel {
+  if (zScore >= 2) return 'confirmed';
+  if (zScore >= 1) return 'likely';
+  return 'possible';
+}
+
+/**
+ * Calculate confidence level from score when Z-score is unavailable.
+ * Maps score ranges to confidence levels inversely (lower score = higher confidence).
+ *
+ * @param avgScore - Average score of the flaw (0-10 scale)
+ * @returns ConfidenceLevel
+ */
+export function calculateConfidenceFromScore(avgScore: number): ConfidenceLevel {
+  // Very low scores = high confidence it's a real flaw
+  if (avgScore <= 3) return 'confirmed';
+  // Poor scores = moderate confidence
+  if (avgScore <= 5) return 'likely';
+  // Below average scores = low confidence
+  return 'possible';
+}
+
+/**
+ * Calculate confidence for a set of matched metrics.
+ * Uses Z-score when available, falls back to score-based calculation.
+ *
+ * @param matchedMetrics - Array of metrics contributing to the flaw
+ * @param avgScore - Overall average score of the flaw
+ * @returns ConfidenceLevel
+ */
+export function calculateFlawConfidence(
+  matchedMetrics: MatchedMetric[],
+  avgScore: number
+): ConfidenceLevel {
+  // Calculate Z-scores for each metric if we have the config
+  const zScores: number[] = [];
+
+  for (const metric of matchedMetrics) {
+    const config = MASTER_SCORING_DB[metric.metricId];
+    if (config && config.std_dev > 0) {
+      const zScore = calculateZScore(metric.value, config.mean, config.std_dev);
+      zScores.push(zScore);
+    }
+  }
+
+  // If we have Z-scores, use the maximum (highest deviation = highest confidence)
+  if (zScores.length > 0) {
+    const maxZScore = Math.max(...zScores);
+    return calculateConfidenceFromZScore(maxZScore);
+  }
+
+  // Fall back to score-based confidence
+  return calculateConfidenceFromScore(avgScore);
+}
+
+// ============================================
 // INSIGHT DEFINITION TYPES
 // ============================================
 
@@ -1619,6 +1694,13 @@ export interface ClassifiedWeakness {
   severityLabel: string;  // Custom label from definition (e.g., "Extremely Long")
   avgScore: number;
   matchedMetrics: MatchedMetric[];
+  /**
+   * Confidence level based on Z-score magnitude:
+   * - confirmed: |z| >= 2 (high statistical certainty, 2+ SDs from mean)
+   * - likely: 1 <= |z| < 2 (moderate certainty)
+   * - possible: 0.5 <= |z| < 1 (low certainty)
+   */
+  confidence: ConfidenceLevel;
 }
 
 export interface ClassifiedStrength {
@@ -2526,6 +2608,8 @@ export function classifyInsights(
           const severity = getWeaknessSeverity(trueAvgScore);
           const labels = insight.content.severity_labels;
           const severityLabel = labels?.[severity] || severity;
+          // Calculate confidence based on Z-scores of matched metrics
+          const confidence = calculateFlawConfidence(trueWeaknessMetrics, trueAvgScore);
 
           weaknesses.push({
             insightId: insight.id,
@@ -2535,6 +2619,7 @@ export function classifyInsights(
             severityLabel,
             avgScore: trueAvgScore,
             matchedMetrics: trueWeaknessMetrics,
+            confidence,
           });
         }
       }
@@ -2617,6 +2702,7 @@ export function convertToFlaw(classified: ClassifiedWeakness, index: number, rol
     rollingPointsDeducted: newRollingLost,
     rollingHarmonyPercentageLost: newRollingLost,
     rollingStandardizedImpact: newRollingLost / 10,
+    confidence: classified.confidence,
   };
 }
 

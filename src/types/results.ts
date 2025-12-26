@@ -3,7 +3,7 @@
  * Complete type definitions for the results UI
  */
 
-import { QualityTier, SeverityLevel, MeasurementUnit } from '@/lib/harmony-scoring';
+import { QualityTier, SeverityLevel, MeasurementUnit, ConfidenceLevel } from '@/lib/harmony-scoring';
 
 // ============================================
 // ILLUSTRATION TYPES
@@ -39,9 +39,9 @@ export interface RatioIllustration {
 export interface Ratio {
   id: string;
   name: string;
-  value: number;
-  score: number;  // 0-10 scale
-  standardizedScore: number;
+  value: number | string;
+  score: number | string;  // 0-10 scale or Greek text
+  standardizedScore: number | string;
   unit: 'x' | 'mm' | '%' | '°';
   idealMin: number;
   idealMax: number;
@@ -71,8 +71,8 @@ export interface Ratio {
 export interface ResponsibleRatio {
   ratioName: string;
   ratioId: string;
-  score: number;
-  value: number;
+  score: number | string;
+  value: number | string;
   isObfuscated?: boolean;
   // Additional properties for AI descriptions
   idealMin: number;
@@ -85,7 +85,7 @@ export interface Strength {
   id: string;
   strengthName: string;
   summary: string;
-  avgScore: number;
+  avgScore: number | string;
   qualityLevel: QualityTier;
   categoryName: string;
   responsibleRatios: ResponsibleRatio[];
@@ -103,6 +103,13 @@ export interface Flaw {
   rollingPointsDeducted?: number;
   rollingHarmonyPercentageLost?: number;
   rollingStandardizedImpact?: number;
+  /**
+   * Confidence level based on Z-score magnitude:
+   * - confirmed: |z| >= 2 (statistically significant)
+   * - likely: 1 <= |z| < 2
+   * - possible: 0.5 <= |z| < 1
+   */
+  confidence?: ConfidenceLevel;
 }
 
 // ============================================
@@ -201,6 +208,7 @@ export type ResultsTab =
   | 'plan'
   | 'guides'
   | 'community'
+  | 'referrals'
   | 'options'
   | 'support';
 
@@ -228,6 +236,8 @@ export interface LeaderboardEntry {
   gender: 'male' | 'female';
   facePhotoUrl: string | null;
   isCurrentUser: boolean;
+  topStrengths: string[];
+  topImprovements: string[];
 }
 
 export interface UserProfile extends Omit<LeaderboardEntry, 'isCurrentUser'> {
@@ -331,7 +341,11 @@ export function formatUnit(unit: 'x' | 'mm' | '%' | '°' | MeasurementUnit): str
   }
 }
 
-export function formatValue(value: number, unit: 'x' | 'mm' | '%' | '°' | MeasurementUnit): string {
+export function formatValue(value: number | string, unit: 'x' | 'mm' | '%' | '°' | MeasurementUnit): string {
+  // Handle obfuscated string values
+  if (typeof value === 'string') {
+    return value;
+  }
   const unitStr = formatUnit(unit);
   if (unit === '%' || unit === 'percent') {
     return `${value.toFixed(1)}${unitStr}`;
@@ -350,12 +364,13 @@ export interface Product {
   id: string;
   name: string;
   brand: string;
-  category: "skin" | "hair" | "anti-aging" | "hormonal" | "bone" | "general";
+  category: "skin" | "hair" | "anti-aging" | "hormonal" | "bone" | "general" | "jawline" | "tools" | "dental";
   affiliateLink: string;
   affiliateType: "amazon" | "direct";
   supplementId: string;
   priority: number;
   baseStackItem?: boolean;
+  description?: string;
 }
 
 export interface ProductRecommendation {

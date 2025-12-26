@@ -20,6 +20,14 @@ export type SeverityLevel = 'extremely_severe' | 'severe' | 'major' | 'moderate'
 export type MeasurementUnit = 'ratio' | 'percent' | 'degrees' | 'mm' | 'none';
 
 /**
+ * Confidence level for flaw/strength detection based on Z-score magnitude
+ * - confirmed: |z| >= 2 (high statistical certainty, 2+ standard deviations from mean)
+ * - likely: 1 <= |z| < 2 (moderate certainty, 1-2 standard deviations)
+ * - possible: 0.5 <= |z| < 1 (low certainty, 0.5-1 standard deviation)
+ */
+export type ConfidenceLevel = 'confirmed' | 'likely' | 'possible';
+
+/**
  * Polarity defines how deviation from the ideal range is interpreted:
  * - 'balanced': Default. Deviation in either direction is equally bad.
  * - 'higher_is_better': Values above the ideal are still good. Only values below
@@ -66,11 +74,36 @@ export interface MetricConfig {
    * Defaults to 8.0 (Good). Range: 6.0-9.0
    */
   softZoneScore?: number;
+  /**
+   * Facial landmarks used to calculate this metric.
+   * For documentation/debugging purposes - references landmark IDs from landmarks.ts
+   * Front profile landmarks: trichion, left_zygion, right_zygion, menton, etc.
+   * Side profile landmarks: gonionTop, gonionBottom, nasion, pronasale, etc.
+   */
+  usedLandmarks?: string[];
 }
 
+/**
+ * Dual Curve System Configuration
+ *
+ * The dual curve system allows for separate curves for scoring vs display:
+ * - `points` (required): The scoring curve used for actual score calculation
+ * - `displayPoints` (optional): A separate curve for UI visualization
+ *
+ * Use cases for separate display curves:
+ * 1. Smoother visualization: Scoring may use sharp cutoffs, but display shows gradual transitions
+ * 2. Marketing/UX: Show more forgiving curves to users while maintaining strict internal scoring
+ * 3. A/B testing: Test different visual representations without affecting actual scores
+ * 4. Simplified UI: Complex multi-segment scoring curves may need simpler display versions
+ *
+ * If `displayPoints` is not provided, the `points` curve is used for both scoring and display.
+ */
 export interface BezierCurveConfig {
   mode: 'custom' | 'exponential';
+  /** Scoring curve points - used for actual score calculation */
   points: CurvePoint[];
+  /** Optional display curve points - used for UI visualization only */
+  displayPoints?: CurvePoint[];
 }
 
 export interface CurvePoint {
@@ -120,7 +153,7 @@ export interface FlawAssessment {
   severity: SeverityLevel;
   deviation: string;
   reasoning: string;
-  confidence: 'confirmed' | 'likely' | 'possible';
+  confidence: ConfidenceLevel;
 }
 
 export interface StrengthAssessment {
@@ -168,7 +201,7 @@ export interface DemographicOptions {
 export interface FlawMapping {
   category: string;
   flawName: string;
-  confidence: 'confirmed' | 'likely' | 'possible';
+  confidence: ConfidenceLevel;
   reasoning: string;
 }
 

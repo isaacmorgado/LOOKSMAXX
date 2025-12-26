@@ -2,8 +2,31 @@
 
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Ruler, Scale, Info, TrendingUp, Calculator, AlertCircle, Dumbbell, Camera, Percent } from 'lucide-react';
+import {
+  Ruler,
+  Scale,
+  Info,
+  TrendingUp,
+  Calculator,
+  AlertCircle,
+  Dumbbell,
+  Camera,
+  Percent,
+  BookOpen,
+  Clock,
+  ArrowRight,
+  Brain,
+  Wrench,
+  TrendingDown,
+  Calendar,
+  Target,
+  Heart,
+  Utensils,
+  Droplet,
+} from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
+import { Guide } from '@/types/guides';
+import { getGuideById } from '@/data/guides';
 import { useHeightOptional } from '@/contexts/HeightContext';
 import { useWeightOptional } from '@/contexts/WeightContext';
 import { usePhysiqueOptional } from '@/contexts/PhysiqueContext';
@@ -373,6 +396,97 @@ function AddPhysiquePrompt() {
   );
 }
 
+// ============================================
+// RECOMMENDED GUIDES SECTION (PSL-specific)
+// ============================================
+
+// Icon mapping for guides
+const GUIDE_ICON_MAP: Record<string, React.ReactNode> = {
+  BookOpen: <BookOpen size={18} />,
+  Dumbbell: <Dumbbell size={18} />,
+  Brain: <Brain size={18} />,
+  Wrench: <Wrench size={18} />,
+  TrendingDown: <TrendingDown size={18} />,
+  Calendar: <Calendar size={18} />,
+  Target: <Target size={18} />,
+  Heart: <Heart size={18} />,
+  Utensils: <Utensils size={18} />,
+  Droplet: <Droplet size={18} />,
+};
+
+// PSL improvement guides - focused on body composition and physique
+const PSL_GUIDE_IDS = ['body-fat', 'v-taper', 'training', 'diet', 'cardio', 'skincare'];
+
+function PSLRecommendedGuides({ onOpenGuide }: { onOpenGuide: () => void }) {
+  const guides = PSL_GUIDE_IDS
+    .map((id) => getGuideById(id))
+    .filter((g): g is Guide => g !== undefined)
+    .slice(0, 3);
+
+  if (guides.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.35 }}
+      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen className="w-5 h-5 text-cyan-400" />
+        <h3 className="font-semibold text-white">Improvement Guides</h3>
+        <span className="px-2 py-0.5 text-xs font-medium rounded border bg-green-500/20 text-green-400 border-green-500/40">
+          PSL Boost
+        </span>
+      </div>
+
+      <p className="text-sm text-neutral-400 mb-4">
+        Optimize your body composition and physique to maximize your PSL score
+      </p>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {guides.map((guide) => (
+          <div
+            key={guide.id}
+            onClick={onOpenGuide}
+            className="group bg-neutral-800/50 hover:bg-neutral-800 rounded-lg p-4 border border-neutral-700 hover:border-green-500/30 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-cyan-500/20 flex items-center justify-center text-green-400 flex-shrink-0">
+                {GUIDE_ICON_MAP[guide.icon] || <BookOpen size={18} />}
+              </div>
+              <h4 className="font-medium text-white group-hover:text-green-400 transition-colors text-sm line-clamp-1">
+                {guide.title}
+              </h4>
+            </div>
+            <p className="text-xs text-neutral-400 line-clamp-2 mb-2">
+              {guide.description}
+            </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 text-xs text-neutral-500">
+                <Clock size={12} />
+                <span>{guide.estimatedReadTime} min</span>
+              </div>
+              <span className="text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                Read
+                <ArrowRight className="w-3 h-3" />
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={onOpenGuide}
+        className="w-full mt-4 flex items-center justify-center gap-2 py-2 text-sm text-neutral-400 hover:text-white transition-colors"
+      >
+        <span>View all guides</span>
+        <ArrowRight className="w-4 h-4" />
+      </button>
+    </motion.div>
+  );
+}
+
 // Map physique muscle mass string to MuscleLevel type
 function mapMuscleLevel(muscleMass: string | undefined): MuscleLevel | undefined {
   if (!muscleMass) return undefined;
@@ -389,13 +503,18 @@ function mapMuscleLevel(muscleMass: string | undefined): MuscleLevel | undefined
 
 // Main PSL Tab component
 export function PSLTab() {
-  const { overallScore, gender } = useResults();
+  const { overallScore, gender, setActiveTab } = useResults();
   const heightContext = useHeightOptional();
   const weightContext = useWeightOptional();
   const physiqueContext = usePhysiqueOptional();
 
   // Local state for height if context not available
   const [localHeightCm, setLocalHeightCm] = useState<number | null>(null);
+
+  // Handle guide opening - navigate to guides tab
+  const handleOpenGuide = () => {
+    setActiveTab('guides');
+  };
 
   // Get height and weight from context or local state
   const heightCm = heightContext?.heightCm ?? localHeightCm;
@@ -413,7 +532,7 @@ export function PSLTab() {
     if (!heightCm || !overallScore) return null;
 
     // Use the overall harmony score as the face score
-    const faceScore = overallScore;
+    const faceScore = typeof overallScore === 'number' ? overallScore : 0;
     const currentGender = gender || 'male';
 
     // Build body analysis if physique data is available
@@ -542,6 +661,9 @@ export function PSLTab() {
           ) : (
             <AddPhysiquePrompt />
           )}
+
+          {/* Recommended Guides for PSL improvement */}
+          <PSLRecommendedGuides onOpenGuide={handleOpenGuide} />
 
           {/* Tier comparison */}
           <TierComparisonChart

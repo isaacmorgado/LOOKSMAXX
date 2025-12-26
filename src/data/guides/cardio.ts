@@ -18,6 +18,14 @@ export const cardioGuide: Guide = {
   tags: ['cardio', 'fat-loss', 'conditioning', 'heart-health'],
   relatedGuides: ['body-fat', 'training', 'diet'],
   productIds: [],
+  forumCategory: 'body-composition',
+  heroMedia: {
+    id: 'cardio-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=1200&q=80',
+    alt: 'Cardio training and running',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',
@@ -46,6 +54,16 @@ Used correctly, cardio:
 - Doesn't destroy muscle gains
 
 The key is knowing when, how much, and what type.`,
+      media: [
+        {
+          id: 'cardio-intro',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=800&q=80',
+          alt: 'Running and cardio training',
+          caption: 'Cardio is a tool—use it strategically',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'fat-loss-math',
@@ -112,6 +130,16 @@ Zone 2 cardio: 60-70% of max heart rate
         'Incline walking burns more than flat without adding impact',
         'Can do LISS daily without recovery issues'
       ],
+      media: [
+        {
+          id: 'liss-walking',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&q=80',
+          alt: 'Walking for cardio and fat loss',
+          caption: 'Walking: The most sustainable cardio',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'hiit',
@@ -156,6 +184,16 @@ Most people's "HIIT" is really "medium intensity interval training." True HIIT i
         'True HIIT is brutal—most people do it wrong',
         'Limit to 2-3x/week to allow recovery',
         'Not recommended for complete beginners'
+      ],
+      media: [
+        {
+          id: 'hiit-training',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80',
+          alt: 'High intensity interval training',
+          caption: 'HIIT: Maximum effort, minimum time',
+          placement: 'inline',
+        },
       ],
     },
     {

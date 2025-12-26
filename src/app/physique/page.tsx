@@ -16,6 +16,7 @@ import {
   SkipForward,
 } from 'lucide-react';
 import { usePhysique, PhysiqueAngle } from '@/contexts/PhysiqueContext';
+import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress';
 
 const stepConfig: Record<
   PhysiqueAngle,
@@ -144,10 +145,15 @@ export default function PhysiquePage() {
 
   return (
     <main className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12">
+      {/* Global Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 pt-4 px-4 bg-gradient-to-b from-black via-black/80 to-transparent pb-8 z-10">
+        <OnboardingProgress currentStep="physique" />
+      </div>
+
       {/* Back button */}
       <button
         onClick={handleBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"
+        className="fixed top-16 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm z-20"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -156,7 +162,7 @@ export default function PhysiquePage() {
       {/* Skip button */}
       <button
         onClick={handleSkip}
-        className="absolute top-6 right-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"
+        className="fixed top-16 right-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm z-20"
       >
         Skip
         <SkipForward className="w-4 h-4" />
@@ -164,8 +170,8 @@ export default function PhysiquePage() {
 
       {/* Logo */}
       <div className="flex justify-center mb-8">
-        <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-          <span className="text-[#00f3ff] text-sm font-bold">L</span>
+        <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+          <span className="text-cyan-400 text-sm font-bold">L</span>
         </div>
       </div>
 
@@ -180,7 +186,7 @@ export default function PhysiquePage() {
                   transition-all duration-200
                   ${
                     currentStep === step || getPhotoForStep(step)
-                      ? 'bg-[#00f3ff] text-black'
+                      ? 'bg-cyan-400 text-black'
                       : 'bg-neutral-800 text-neutral-500'
                   }
                 `}
@@ -204,7 +210,7 @@ export default function PhysiquePage() {
             {index < stepOrder.length - 1 && (
               <div
                 className={`w-8 h-0.5 ${
-                  getPhotoForStep(step) ? 'bg-[#00f3ff]' : 'bg-neutral-800'
+                  getPhotoForStep(step) ? 'bg-cyan-400' : 'bg-neutral-800'
                 } transition-colors duration-200`}
               />
             )}
@@ -215,7 +221,7 @@ export default function PhysiquePage() {
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <StepIcon className="w-6 h-6 text-[#00f3ff]" />
+          <StepIcon className="w-6 h-6 text-cyan-400" />
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
             {config.title}
           </h1>
@@ -239,7 +245,7 @@ export default function PhysiquePage() {
               cursor-pointer transition-all duration-200
               ${
                 isDragActive
-                  ? 'border-[#00f3ff] bg-[#00f3ff]/5'
+                  ? 'border-cyan-400 bg-cyan-400/5'
                   : 'border-neutral-700 bg-neutral-900/50 hover:border-neutral-600 hover:bg-neutral-900'
               }
             `}
@@ -250,13 +256,13 @@ export default function PhysiquePage() {
             <div
               className={`
                 p-5 rounded-full transition-colors duration-200
-                ${isDragActive ? 'bg-[#00f3ff]/20' : 'bg-neutral-800'}
+                ${isDragActive ? 'bg-cyan-400/20' : 'bg-neutral-800'}
               `}
             >
               <Upload
                 className={`
                   w-10 h-10 transition-colors duration-200
-                  ${isDragActive ? 'text-[#00f3ff]' : 'text-neutral-500'}
+                  ${isDragActive ? 'text-cyan-400' : 'text-neutral-500'}
                 `}
               />
             </div>
@@ -266,7 +272,7 @@ export default function PhysiquePage() {
               <p
                 className={`
                   text-base font-medium transition-colors duration-200
-                  ${isDragActive ? 'text-[#00f3ff]' : 'text-neutral-300'}
+                  ${isDragActive ? 'text-cyan-400' : 'text-neutral-300'}
                 `}
               >
                 {isDragActive
@@ -308,7 +314,7 @@ export default function PhysiquePage() {
             {/* Photo type badge */}
             <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-black/80 border border-neutral-700 z-10">
               <span className="text-white text-sm font-medium flex items-center gap-2">
-                <StepIcon className="w-4 h-4 text-[#00f3ff]" />
+                <StepIcon className="w-4 h-4 text-cyan-400" />
                 {config.title}
               </span>
             </div>
@@ -329,7 +335,7 @@ export default function PhysiquePage() {
             {/* Upload status */}
             <div className="absolute bottom-4 left-4 right-4 px-4 py-3 rounded-lg bg-black/80 border border-neutral-700 z-10">
               <p className="text-white font-medium text-sm flex items-center gap-2">
-                <Check className="w-4 h-4 text-[#00f3ff]" />
+                <Check className="w-4 h-4 text-cyan-400" />
                 Photo uploaded successfully
               </p>
               <p className="text-neutral-500 text-xs mt-0.5">
@@ -340,8 +346,8 @@ export default function PhysiquePage() {
         )}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex items-center gap-4 mt-8">
+      {/* Navigation Buttons - Desktop */}
+      <div className="hidden md:flex items-center gap-4 mt-8">
         {/* Back Button */}
         <button
           onClick={handleBack}
@@ -355,7 +361,7 @@ export default function PhysiquePage() {
         {canProceed ? (
           <button
             onClick={handleNext}
-            className="h-12 px-8 rounded-xl font-medium text-base flex items-center gap-2 transition-all duration-200 bg-[#00f3ff] text-black hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] cursor-pointer"
+            className="h-12 px-8 rounded-xl font-medium text-base flex items-center gap-2 transition-all duration-200 bg-cyan-400 text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] cursor-pointer"
           >
             {currentStepIndex < stepOrder.length - 1
               ? `Next: ${stepOrder[currentStepIndex + 1].charAt(0).toUpperCase() + stepOrder[currentStepIndex + 1].slice(1)}`
@@ -373,6 +379,37 @@ export default function PhysiquePage() {
         )}
       </div>
 
+      {/* Fixed Bottom Navigation - Mobile Only */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent md:hidden z-30">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleBack}
+            className="h-12 px-4 rounded-xl font-medium flex items-center gap-2 border border-neutral-700 bg-black text-white transition-all duration-200"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          {canProceed ? (
+            <button
+              onClick={handleNext}
+              className="flex-1 h-12 rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-cyan-400 text-black transition-all duration-200"
+            >
+              {currentStepIndex < stepOrder.length - 1
+                ? `Next: ${stepOrder[currentStepIndex + 1].charAt(0).toUpperCase() + stepOrder[currentStepIndex + 1].slice(1)}`
+                : 'Continue to Face Photos'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="flex-1 h-12 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-neutral-700 text-neutral-400 transition-all duration-200"
+            >
+              Skip This Step
+              <SkipForward className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Thumbnails for uploaded photos */}
       {hasAnyPhoto && (
         <div className="mt-8 flex items-center gap-4">
@@ -384,7 +421,7 @@ export default function PhysiquePage() {
               <button
                 key={step}
                 className={`relative w-14 h-18 rounded-lg overflow-hidden border-2 ${
-                  currentStep === step ? 'border-[#00f3ff]' : 'border-neutral-700'
+                  currentStep === step ? 'border-cyan-400' : 'border-neutral-700'
                 } cursor-pointer hover:opacity-90 transition-opacity`}
                 onClick={() => setCurrentStep(step)}
               >

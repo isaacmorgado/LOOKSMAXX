@@ -18,6 +18,14 @@ export const vTaperGuide: Guide = {
   tags: ['physique', 'shoulders', 'back', 'v-taper', 'aesthetics'],
   relatedGuides: ['body-fat', 'training', 'diet'],
   productIds: ['creatine_mono', 'omega3_fish_oil', 'collagen_peptides'],
+  forumCategory: 'body-composition',
+  heroMedia: {
+    id: 'v-taper-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=1200&q=80',
+    alt: 'Classic V-taper physique - wide shoulders, narrow waist',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',

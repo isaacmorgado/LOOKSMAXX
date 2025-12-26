@@ -22,6 +22,14 @@ export interface BodyAnalysis {
   weightKg?: number;        // Weight for FFMI calculation
 }
 
+// Claude Vision qualitative data for PSL bonuses/penalties
+export interface PSLVisionData {
+  skin?: { clarity?: number };
+  hair?: { hairline_nw?: number };
+  teeth?: { alignment?: string };
+  facial_features?: { hollow_cheeks?: number };
+}
+
 export interface PSLInput {
   faceScore: number;        // 0-10 from harmony analysis
   heightCm: number;         // User input height in cm
@@ -29,6 +37,7 @@ export interface PSLInput {
   bodyAnalysis?: BodyAnalysis;  // From AI vision (paid)
   weightKg?: number;        // Weight for FFMI calculation (can be separate from bodyAnalysis)
   failos?: string[];        // Detected major failos
+  vision?: PSLVisionData;   // Claude Vision qualitative data
 }
 
 // ============================================

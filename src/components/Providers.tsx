@@ -12,27 +12,38 @@ import { LeaderboardProvider } from '@/contexts/LeaderboardContext';
 import { ForumProvider } from '@/contexts/ForumContext';
 import { RegionProvider } from '@/contexts/RegionContext';
 
+import { PricingProvider, usePricing } from '@/contexts/PricingContext';
+import PricingModal from '@/components/results/modals/PricingModal';
+
+function PricingModalWrapper() {
+  const { isPricingModalOpen, closePricingModal } = usePricing();
+  return <PricingModal isOpen={isPricingModalOpen} onClose={closePricingModal} />;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <RegionProvider>
-        <GenderProvider>
-          <EthnicityProvider>
-            <HeightProvider>
-              <WeightProvider>
-                <UploadProvider>
-                  <PhysiqueProvider>
-                    <LeaderboardProvider>
-                      <ForumProvider>
-                        {children}
-                      </ForumProvider>
-                    </LeaderboardProvider>
-                  </PhysiqueProvider>
-                </UploadProvider>
-              </WeightProvider>
-            </HeightProvider>
-          </EthnicityProvider>
-        </GenderProvider>
+        <PricingProvider>
+          <GenderProvider>
+            <EthnicityProvider>
+              <HeightProvider>
+                <WeightProvider>
+                  <UploadProvider>
+                    <PhysiqueProvider>
+                      <LeaderboardProvider>
+                        <ForumProvider>
+                          {children}
+                          <PricingModalWrapper />
+                        </ForumProvider>
+                      </LeaderboardProvider>
+                    </PhysiqueProvider>
+                  </UploadProvider>
+                </WeightProvider>
+              </HeightProvider>
+            </EthnicityProvider>
+          </GenderProvider>
+        </PricingProvider>
       </RegionProvider>
     </AuthProvider>
   );

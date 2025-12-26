@@ -3,8 +3,27 @@
 import { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Info, Target, Palette, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import {
+  Info,
+  Target,
+  Palette,
+  TrendingUp,
+  Users,
+  ArrowRight,
+  BookOpen,
+  Clock,
+  Brain,
+  Wrench,
+  TrendingDown,
+  Dumbbell,
+  Calendar,
+  Heart,
+  Utensils,
+  Droplet,
+} from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
+import { Guide } from '@/types/guides';
+import { getGuideById } from '@/data/guides';
 import { TabContent } from '../ResultsLayout';
 import { ArchetypeCard } from '@/components/psl/archetype/ArchetypeCard';
 import {
@@ -398,11 +417,125 @@ function RecommendedForumsSection({
 }
 
 // ============================================
+// RECOMMENDED GUIDES SECTION
+// ============================================
+
+// Icon mapping for guides
+const GUIDE_ICON_MAP: Record<string, React.ReactNode> = {
+  BookOpen: <BookOpen size={18} />,
+  Dumbbell: <Dumbbell size={18} />,
+  Brain: <Brain size={18} />,
+  Wrench: <Wrench size={18} />,
+  TrendingDown: <TrendingDown size={18} />,
+  Calendar: <Calendar size={18} />,
+  Target: <Target size={18} />,
+  Heart: <Heart size={18} />,
+  Utensils: <Utensils size={18} />,
+  Droplet: <Droplet size={18} />,
+};
+
+// Map archetypes to recommended guides
+const ARCHETYPE_GUIDES: Record<string, string[]> = {
+  Softboy: ['skincare', 'mindset', 'diet', 'maintenance'],
+  Prettyboy: ['skincare', 'maintenance', 'diet', 'body-fat'],
+  RobustPrettyboy: ['v-taper', 'training', 'skincare', 'diet'],
+  Chad: ['v-taper', 'training', 'core-neck', 'body-fat'],
+  Hypermasculine: ['v-taper', 'training', 'core-neck', 'cardio'],
+  Exotic: ['skincare', 'mindset', 'maintenance', 'diet'],
+};
+
+function RecommendedGuidesSection({
+  classification,
+  onOpenGuide,
+}: {
+  classification: ArchetypeClassification;
+  onOpenGuide: (guide: Guide) => void;
+}) {
+  const archetype = classification.primary.category;
+  const colors = ARCHETYPE_COLORS[archetype];
+  const guideIds = ARCHETYPE_GUIDES[archetype] || ARCHETYPE_GUIDES.Softboy;
+
+  const guides = guideIds
+    .map((id) => getGuideById(id))
+    .filter((g): g is Guide => g !== undefined)
+    .slice(0, 3);
+
+  if (guides.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.35 }}
+      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen className="w-5 h-5 text-cyan-400" />
+        <h3 className="font-semibold text-white">Recommended Guides</h3>
+        <span
+          className="px-2 py-0.5 text-xs font-medium rounded border"
+          style={{
+            backgroundColor: `${colors.primary}20`,
+            color: colors.primary,
+            borderColor: `${colors.primary}40`,
+          }}
+        >
+          {archetype}
+        </span>
+      </div>
+
+      <p className="text-sm text-neutral-400 mb-4">
+        Guides tailored to your archetype for maximizing your aesthetic potential
+      </p>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {guides.map((guide) => (
+          <div
+            key={guide.id}
+            onClick={() => onOpenGuide(guide)}
+            className="group bg-neutral-800/50 hover:bg-neutral-800 rounded-lg p-4 border border-neutral-700 hover:border-cyan-500/30 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
+                {GUIDE_ICON_MAP[guide.icon] || <BookOpen size={18} />}
+              </div>
+              <h4 className="font-medium text-white group-hover:text-cyan-400 transition-colors text-sm line-clamp-1">
+                {guide.title}
+              </h4>
+            </div>
+            <p className="text-xs text-neutral-400 line-clamp-2 mb-2">
+              {guide.description}
+            </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 text-xs text-neutral-500">
+                <Clock size={12} />
+                <span>{guide.estimatedReadTime} min</span>
+              </div>
+              <span className="text-xs text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                Read
+                <ArrowRight className="w-3 h-3" />
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Link href="/results?tab=guides" className="block mt-4">
+        <div className="flex items-center justify-center gap-2 py-2 text-sm text-neutral-400 hover:text-white transition-colors">
+          <span>View all guides</span>
+          <ArrowRight className="w-4 h-4" />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+// ============================================
 // MAIN ARCHETYPE TAB
 // ============================================
 
 export function ArchetypeTab() {
-  const { frontRatios, sideRatios, gender, ethnicity } = useResults();
+  const { frontRatios, sideRatios, gender, ethnicity, setActiveTab } = useResults();
 
   // Classify archetype from ratios
   const classification = useMemo((): ArchetypeClassification | null => {
@@ -415,6 +548,11 @@ export function ArchetypeTab() {
       return null;
     }
   }, [frontRatios, sideRatios, gender, ethnicity]);
+
+  // Handle guide opening - navigate to guides tab
+  const handleOpenGuide = () => {
+    setActiveTab('guides');
+  };
 
   if (!classification) {
     return (
@@ -449,6 +587,12 @@ export function ArchetypeTab() {
 
         {/* Style Recommendations */}
         <StyleRecommendations classification={classification} />
+
+        {/* Recommended Guides */}
+        <RecommendedGuidesSection
+          classification={classification}
+          onOpenGuide={handleOpenGuide}
+        />
 
         {/* Recommended Forums */}
         <RecommendedForumsSection classification={classification} />

@@ -32,6 +32,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Ratio of bizygomatic width to upper face height',
     profileType: 'front',
     customCurve: BEZIER_CURVES.faceWidthToHeight,
+    usedLandmarks: ['left_zygion', 'right_zygion', 'trichion', 'menton'],
   },
 
   lowerThirdProportion: {
@@ -49,6 +50,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Percentage of face occupied by lower third (subnasale to menton)',
     profileType: 'front',
     customCurve: BEZIER_CURVES.lowerThirdProportion,
+    usedLandmarks: ['subnasale', 'menton', 'trichion'],
   },
 
   lowerThirdProportionAlt: {
@@ -83,6 +85,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Percentage of face occupied by middle third',
     profileType: 'front',
     customCurve: BEZIER_CURVES.middleThirdProportion,
+    usedLandmarks: ['nasal_base', 'subnasale', 'trichion', 'menton'],
   },
 
   upperThirdProportion: {
@@ -100,6 +103,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Percentage of face occupied by upper third (trichion to glabella)',
     profileType: 'front',
     customCurve: BEZIER_CURVES.upperThirdProportion,
+    usedLandmarks: ['trichion', 'nasal_base', 'menton'],
   },
 
   bitemporalWidth: {
@@ -117,6 +121,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Temple width as percentage of bizygomatic width',
     profileType: 'front',
     customCurve: BEZIER_CURVES.bitemporalWidth,
+    usedLandmarks: ['left_temporal', 'right_temporal', 'left_zygion', 'right_zygion'],
   },
 
   cheekboneHeight: {
@@ -134,6 +139,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Vertical position of cheekbones relative to face height',
     profileType: 'front',
     customCurve: BEZIER_CURVES.cheekboneHeight,
+    usedLandmarks: ['left_zygion', 'right_zygion', 'trichion', 'menton'],
   },
 
   cheekFullness: {
@@ -167,6 +173,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Total face height divided by cheek width',
     profileType: 'front',
     customCurve: BEZIER_CURVES.totalFacialWidthToHeight,
+    usedLandmarks: ['left_zygion', 'right_zygion', 'trichion', 'menton'],
   },
 
   midfaceRatio: {
@@ -184,6 +191,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Midface width to height ratio for facial balance',
     profileType: 'front',
     customCurve: BEZIER_CURVES.midfaceRatio,
+    usedLandmarks: ['left_zygion', 'right_zygion', 'nasal_base', 'subnasale'],
   },
 
   // JAW MEASUREMENTS
@@ -202,6 +210,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle of the jawline from gonion to chin',
     profileType: 'front',
     customCurve: BEZIER_CURVES.jawSlope,
+    usedLandmarks: ['left_gonion_inferior', 'right_gonion_inferior', 'menton'],
   },
 
   jawFrontalAngle: {
@@ -219,6 +228,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle of jaw corners from frontal view',
     profileType: 'front',
     customCurve: BEZIER_CURVES.jawFrontalAngle,
+    usedLandmarks: ['left_gonion_superior', 'left_gonion_inferior', 'right_gonion_superior', 'right_gonion_inferior', 'menton'],
   },
 
   bigonialWidth: {
@@ -236,6 +246,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Jaw width as percentage of bizygomatic width',
     profileType: 'front',
     customCurve: BEZIER_CURVES.bigonialWidth,
+    usedLandmarks: ['left_gonion_inferior', 'right_gonion_inferior', 'left_zygion', 'right_zygion'],
   },
 
   jawWidthRatio: {
@@ -252,6 +263,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     weight: 0.03,
     description: 'Bigonial width divided by bizygomatic width',
     profileType: 'front',
+    usedLandmarks: ['left_gonion_inferior', 'right_gonion_inferior', 'left_zygion', 'right_zygion'],
   },
 
   // EYE MEASUREMENTS
@@ -277,6 +289,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     polarity: 'higher_is_better',
     safeFloor: 0.0,       // Neutral tilt - anything above is acceptable
     softZoneScore: 8.0,   // "Good" score for 0-4 range
+    usedLandmarks: ['left_canthus_lateralis', 'left_canthus_medialis', 'right_canthus_lateralis', 'right_canthus_medialis'],
   },
 
   eyeAspectRatio: {
@@ -294,6 +307,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Eye width divided by eye height',
     profileType: 'front',
     customCurve: BEZIER_CURVES.eyeAspectRatio,
+    usedLandmarks: ['left_canthus_lateralis', 'left_canthus_medialis', 'left_palpebra_superior', 'left_palpebra_inferior', 'right_canthus_lateralis', 'right_canthus_medialis', 'right_palpebra_superior', 'right_palpebra_inferior'],
   },
 
   eyeSeparationRatio: {
@@ -311,6 +325,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Intercanthal distance as percentage of bizygomatic width',
     profileType: 'front',
     customCurve: BEZIER_CURVES.eyeSeparationRatio,
+    usedLandmarks: ['left_canthus_medialis', 'right_canthus_medialis', 'left_zygion', 'right_zygion'],
   },
 
   interpupillaryRatio: {
@@ -327,6 +342,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     weight: 0.02,
     description: 'IPD as percentage of bizygomatic width',
     profileType: 'front',
+    usedLandmarks: ['left_pupila', 'right_pupila', 'left_zygion', 'right_zygion'],
   },
 
   interpupillaryMouthWidthRatio: {
@@ -501,6 +517,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Nose width divided by nose height x 100',
     profileType: 'front',
     customCurve: BEZIER_CURVES.nasalIndex,
+    usedLandmarks: ['nasal_base', 'subnasale', 'left_ala_nasi', 'right_ala_nasi'],
   },
 
   intercanthalNasalRatio: {
@@ -518,6 +535,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Alar width should roughly equal intercanthal distance',
     profileType: 'front',
     customCurve: BEZIER_CURVES.intercanthalNasalRatio,
+    usedLandmarks: ['left_ala_nasi', 'right_ala_nasi', 'left_canthus_medialis', 'right_canthus_medialis'],
   },
 
   noseBridgeWidth: {
@@ -535,6 +553,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Ratio of nose bridge width to alar base width',
     profileType: 'front',
     customCurve: BEZIER_CURVES.noseBridgeToNoseWidth,
+    usedLandmarks: ['left_dorsum_nasi', 'right_dorsum_nasi', 'left_ala_nasi', 'right_ala_nasi'],
   },
 
   noseTipPosition: {
@@ -779,6 +798,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle at the jaw corner (gonion)',
     profileType: 'side',
     customCurve: BEZIER_CURVES.gonialAngle,
+    usedLandmarks: ['gonionTop', 'gonionBottom', 'intertragicNotch', 'menton'],
   },
 
   nasolabialAngle: {
@@ -796,6 +816,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle between columella and upper lip',
     profileType: 'side',
     customCurve: BEZIER_CURVES.nasolabialAngle,
+    usedLandmarks: ['columella', 'subnasale', 'labraleSuperius'],
   },
 
   nasofrontalAngle: {
@@ -813,6 +834,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle at the bridge of nose (nasion)',
     profileType: 'side',
     customCurve: BEZIER_CURVES.nasofrontalAngle,
+    usedLandmarks: ['glabella', 'nasion', 'rhinion'],
   },
 
   nasofacialAngle: {
@@ -881,6 +903,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Nose projection relative to nasal length (Goode ratio)',
     profileType: 'side',
     customCurve: BEZIER_CURVES.nasalProjection,
+    usedLandmarks: ['nasion', 'pronasale', 'subnasale'],
   },
 
   nasalWToHRatio: {
@@ -949,6 +972,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle at the labiomental fold',
     profileType: 'side',
     customCurve: BEZIER_CURVES.mentolabialAngle,
+    usedLandmarks: ['labraleInferius', 'sublabiale', 'pogonion'],
   },
 
   zAngle: {
@@ -983,6 +1007,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle between chin and neck',
     profileType: 'side',
     customCurve: BEZIER_CURVES.submentalCervicalAngle,
+    usedLandmarks: ['menton', 'cervicalPoint', 'neckPoint'],
   },
 
   facialConvexityGlabella: {
@@ -1000,6 +1025,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Facial convexity angle using glabella',
     profileType: 'side',
     customCurve: BEZIER_CURVES.facialConvexityGlabella,
+    usedLandmarks: ['glabella', 'subnasale', 'pogonion'],
   },
 
   facialConvexityNasion: {
@@ -1017,6 +1043,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Facial convexity angle using nasion',
     profileType: 'side',
     customCurve: BEZIER_CURVES.facialConvexityNasion,
+    usedLandmarks: ['nasion', 'subnasale', 'pogonion'],
   },
 
   totalFacialConvexity: {
@@ -1034,6 +1061,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Complete facial profile convexity measurement',
     profileType: 'side',
     customCurve: BEZIER_CURVES.totalFacialConvexity,
+    usedLandmarks: ['trichion', 'subnasale', 'pogonion', 'menton'],
   },
 
   facialDepthToHeight: {
@@ -1118,6 +1146,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Angle of mandibular plane to Frankfort plane',
     profileType: 'side',
     customCurve: BEZIER_CURVES.mandibularPlaneAngle,
+    usedLandmarks: ['gonionBottom', 'menton', 'porion', 'orbitale'],
   },
 
   ramusToMandibleRatio: {
@@ -1135,6 +1164,7 @@ export const METRIC_CONFIGS: Record<string, MetricConfig> = {
     description: 'Ramus height divided by mandible length',
     profileType: 'side',
     customCurve: BEZIER_CURVES.ramusToMandibleRatio,
+    usedLandmarks: ['gonionTop', 'gonionBottom', 'pogonion'],
   },
 
   gonionToMouthLine: {

@@ -4,9 +4,15 @@
  * Since MediaPipe doesn't work well with side profiles, this module uses
  * edge detection and contour analysis to find the profile silhouette
  * and estimate landmark positions.
+ *
+ * Performance optimizations:
+ * - Image downsampling before edge detection (reduces computation 4-9x)
  */
 
 import { SIDE_PROFILE_LANDMARKS } from './landmarks';
+
+// Maximum dimension for edge detection processing
+const MAX_PROCESSING_SIZE = 480;
 
 interface Point {
   x: number;
@@ -38,11 +44,15 @@ export async function detectSideProfile(
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
+    // Downsample large images for faster edge detection
+    const { width, height } = downsampleDimensions(img.width, img.height, MAX_PROCESSING_SIZE);
+    canvas.width = width;
+    canvas.height = height;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, width, height);
 
-    // Get image data
+    // Get image data (landmarks use normalized 0-1 coordinates, so no rescaling needed)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     // Step 1: Convert to grayscale
@@ -91,6 +101,26 @@ function loadImage(url: string): Promise<HTMLImageElement> {
     img.onerror = reject;
     img.src = url;
   });
+}
+
+/**
+ * Calculate downsampled dimensions while maintaining aspect ratio
+ */
+function downsampleDimensions(
+  width: number,
+  height: number,
+  maxSize: number
+): { width: number; height: number } {
+  const maxDim = Math.max(width, height);
+  if (maxDim <= maxSize) {
+    return { width, height };
+  }
+
+  const scale = maxSize / maxDim;
+  return {
+    width: Math.round(width * scale),
+    height: Math.round(height * scale),
+  };
 }
 
 /**
@@ -196,7 +226,7 @@ function extractProfileContour(
 
   // Face is likely on the side with more edge activity
   const faceOnLeft = leftEdgeSum > rightEdgeSum;
-  const orientation: 'left' | 'right' = faceOnLeft ? 'right' : 'left'; // pointing direction
+  const orientation: 'left' | 'right' = faceOnLeft ? 'left' : 'right'; // profile edge direction
 
   // Find the profile edge - scan from the face side inward
   const contourPoints: Point[] = [];

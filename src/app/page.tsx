@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Scan, BarChart3, Zap, Check, X, MessageSquare } from 'lucide-react';
+import { ArrowRight, Scan, BarChart3, Zap, Check, X, MessageSquare, Users } from 'lucide-react';
 
 export default function HomePage() {
   const features = [
@@ -71,8 +71,8 @@ export default function HomePage() {
       <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-b border-neutral-800 z-50">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-sm font-bold">L</span>
+            <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-sm font-bold">L</span>
             </div>
             <span className="text-lg font-semibold text-white">LOOKSMAXX</span>
           </div>
@@ -86,7 +86,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/login"
-              className="h-10 px-5 rounded-lg bg-[#00f3ff] text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all"
+              className="h-10 px-5 rounded-lg bg-cyan-400 text-black text-sm font-medium flex items-center gap-2 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all"
             >
               Get Started
               <ArrowRight className="w-4 h-4" />
@@ -96,21 +96,43 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-36 pb-24 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white mb-6">
-            Advanced Facial Analysis
+            Discover Your True<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-cyan-300">Facial Score</span> in 60 Seconds
           </h1>
           <p className="text-lg md:text-xl text-neutral-400 mb-10 max-w-2xl mx-auto">
             Professional-grade facial metrics analysis powered by AI. Get detailed insights about your facial structure and proportions.
           </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-[#00f3ff] text-black font-medium hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] transition-all"
-          >
-            Start Analysis
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+          <div className="flex flex-col items-center gap-6">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-cyan-400 text-black font-medium hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all"
+            >
+              Start Free Analysis
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+
+            {/* Social Proof */}
+            <div className="flex items-center gap-3">
+              {/* Avatar cluster */}
+              <div className="flex -space-x-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-800 border-2 border-black flex items-center justify-center"
+                  >
+                    <Users className="w-4 h-4 text-neutral-500" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-white font-semibold text-sm">47,832+</span>
+                <span className="text-neutral-500 text-xs">faces analyzed this week</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -123,8 +145,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-black rounded-xl border border-neutral-800 p-6 hover:border-neutral-700 transition-colors">
-                <div className="w-12 h-12 rounded-lg bg-[#00f3ff]/10 flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-[#00f3ff]" />
+                <div className="w-12 h-12 rounded-lg bg-cyan-400/10 flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 text-cyan-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-neutral-400 text-sm">{feature.description}</p>
@@ -149,12 +171,12 @@ export default function HomePage() {
                 key={index}
                 className={`relative rounded-xl p-6 flex flex-col ${
                   plan.highlighted
-                    ? 'border-2 border-[#00f3ff] bg-black shadow-[0_0_30px_rgba(0,243,255,0.15)]'
+                    ? 'border-2 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.15)]'
                     : 'border border-neutral-800 bg-black'
                 }`}
               >
                 {plan.badge && (
-                  <div className="absolute top-0 right-6 -mt-3 bg-[#00f3ff] text-black text-xs font-medium px-3 py-1 rounded-full">
+                  <div className="absolute top-0 right-6 -mt-3 bg-cyan-400 text-black text-xs font-medium px-3 py-1 rounded-full">
                     {plan.badge}
                   </div>
                 )}
@@ -167,7 +189,7 @@ export default function HomePage() {
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-2 text-sm">
                       {feature.included ? (
-                        <Check className="w-5 h-5 text-[#00f3ff] flex-shrink-0" />
+                        <Check className="w-5 h-5 text-cyan-400 flex-shrink-0" />
                       ) : (
                         <X className="w-5 h-5 text-neutral-600 flex-shrink-0" />
                       )}
@@ -181,7 +203,7 @@ export default function HomePage() {
                   href="/login"
                   className={`w-full h-11 rounded-lg text-sm font-medium flex items-center justify-center transition-all ${
                     plan.highlighted
-                      ? 'bg-[#00f3ff] text-black hover:shadow-[0_0_20px_rgba(0,243,255,0.3)]'
+                      ? 'bg-cyan-400 text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
                       : 'border border-neutral-700 text-white hover:bg-white/5'
                   }`}
                 >
@@ -204,7 +226,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-[#00f3ff] text-black font-medium hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] transition-all"
+            className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-cyan-400 text-black font-medium hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all"
           >
             Get Started Free
             <ArrowRight className="w-5 h-5" />
@@ -216,8 +238,8 @@ export default function HomePage() {
       <footer className="py-8 px-4 border-t border-neutral-800">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-xs font-bold">L</span>
+            <div className="h-6 w-6 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-xs font-bold">L</span>
             </div>
             <span className="text-sm text-neutral-400">LOOKSMAXX</span>
           </div>

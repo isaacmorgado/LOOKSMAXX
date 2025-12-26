@@ -24,6 +24,14 @@ export const skincareGuide: Guide = {
     'aquaphor_lip',
     'tretinoin_guide',
   ],
+  forumCategory: 'poor-skin',
+  heroMedia: {
+    id: 'skincare-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200&q=80',
+    alt: 'Clear, healthy skin and skincare',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',
@@ -116,6 +124,16 @@ Remove dirt, oil, sweat, and sunscreen without stripping your skin.
 **The Feel:**
 After cleansing, skin should feel clean but not tight or squeaky. If it feels stripped, your cleanser is too harsh.`,
       products: ['cerave_cleanser'],
+      media: [
+        {
+          id: 'cleansing-technique',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1556228994-6c24d36f2d8e?w=800&q=80',
+          alt: 'Skincare routine and cleansing',
+          caption: 'Gentle circular motions for 30-60 seconds',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'moisturizing',
@@ -199,6 +217,16 @@ After cleansing, skin should feel clean but not tight or squeaky. If it feels st
       warnings: [
         'Skipping sunscreen will undo your other skincare efforts',
         'Reapply if outdoors for extended periods'
+      ],
+      media: [
+        {
+          id: 'sunscreen-amount',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1532413992378-f169ac26fff0?w=800&q=80',
+          alt: 'Sunscreen and sun protection',
+          caption: 'Use about 1/4 teaspoon (two finger lengths) for your face',
+          placement: 'inline',
+        },
       ],
     },
     {
@@ -301,6 +329,24 @@ This is normal. Push through carefully. It gets better.
         'Start low and slow—0.025% is enough initially',
         'Over-application causes more irritation, not faster results',
         'Tretinoin + sun exposure = damage. Always use sunscreen.'
+      ],
+      media: [
+        {
+          id: 'tretinoin-application',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&q=80',
+          alt: 'Skincare product application',
+          caption: 'Pea-sized amount, dot on forehead, cheeks, chin, then spread',
+          placement: 'inline',
+        },
+        {
+          id: 'tretinoin-timeline',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&q=80',
+          alt: 'Skincare progress and results',
+          caption: 'Expect 3-6 months for initial improvement, 12+ for full results',
+          placement: 'full-width',
+        },
       ],
     },
     {

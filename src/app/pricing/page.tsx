@@ -102,8 +102,8 @@ export default function PricingPage() {
       <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-b border-neutral-800 z-50">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-sm font-bold">L</span>
+            <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-sm font-bold">L</span>
             </div>
             <span className="text-lg font-semibold text-white">LOOKSMAXX</span>
           </Link>

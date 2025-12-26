@@ -19,6 +19,7 @@ export type {
   SeverityLevel,
   MeasurementUnit,
   MetricPolarity,
+  ConfidenceLevel,
   MetricConfig,
   BezierCurveConfig,
   CurvePoint,

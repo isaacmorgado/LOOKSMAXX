@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, AlertTriangle, CheckCircle, Sparkles } from 'lucide-react';
 import { Strength, Flaw, Recommendation, getScoreColor } from '@/types/results';
+import { ConfidenceLevel } from '@/lib/harmony-scoring';
 
 // ============================================
 // QUALITY TIER BADGES (Harmony Style) - Strengths
@@ -20,23 +21,23 @@ interface QualityConfig {
 const QUALITY_CONFIGS: Record<QualityTier, QualityConfig> = {
   ideal: {
     label: 'Ideal',
-    textColor: 'rgb(8, 145, 178)',    // cyan-600
-    bgColor: 'rgb(207, 250, 254)',    // cyan-100
+    textColor: 'rgb(34, 211, 238)',    // cyan-400
+    bgColor: 'rgba(34, 211, 238, 0.15)', // cyan-400/15
   },
   excellent: {
     label: 'Excellent',
-    textColor: 'rgb(4, 120, 87)',     // emerald-700
-    bgColor: 'rgb(209, 250, 229)',    // emerald-100
+    textColor: 'rgb(52, 211, 153)',    // emerald-400
+    bgColor: 'rgba(52, 211, 153, 0.15)', // emerald-400/15
   },
   good: {
     label: 'Good',
-    textColor: 'rgb(21, 128, 61)',    // green-700
-    bgColor: 'rgb(220, 252, 231)',    // green-100
+    textColor: 'rgb(74, 222, 128)',    // green-400
+    bgColor: 'rgba(74, 222, 128, 0.15)', // green-400/15
   },
   below_average: {
     label: 'Average',
-    textColor: 'rgb(113, 113, 122)',  // gray-500
-    bgColor: 'rgb(244, 244, 245)',    // gray-100
+    textColor: 'rgb(163, 163, 163)',   // neutral-400
+    bgColor: 'rgba(163, 163, 163, 0.15)', // neutral-400/15
   },
 };
 
@@ -72,26 +73,26 @@ interface SeverityConfig {
 const SEVERITY_CONFIGS: Record<SeverityLevel, SeverityConfig> = {
   extremely_severe: {
     label: 'extremely severe',
-    textColor: 'rgb(127, 29, 29)',     // red-900
-    bgColor: 'rgb(254, 202, 202)',     // red-200
+    textColor: 'rgb(248, 113, 113)',   // red-400
+    bgColor: 'rgba(248, 113, 113, 0.15)', // red-400/15
   },
   severe: {
     label: 'severe',
-    textColor: 'rgb(185, 28, 28)',     // red-700
-    bgColor: 'rgb(254, 226, 226)',     // red-50
-    borderColor: 'rgb(254, 202, 202)', // red-200
+    textColor: 'rgb(248, 113, 113)',   // red-400
+    bgColor: 'rgba(248, 113, 113, 0.1)', // red-400/10
+    borderColor: 'rgba(248, 113, 113, 0.3)', // red-400/30
   },
   moderate: {
     label: 'moderate',
-    textColor: 'rgb(194, 65, 12)',     // orange-700
-    bgColor: 'rgb(255, 237, 213)',     // orange-50
-    borderColor: 'rgb(254, 215, 170)', // orange-200
+    textColor: 'rgb(251, 146, 60)',    // orange-400
+    bgColor: 'rgba(251, 146, 60, 0.1)', // orange-400/10
+    borderColor: 'rgba(251, 146, 60, 0.3)', // orange-400/30
   },
   minor: {
     label: 'minor',
-    textColor: 'rgb(161, 98, 7)',      // yellow-700
-    bgColor: 'rgb(254, 249, 195)',     // yellow-50
-    borderColor: 'rgb(254, 240, 138)', // yellow-200
+    textColor: 'rgb(250, 204, 21)',    // yellow-400
+    bgColor: 'rgba(250, 204, 21, 0.1)', // yellow-400/10
+    borderColor: 'rgba(250, 204, 21, 0.3)', // yellow-400/30
   },
 };
 
@@ -127,6 +128,66 @@ function SeverityBadge({ severity }: { severity: SeverityLevel }) {
 }
 
 // ============================================
+// CONFIDENCE BADGES - Flaw Detection Certainty
+// ============================================
+
+interface ConfidenceConfig {
+  label: string;
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
+  icon: string;  // Unicode checkmark/question icons
+}
+
+const CONFIDENCE_CONFIGS: Record<ConfidenceLevel, ConfidenceConfig> = {
+  confirmed: {
+    label: 'Confirmed',
+    textColor: 'rgb(74, 222, 128)',     // green-400
+    bgColor: 'rgba(74, 222, 128, 0.1)', // green-400/10
+    borderColor: 'rgba(74, 222, 128, 0.3)', // green-400/30
+    icon: '\u2713',  // checkmark
+  },
+  likely: {
+    label: 'Likely',
+    textColor: 'rgb(96, 165, 250)',     // blue-400
+    bgColor: 'rgba(96, 165, 250, 0.1)', // blue-400/10
+    borderColor: 'rgba(96, 165, 250, 0.3)', // blue-400/30
+    icon: '\u2248',  // approximately equal
+  },
+  possible: {
+    label: 'Possible',
+    textColor: 'rgb(163, 163, 163)',    // neutral-400
+    bgColor: 'rgba(163, 163, 163, 0.1)', // neutral-400/10
+    borderColor: 'rgba(163, 163, 163, 0.3)', // neutral-400/30
+    icon: '?',
+  },
+};
+
+interface ConfidenceBadgeProps {
+  confidence: ConfidenceLevel;
+  showIcon?: boolean;
+}
+
+export function ConfidenceBadge({ confidence, showIcon = true }: ConfidenceBadgeProps) {
+  const config = CONFIDENCE_CONFIGS[confidence] || CONFIDENCE_CONFIGS.possible;
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] font-medium tracking-wide whitespace-nowrap"
+      style={{
+        color: config.textColor,
+        backgroundColor: config.bgColor,
+        border: `1px solid ${config.borderColor}`,
+      }}
+      title={`Detection confidence: ${config.label}`}
+    >
+      {showIcon && <span className="text-[8px] sm:text-[9px]">{config.icon}</span>}
+      {config.label}
+    </span>
+  );
+}
+
+// ============================================
 // PROCEDURE PHASE BADGE
 // ============================================
 
@@ -139,20 +200,20 @@ interface PhaseConfig {
 
 const PHASE_CONFIGS: Record<ProcedurePhase, PhaseConfig> = {
   Foundational: {
-    textColor: 'rgb(4, 120, 87)',     // emerald-700
-    bgColor: 'rgb(209, 250, 229)',    // emerald-50
+    textColor: 'rgb(52, 211, 153)',   // emerald-400
+    bgColor: 'rgba(52, 211, 153, 0.15)', // emerald-400/15
   },
   'Non-Invasive': {
-    textColor: 'rgb(29, 78, 216)',    // blue-700
-    bgColor: 'rgb(219, 234, 254)',    // blue-50
+    textColor: 'rgb(96, 165, 250)',   // blue-400
+    bgColor: 'rgba(96, 165, 250, 0.15)', // blue-400/15
   },
   'Minimally Invasive': {
-    textColor: 'rgb(109, 40, 217)',   // violet-700
-    bgColor: 'rgb(237, 233, 254)',    // violet-50
+    textColor: 'rgb(167, 139, 250)',  // violet-400
+    bgColor: 'rgba(167, 139, 250, 0.15)', // violet-400/15
   },
   Surgical: {
-    textColor: 'rgb(126, 34, 206)',   // purple-700
-    bgColor: 'rgb(243, 232, 255)',    // purple-50
+    textColor: 'rgb(192, 132, 252)',  // purple-400
+    bgColor: 'rgba(192, 132, 252, 0.15)', // purple-400/15
   },
 };
 
@@ -178,30 +239,32 @@ function PhaseBadge({ phase }: { phase: ProcedurePhase }) {
 
 interface RatioItemProps {
   name: string;
-  score: number;
+  score: number | string;
   onClick?: () => void;
   animationDelay?: number;
 }
 
 function RatioItem({ name, score, onClick, animationDelay = 0 }: RatioItemProps) {
+  const numericScore = typeof score === 'number' ? score : 0;
+
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-md bg-white border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-sm text-left cursor-pointer animate-fade-in"
+      className="w-full flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-md bg-neutral-800/50 border border-neutral-700/50 transition-all duration-200 hover:border-neutral-600 hover:bg-neutral-800 text-left cursor-pointer animate-fade-in"
       style={{
         animationDuration: '0.2s',
         animationDelay: `${animationDelay}s`,
       }}
     >
-      <span className="text-xs sm:text-sm text-gray-700 font-medium">{name}</span>
+      <span className="text-xs sm:text-sm text-neutral-300 font-medium">{name}</span>
       <div className="flex items-baseline gap-0.5 sm:gap-1">
         <span
           className="text-xs sm:text-sm font-semibold"
-          style={{ color: getScoreColor(score) }}
+          style={{ color: typeof score === 'string' ? '#a3a3a3' : getScoreColor(numericScore) }}
         >
-          {score.toFixed(1)}
+          {typeof score === 'number' ? score.toFixed(1) : score}
         </span>
-        <span className="text-[10px] sm:text-xs text-gray-500">/10</span>
+        <span className="text-[10px] sm:text-xs text-neutral-500">/10</span>
       </div>
     </button>
   );
@@ -221,16 +284,16 @@ interface PlanItemProps {
 function PlanItem({ name, phase, inPlan = true, animationDelay = 0 }: PlanItemProps) {
   return (
     <div
-      className="flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-md bg-white border border-gray-200 animate-fade-in"
+      className="flex items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-md bg-neutral-800/50 border border-neutral-700/50 animate-fade-in"
       style={{
         animationDuration: '0.2s',
         animationDelay: `${animationDelay}s`,
       }}
     >
-      <span className="text-xs sm:text-sm text-gray-700 font-medium">{name}</span>
+      <span className="text-xs sm:text-sm text-neutral-300 font-medium">{name}</span>
       <div className="flex items-center gap-2">
         {inPlan && (
-          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-medium">
+          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-emerald-400/15 text-emerald-400 font-medium">
             In Plan
           </span>
         )}
@@ -260,27 +323,28 @@ export function StrengthCard({
   animationDelay = 0,
 }: StrengthCardProps) {
   // Get score color for the average score
-  const scoreColor = getScoreColor(strength.avgScore);
+  const numericScore = typeof strength.avgScore === 'number' ? strength.avgScore : 0;
+  const scoreColor = getScoreColor(numericScore);
 
   return (
     <div
-      className="rounded-lg bg-white border border-gray-200 overflow-hidden transition-all duration-200 hover:border-gray-300 hover:shadow-sm animate-fade-in"
+      className="rounded-lg bg-neutral-900 border border-neutral-800/60 overflow-hidden transition-all duration-200 hover:border-neutral-700 hover:shadow-lg shadow-black/10 animate-fade-in"
       style={{ animationDelay: `${animationDelay}s` }}
     >
       {/* Header */}
       <button
         onClick={onToggle}
-        className="w-full p-4 sm:p-6 hover:bg-gray-50/50 transition-colors duration-200 text-left"
+        className="w-full p-4 sm:p-6 hover:bg-neutral-800/50 transition-colors duration-200 text-left"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
           {/* Left: Badge + Content */}
           <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
             <QualityBadge quality={strength.qualityLevel} />
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 sm:mb-1.5 leading-snug">
+              <h4 className="text-sm sm:text-base font-semibold text-white mb-1 sm:mb-1.5 leading-snug">
                 {strength.strengthName}
               </h4>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 {strength.summary}
               </p>
             </div>
@@ -293,15 +357,15 @@ export function StrengthCard({
                 className="text-lg sm:text-xl font-semibold tracking-tight transition-colors duration-200"
                 style={{ color: scoreColor }}
               >
-                {strength.avgScore.toFixed(2)}
+                {typeof strength.avgScore === 'number' ? strength.avgScore.toFixed(2) : strength.avgScore}
               </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 font-medium mt-0.5">avg /10</div>
+              <div className="text-[10px] sm:text-xs text-neutral-500 font-medium mt-0.5">avg /10</div>
             </div>
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-neutral-500" />
             </motion.div>
           </div>
         </div>
@@ -317,8 +381,8 @@ export function StrengthCard({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="border-t border-gray-200 bg-gray-50/50 px-4 sm:px-6 py-3 sm:py-4">
-              <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">
+            <div className="border-t border-neutral-800 bg-neutral-900/50 px-4 sm:px-6 py-3 sm:py-4">
+              <div className="text-[10px] sm:text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 sm:mb-3">
                 Contributing Ratios
               </div>
               <div className="space-y-2">
@@ -382,23 +446,26 @@ export function FlawCard({
 
   return (
     <div
-      className="rounded-lg bg-white border border-gray-200 overflow-hidden transition-all duration-200 hover:border-gray-300 hover:shadow-sm animate-fade-in"
+      className="rounded-lg bg-neutral-900 border border-neutral-800/60 overflow-hidden transition-all duration-200 hover:border-neutral-700 hover:shadow-lg shadow-black/10 animate-fade-in"
       style={{ animationDelay: `${animationDelay}s` }}
     >
       {/* Header */}
       <button
         onClick={onToggle}
-        className="w-full p-4 sm:p-6 hover:bg-gray-50/50 transition-colors duration-200 text-left"
+        className="w-full p-4 sm:p-6 hover:bg-neutral-800/50 transition-colors duration-200 text-left"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-          {/* Left: Badge + Content */}
+          {/* Left: Badges + Content */}
           <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-            <SeverityBadge severity={severity} />
+            <div className="flex flex-col gap-1">
+              <SeverityBadge severity={severity} />
+              {flaw.confidence && <ConfidenceBadge confidence={flaw.confidence} />}
+            </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 sm:mb-1.5 leading-snug">
+              <h4 className="text-sm sm:text-base font-semibold text-white mb-1 sm:mb-1.5 leading-snug">
                 {flaw.flawName}
               </h4>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 {flaw.summary}
               </p>
             </div>
@@ -407,12 +474,12 @@ export function FlawCard({
           {/* Right: Points impact + Chevron */}
           <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-shrink-0 sm:flex-col sm:items-end sm:gap-1.5">
             <div className="text-right space-y-1">
-              <div className="text-lg sm:text-xl font-semibold tracking-tight text-red-600">
+              <div className="text-lg sm:text-xl font-semibold tracking-tight text-red-400">
                 -{flaw.harmonyPercentageLost.toFixed(2)}
               </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 font-medium">points</div>
+              <div className="text-[10px] sm:text-xs text-neutral-500 font-medium">points</div>
               {flaw.rollingHarmonyPercentageLost !== undefined && (
-                <div className="text-[10px] text-gray-400 font-medium pt-0.5 border-t border-gray-200 mt-1 pt-1">
+                <div className="text-[10px] text-neutral-500 font-medium pt-0.5 border-t border-neutral-800 mt-1 pt-1">
                   Rolling: -{flaw.rollingHarmonyPercentageLost.toFixed(2)}
                 </div>
               )}
@@ -421,7 +488,7 @@ export function FlawCard({
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-neutral-500" />
             </motion.div>
           </div>
         </div>
@@ -438,8 +505,8 @@ export function FlawCard({
             className="overflow-hidden"
           >
             {/* Affected Ratios Section */}
-            <div className="border-t border-gray-200 bg-gray-50/50 px-4 sm:px-6 py-3 sm:py-4">
-              <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">
+            <div className="border-t border-neutral-800 bg-neutral-900/50 px-4 sm:px-6 py-3 sm:py-4">
+              <div className="text-[10px] sm:text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 sm:mb-3">
                 Affected Ratios
               </div>
               <div className="space-y-2">
@@ -457,10 +524,10 @@ export function FlawCard({
 
             {/* Your Plan Section (if there are matched recommendations) */}
             {matchedRecommendations.length > 0 && (
-              <div className="border-t border-gray-200 bg-emerald-50/30 px-4 sm:px-6 py-3 sm:py-4">
+              <div className="border-t border-neutral-800 bg-emerald-400/5 px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
-                  <Sparkles className="w-3 h-3 text-emerald-600" />
-                  <span className="text-[10px] sm:text-xs font-medium text-emerald-700 uppercase tracking-wider">
+                  <Sparkles className="w-3 h-3 text-emerald-400" />
+                  <span className="text-[10px] sm:text-xs font-medium text-emerald-400 uppercase tracking-wider">
                     Your Plan
                   </span>
                 </div>
@@ -506,9 +573,9 @@ export function StrengthsSection({
   const hasMore = strengths.length > maxVisible;
 
   return (
-    <div className="rounded-lg bg-white border border-gray-200 p-4 sm:p-6 lg:p-8">
+    <div className="rounded-xl bg-neutral-900/80 border border-neutral-800/50 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h3 className="text-base sm:text-lg font-semibold tracking-tight text-gray-900">
+        <h3 className="text-base sm:text-lg font-semibold tracking-tight text-white">
           Key Strengths
         </h3>
       </div>
@@ -529,12 +596,12 @@ export function StrengthsSection({
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full mt-6 py-3 rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 text-sm font-medium text-gray-900"
+          className="w-full mt-6 py-3 rounded-lg bg-neutral-800 border border-neutral-700/50 hover:border-neutral-600 hover:bg-neutral-700 transition-all duration-200 text-sm font-medium text-white"
         >
           <span className="flex items-center justify-center gap-2">
             <span>{showAll ? 'Show Less' : `Show All ${strengths.length} Strengths`}</span>
             <motion.div animate={{ rotate: showAll ? 180 : 0 }} transition={{ duration: 0.2 }}>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-neutral-400" />
             </motion.div>
           </span>
         </button>
@@ -567,9 +634,9 @@ export function FlawsSection({
   const hasMore = flaws.length > maxVisible;
 
   return (
-    <div className="rounded-lg bg-white border border-gray-200 p-4 sm:p-6 lg:p-8">
+    <div className="rounded-xl bg-neutral-900/80 border border-neutral-800/50 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h3 className="text-base sm:text-lg font-semibold tracking-tight text-gray-900">
+        <h3 className="text-base sm:text-lg font-semibold tracking-tight text-white">
           Areas of Improvement
         </h3>
       </div>
@@ -591,12 +658,12 @@ export function FlawsSection({
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full mt-6 py-3 rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 text-sm font-medium text-gray-900"
+          className="w-full mt-6 py-3 rounded-lg bg-neutral-800 border border-neutral-700/50 hover:border-neutral-600 hover:bg-neutral-700 transition-all duration-200 text-sm font-medium text-white"
         >
           <span className="flex items-center justify-center gap-2">
             <span>{showAll ? 'Show Less' : `Show All ${flaws.length} Areas`}</span>
             <motion.div animate={{ rotate: showAll ? 180 : 0 }} transition={{ duration: 0.2 }}>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-neutral-400" />
             </motion.div>
           </span>
         </button>
@@ -618,10 +685,10 @@ export function CompactStrengthBadge({ strength, onClick }: CompactStrengthBadge
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-2 py-1 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+      className="inline-flex items-center gap-1.5 px-2 py-1 bg-green-400/10 border border-green-400/30 rounded-lg hover:bg-green-400/20 transition-colors"
     >
-      <CheckCircle size={12} className="text-green-600" />
-      <span className="text-xs text-green-700">{strength.strengthName}</span>
+      <CheckCircle size={12} className="text-green-400" />
+      <span className="text-xs text-green-400">{strength.strengthName}</span>
     </button>
   );
 }
@@ -651,6 +718,6 @@ export function CompactFlawBadge({ flaw, onClick }: CompactFlawBadgeProps) {
 }
 
 // Export utility functions
-export { getSeverityFromImpact, getSeverityFromScore, SEVERITY_CONFIGS };
+export { getSeverityFromImpact, getSeverityFromScore, SEVERITY_CONFIGS, CONFIDENCE_CONFIGS };
 export { SeverityBadge };
 export type { SeverityLevel };

@@ -18,14 +18,18 @@ export interface ShareResult {
 /**
  * Generate shareable text for results
  */
-export function generateShareText(score: number, frontScore?: number, sideScore?: number): string {
-  const emoji = score >= 8 ? '🔥' : score >= 6 ? '✨' : '📊';
+export function generateShareText(score: number | string, frontScore?: number | string, sideScore?: number | string): string {
+  const numericScore = typeof score === 'number' ? score : 0;
+  const emoji = numericScore >= 8 ? '🔥' : numericScore >= 6 ? '✨' : '📊';
+  const scoreDisplay = typeof score === 'number' ? score.toFixed(1) : score;
 
-  let text = `${emoji} My LOOKSMAXX Facial Harmony Score: ${score.toFixed(1)}/10`;
+  let text = `${emoji} My LOOKSMAXX Facial Harmony Score: ${scoreDisplay}/10`;
 
   if (frontScore !== undefined && sideScore !== undefined) {
-    text += `\n• Front Profile: ${frontScore.toFixed(1)}/10`;
-    text += `\n• Side Profile: ${sideScore.toFixed(1)}/10`;
+    const frontDisplay = typeof frontScore === 'number' ? frontScore.toFixed(1) : frontScore;
+    const sideDisplay = typeof sideScore === 'number' ? sideScore.toFixed(1) : sideScore;
+    text += `\n• Front Profile: ${frontDisplay}/10`;
+    text += `\n• Side Profile: ${sideDisplay}/10`;
   }
 
   return text;

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Scale, ChevronUp, ChevronDown } from 'lucide-react';
 import { useWeight } from '@/contexts/WeightContext';
+import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress';
 
 // Convert kg to lbs
 function kgToLbs(kg: number): number {
@@ -116,10 +117,15 @@ export default function WeightPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black px-4">
+      {/* Global Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 pt-4 px-4 bg-gradient-to-b from-black via-black/80 to-transparent pb-8 z-10">
+        <OnboardingProgress currentStep="weight" />
+      </div>
+
       {/* Back button */}
       <button
         onClick={handleBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"
+        className="fixed top-16 left-6 flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm z-20"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -129,8 +135,8 @@ export default function WeightPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-center mb-6">
-            <div className="h-12 w-12 rounded-xl bg-[#00f3ff]/20 flex items-center justify-center">
-              <Scale className="w-6 h-6 text-[#00f3ff]" />
+            <div className="h-12 w-12 rounded-xl bg-cyan-400/20 flex items-center justify-center">
+              <Scale className="w-6 h-6 text-cyan-400" />
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center text-white mb-2">
@@ -148,7 +154,7 @@ export default function WeightPage() {
               onClick={() => setInputMode('imperial')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 inputMode === 'imperial'
-                  ? 'bg-[#00f3ff] text-black'
+                  ? 'bg-cyan-400 text-black'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -158,7 +164,7 @@ export default function WeightPage() {
               onClick={() => setInputMode('metric')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 inputMode === 'metric'
-                  ? 'bg-[#00f3ff] text-black'
+                  ? 'bg-cyan-400 text-black'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -192,7 +198,28 @@ export default function WeightPage() {
           )}
         </div>
 
-        {/* Continue Button */}
+        {/* Continue Button - Desktop */}
+        <button
+          onClick={handleContinue}
+          disabled={!weightKg}
+          className={`
+            hidden md:block w-full h-12 rounded-xl font-medium text-sm
+            transition-all duration-200
+            ${weightKg
+              ? 'bg-cyan-400 text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] cursor-pointer'
+              : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+            }
+          `}
+        >
+          Continue
+        </button>
+
+        {/* Spacer for mobile bottom CTA */}
+        <div className="h-24 md:hidden" />
+      </div>
+
+      {/* Fixed Bottom CTA - Mobile Only */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent md:hidden z-30">
         <button
           onClick={handleContinue}
           disabled={!weightKg}
@@ -200,7 +227,7 @@ export default function WeightPage() {
             w-full h-12 rounded-xl font-medium text-sm
             transition-all duration-200
             ${weightKg
-              ? 'bg-[#00f3ff] text-black hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] cursor-pointer'
+              ? 'bg-cyan-400 text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] cursor-pointer'
               : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
             }
           `}

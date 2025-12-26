@@ -112,6 +112,11 @@ export interface ClassificationInput {
   hollowCheeks?: number;           // 0-10 score
   bodyType?: 'ectomorphic' | 'ecto-mesomorphic' | 'mesomorphic' | 'endo-mesomorphic' | 'meso-endomorphic';
   frameSize?: 'small' | 'medium' | 'large' | 'very-large';
+
+  // Claude Vision data
+  skinClarity?: number;            // 0-10
+  hairlineNW?: number;             // 0-7
+  teethAlignment?: string;         // 'aligned'|'minor-issues'|'crooked'
 }
 
 // ============================================
@@ -123,7 +128,8 @@ export interface ClassificationInput {
  */
 function getMetricValue(ratios: Ratio[], metricId: string): number | undefined {
   const metric = ratios.find((r) => r.id === metricId || r.id.toLowerCase() === metricId.toLowerCase());
-  return metric?.value;
+  if (!metric) return undefined;
+  return typeof metric.value === 'number' ? metric.value : undefined;
 }
 
 /**
@@ -138,21 +144,21 @@ export function ratiosToClassificationInput(
   return {
     // Front metrics
     gonialAngle: getMetricValue(frontRatios, 'jawFrontalAngle') ||
-                 getMetricValue(sideRatios, 'gonialAngle'),
+      getMetricValue(sideRatios, 'gonialAngle'),
     fwhr: getMetricValue(frontRatios, 'faceWidthToHeight') ||
-          getMetricValue(frontRatios, 'totalFacialWidthToHeight'),
+      getMetricValue(frontRatios, 'totalFacialWidthToHeight'),
     lateralCanthalTilt: getMetricValue(frontRatios, 'lateralCanthalTilt'),
     cheekboneHeight: getMetricValue(frontRatios, 'cheekboneHeight'),
     browRidgeProminence: getMetricValue(frontRatios, 'eyebrowLowSetedness'),
     jawWidthRatio: getMetricValue(frontRatios, 'jawWidthRatio') ||
-                   getMetricValue(frontRatios, 'bigonialWidth'),
+      getMetricValue(frontRatios, 'bigonialWidth'),
     midfaceRatio: getMetricValue(frontRatios, 'midfaceRatio'),
 
     // Side metrics
     nasofrontalAngle: getMetricValue(sideRatios, 'nasofrontalAngle'),
     gonialAngleSide: getMetricValue(sideRatios, 'gonialAngle'),
     facialConvexity: getMetricValue(sideRatios, 'facialConvexityGlabella') ||
-                     getMetricValue(sideRatios, 'facialConvexityNasion'),
+      getMetricValue(sideRatios, 'facialConvexityNasion'),
     chinProjection: getMetricValue(sideRatios, 'chinProjection'),
 
     // User data
@@ -300,6 +306,24 @@ function scorePrettyboy(input: ClassificationInput): ArchetypeScoreResult {
     matchedTraits.push('Balanced dimorphism');
   }
 
+  // Vision bonus: Clear skin is essential for Prettyboy
+  if (input.skinClarity !== undefined && input.skinClarity >= 8) {
+    score += 10;
+    matchedTraits.push('Flawless skin');
+  }
+
+  // Vision bonus: Good hairline
+  if (input.hairlineNW !== undefined && input.hairlineNW <= 1) {
+    score += 5;
+    matchedTraits.push('Perfect hairline');
+  }
+
+  // Vision bonus: Aligned teeth
+  if (input.teethAlignment === 'aligned' || input.teethAlignment === 'perfect') {
+    score += 5;
+    matchedTraits.push('Perfect dental alignment');
+  }
+
   return {
     category: 'Prettyboy',
     score: Math.min(100, score),
@@ -408,6 +432,12 @@ function scoreChad(input: ClassificationInput): ArchetypeScoreResult {
     matchedTraits.push('Hollow cheeks');
   }
 
+  // Vision bonus: Masculine hairline
+  if (input.hairlineNW !== undefined && input.hairlineNW <= 1) {
+    score += 5;
+    matchedTraits.push('Elite hairline');
+  }
+
   return {
     category: 'Chad',
     score: Math.min(100, score),
@@ -455,6 +485,12 @@ function scoreHypermasculine(input: ClassificationInput): ArchetypeScoreResult {
   if (dimorphism === 'very-high' || dimorphism === 'high') {
     score += 15;
     matchedTraits.push('Very high dimorphism');
+  }
+
+  // Vision bonus: Strong hairline
+  if (input.hairlineNW !== undefined && input.hairlineNW <= 2) {
+    score += 5;
+    matchedTraits.push('Robust hairline');
   }
 
   return {
@@ -674,17 +710,25 @@ export function classifyArchetype(input: ClassificationInput): ArchetypeClassifi
     },
     secondary: secondarySub
       ? {
-          category: secondaryResult.category,
-          subArchetype: secondarySub.name,
-          confidence: secondaryResult.confidence,
-          traits: secondaryResult.matchedTraits,
-        }
+        category: secondaryResult.category,
+        subArchetype: secondarySub.name,
+        confidence: secondaryResult.confidence,
+        traits: secondaryResult.matchedTraits,
+      }
       : null,
     allScores: scores,
     dimorphismLevel,
     styleGuide: primarySub.style,
     transitionPath,
   };
+}
+
+// Vision data structure from Claude Vision API
+interface VisionData {
+  skin?: { clarity?: number };
+  hair?: { hairline_nw?: number };
+  teeth?: { alignment?: string };
+  facial_features?: { hollow_cheeks?: number };
 }
 
 /**
@@ -694,9 +738,19 @@ export function classifyFromRatios(
   frontRatios: Ratio[],
   sideRatios: Ratio[],
   gender: Gender,
-  ethnicity: Ethnicity
+  ethnicity: Ethnicity,
+  vision?: VisionData
 ): ArchetypeClassification {
   const input = ratiosToClassificationInput(frontRatios, sideRatios, gender, ethnicity);
+
+  // Add vision data if available
+  if (vision) {
+    input.skinClarity = vision.skin?.clarity;
+    input.hairlineNW = vision.hair?.hairline_nw;
+    input.teethAlignment = vision.teeth?.alignment;
+    input.hollowCheeks = vision.facial_features?.hollow_cheeks;
+  }
+
   return classifyArchetype(input);
 }
 

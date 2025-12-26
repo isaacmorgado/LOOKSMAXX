@@ -729,3 +729,219 @@ export function getPlanSummary(plan: RecommendationPlan): {
     estimatedTotalImprovement: plan.potentialImprovement,
   };
 }
+
+// ============================================
+// TREATMENT EXCLUSIVITY & CONFLICT DETECTION
+// ============================================
+
+import {
+  treatmentsConflict,
+  getConflictingTreatments,
+  getTreatmentExclusivity,
+  CONFLICT_REASONS,
+} from '../advice-engine';
+import type { ExclusiveCategory } from './types';
+
+/**
+ * Conflict information for a pair of treatments
+ */
+export interface TreatmentConflict {
+  treatment1Id: string;
+  treatment1Name: string;
+  treatment2Id: string;
+  treatment2Name: string;
+  reason: string;
+  category?: ExclusiveCategory;
+}
+
+/**
+ * Find all conflicts in a list of selected treatments
+ */
+export function findTreatmentConflicts(
+  selectedTreatmentIds: string[],
+  treatmentNameMap?: Record<string, string>
+): TreatmentConflict[] {
+  const conflicts: TreatmentConflict[] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < selectedTreatmentIds.length; i++) {
+    for (let j = i + 1; j < selectedTreatmentIds.length; j++) {
+      const id1 = selectedTreatmentIds[i];
+      const id2 = selectedTreatmentIds[j];
+
+      // Create unique key for this pair
+      const pairKey = [id1, id2].sort().join(':');
+      if (seen.has(pairKey)) continue;
+      seen.add(pairKey);
+
+      if (treatmentsConflict(id1, id2)) {
+        const exclusivity1 = getTreatmentExclusivity(id1);
+        const exclusivity2 = getTreatmentExclusivity(id2);
+        const category = exclusivity1?.exclusiveCategory || exclusivity2?.exclusiveCategory;
+        const reason = category
+          ? CONFLICT_REASONS[category]
+          : 'These treatments are mutually exclusive and should not be combined.';
+
+        conflicts.push({
+          treatment1Id: id1,
+          treatment1Name: treatmentNameMap?.[id1] || id1,
+          treatment2Id: id2,
+          treatment2Name: treatmentNameMap?.[id2] || id2,
+          reason,
+          category,
+        });
+      }
+    }
+  }
+
+  return conflicts;
+}
+
+/**
+ * Filter recommendations to remove conflicting treatments
+ * Keeps the treatment with higher relevance score when conflicts occur
+ */
+export function filterConflictingRecommendations(
+  recommendations: TreatmentRecommendation[]
+): {
+  filtered: TreatmentRecommendation[];
+  removed: TreatmentRecommendation[];
+  conflicts: TreatmentConflict[];
+} {
+  // Sort by relevance score (highest first)
+  const sorted = [...recommendations].sort((a, b) => b.relevanceScore - a.relevanceScore);
+  const filtered: TreatmentRecommendation[] = [];
+  const removed: TreatmentRecommendation[] = [];
+  const conflicts: TreatmentConflict[] = [];
+  const selectedIds = new Set<string>();
+
+  for (const rec of sorted) {
+    const treatmentId = rec.treatment.id;
+    const conflictingIds = getConflictingTreatments(treatmentId);
+
+    // Check if any already-selected treatment conflicts with this one
+    let hasConflict = false;
+    let conflictingSelectedId: string | null = null;
+
+    const selectedIdsArray = Array.from(selectedIds);
+    for (const selectedId of selectedIdsArray) {
+      if (conflictingIds.includes(selectedId)) {
+        hasConflict = true;
+        conflictingSelectedId = selectedId;
+        break;
+      }
+    }
+
+    if (hasConflict && conflictingSelectedId) {
+      // Record the conflict
+      const exclusivity = getTreatmentExclusivity(treatmentId);
+      const category = exclusivity?.exclusiveCategory;
+      const reason = category
+        ? CONFLICT_REASONS[category]
+        : 'These treatments are mutually exclusive.';
+
+      // Find the conflicting recommendation for name lookup
+      const conflictingRec = filtered.find(r => r.treatment.id === conflictingSelectedId);
+
+      conflicts.push({
+        treatment1Id: conflictingSelectedId,
+        treatment1Name: conflictingRec?.treatment.name || conflictingSelectedId,
+        treatment2Id: treatmentId,
+        treatment2Name: rec.treatment.name,
+        reason,
+        category,
+      });
+
+      removed.push(rec);
+    } else {
+      filtered.push(rec);
+      selectedIds.add(treatmentId);
+    }
+  }
+
+  return { filtered, removed, conflicts };
+}
+
+/**
+ * Validate a single treatment selection against existing selections
+ */
+export function validateTreatmentSelection(
+  newTreatmentId: string,
+  existingTreatmentIds: string[],
+  treatmentNameMap?: Record<string, string>
+): {
+  isValid: boolean;
+  conflicts: TreatmentConflict[];
+} {
+  const conflicts: TreatmentConflict[] = [];
+  const conflictingIds = getConflictingTreatments(newTreatmentId);
+
+  for (const existingId of existingTreatmentIds) {
+    if (conflictingIds.includes(existingId)) {
+      const exclusivity = getTreatmentExclusivity(newTreatmentId);
+      const category = exclusivity?.exclusiveCategory;
+      const reason = category
+        ? CONFLICT_REASONS[category]
+        : 'These treatments are mutually exclusive.';
+
+      conflicts.push({
+        treatment1Id: existingId,
+        treatment1Name: treatmentNameMap?.[existingId] || existingId,
+        treatment2Id: newTreatmentId,
+        treatment2Name: treatmentNameMap?.[newTreatmentId] || newTreatmentId,
+        reason,
+        category,
+      });
+    }
+  }
+
+  return {
+    isValid: conflicts.length === 0,
+    conflicts,
+  };
+}
+
+/**
+ * Get a recommended alternative when a treatment conflicts
+ */
+export function getAlternativeTreatments(
+  conflictingTreatmentId: string,
+  existingTreatmentIds: string[]
+): string[] {
+  const exclusivity = getTreatmentExclusivity(conflictingTreatmentId);
+  if (!exclusivity?.exclusiveCategory) {
+    return [];
+  }
+
+  // Find all treatments in the same category that don't conflict with existing selections
+  const alternatives: string[] = [];
+  const conflictingIds = new Set(existingTreatmentIds);
+
+  // Look through all treatments for same category that aren't already conflicting
+  for (const treatment of ALL_TREATMENTS) {
+    if (treatment.id === conflictingTreatmentId) continue;
+    if (conflictingIds.has(treatment.id)) continue;
+
+    // Check if this treatment could address similar issues
+    const treatmentExclusivity = getTreatmentExclusivity(treatment.id);
+
+    // Not in same exclusive category = potential alternative
+    if (
+      !treatmentExclusivity?.exclusiveCategory ||
+      treatmentExclusivity.exclusiveCategory !== exclusivity.exclusiveCategory
+    ) {
+      // Check if it targets similar metrics
+      const originalTreatment = ALL_TREATMENTS.find(t => t.id === conflictingTreatmentId);
+      if (originalTreatment) {
+        const sharedMetrics = treatment.targetMetrics.filter(m =>
+          originalTreatment.targetMetrics.includes(m)
+        );
+        if (sharedMetrics.length > 0) {
+          alternatives.push(treatment.id);
+        }
+      }
+    }
+  }
+
+  return alternatives;
+}

@@ -42,15 +42,18 @@ export function MeasurementCard({
   isExpanded = false,
   onToggle,
 }: MeasurementCardProps) {
-  const scoreColor = getScoreColor(ratio.score);
+  // Handle string values for obfuscated data
+  const numericScore = typeof ratio.score === 'number' ? ratio.score : 0;
+  const numericValue = typeof ratio.value === 'number' ? ratio.value : 0; // Default to 0 for visualizations if obfuscated
+
+  const scoreColor = getScoreColor(numericScore);
   const severityIndicator = getSeverityIndicator(ratio.severity);
 
   return (
     <motion.div
       layout
-      className={`bg-neutral-900/80 border rounded-xl overflow-hidden transition-all ${
-        isExpanded ? 'border-cyan-500/50' : 'border-neutral-800 hover:border-neutral-700'
-      }`}
+      className={`bg-neutral-900/80 border rounded-xl overflow-hidden transition-all ${isExpanded ? 'border-cyan-500/50' : 'border-neutral-800 hover:border-neutral-700'
+        }`}
     >
       {/* Collapsed Header */}
       <button
@@ -62,12 +65,12 @@ export function MeasurementCard({
           <div
             className="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg"
             style={{
-              backgroundColor: `${scoreColor}15`,
-              color: scoreColor,
+              backgroundColor: typeof ratio.score === 'string' ? '#262626' : `${scoreColor}15`,
+              color: typeof ratio.score === 'string' ? '#a3a3a3' : scoreColor,
               border: severityIndicator.showBadge ? `2px solid ${severityIndicator.color}40` : 'none',
             }}
           >
-            {ratio.score.toFixed(1)}
+            {typeof ratio.score === 'number' ? ratio.score.toFixed(1) : ratio.score}
           </div>
           {/* Severity indicator dot for non-optimal metrics */}
           {severityIndicator.showBadge && (
@@ -91,7 +94,7 @@ export function MeasurementCard({
           </div>
           <div className="flex items-center gap-3">
             <span className="text-lg font-medium text-white">
-              {formatValue(ratio.value, ratio.unit)}
+              {typeof ratio.value === 'number' ? formatValue(ratio.value, ratio.unit) : ratio.value}
             </span>
             <span className="text-xs text-neutral-500">
               Ideal: {formatValue(ratio.idealMin, ratio.unit)} - {formatValue(ratio.idealMax, ratio.unit)}
@@ -100,12 +103,12 @@ export function MeasurementCard({
           {/* Compact range bar */}
           <div className="mt-2">
             <CompactIdealRangeBar
-              value={ratio.value}
+              value={numericValue}
               idealMin={ratio.idealMin}
               idealMax={ratio.idealMax}
               rangeMin={ratio.rangeMin}
               rangeMax={ratio.rangeMax}
-              score={ratio.score}
+              score={numericScore}
             />
           </div>
         </div>
@@ -126,12 +129,12 @@ export function MeasurementCard({
           {/* Full range visualization */}
           <div className="bg-neutral-800/50 rounded-lg p-4">
             <IdealRangeBar
-              value={ratio.value}
+              value={numericValue}
               idealMin={ratio.idealMin}
               idealMax={ratio.idealMax}
               rangeMin={ratio.rangeMin}
               rangeMax={ratio.rangeMax}
-              score={ratio.score}
+              score={numericScore}
               unit={ratio.unit}
             />
           </div>
@@ -196,7 +199,10 @@ interface CompactMeasurementCardProps {
 }
 
 export function CompactMeasurementCard({ ratio, onClick, showSeverity = true }: CompactMeasurementCardProps) {
-  const scoreColor = getScoreColor(ratio.score);
+  // Handle string values for obfuscated data
+  const numericScore = typeof ratio.score === 'number' ? ratio.score : 0;
+
+  const scoreColor = getScoreColor(numericScore);
   const severityIndicator = getSeverityIndicator(ratio.severity);
 
   return (
@@ -209,12 +215,12 @@ export function CompactMeasurementCard({ ratio, onClick, showSeverity = true }: 
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center font-bold"
           style={{
-            backgroundColor: `${scoreColor}15`,
-            color: scoreColor,
+            backgroundColor: typeof ratio.score === 'string' ? '#262626' : `${scoreColor}15`,
+            color: typeof ratio.score === 'string' ? '#a3a3a3' : scoreColor,
             border: severityIndicator.showBadge ? `1.5px solid ${severityIndicator.color}30` : 'none',
           }}
         >
-          {ratio.score.toFixed(1)}
+          {typeof ratio.score === 'number' ? ratio.score.toFixed(1) : ratio.score}
         </div>
         {/* Severity dot */}
         {showSeverity && severityIndicator.showBadge && (
@@ -241,7 +247,7 @@ export function CompactMeasurementCard({ ratio, onClick, showSeverity = true }: 
           )}
         </div>
         <p className="text-xs text-neutral-500">
-          {formatValue(ratio.value, ratio.unit)}
+          {typeof ratio.value === 'number' ? formatValue(ratio.value, ratio.unit) : ratio.value}
         </p>
       </div>
       <ChevronDown size={16} className="text-neutral-500 flex-shrink-0" />

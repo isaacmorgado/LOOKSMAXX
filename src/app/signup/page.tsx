@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { api } from "@/lib/api";
 
 function CheckIcon({ className }: { className?: string }) {
@@ -59,6 +60,8 @@ function SignupForm() {
   }>({ checking: false, valid: null, message: null });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Pre-fill referral code from URL if present
   useEffect(() => {
@@ -210,8 +213,8 @@ function SignupForm() {
         {/* Logo and Header */}
         <div className="mb-8">
           <div className="flex justify-center mb-6">
-            <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-sm font-bold">L</span>
+            <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-sm font-bold">L</span>
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center text-white mb-2">
@@ -230,7 +233,7 @@ function SignupForm() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
+              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-all"
               placeholder="you@example.com"
               required
             />
@@ -252,7 +255,7 @@ function SignupForm() {
                     ? "border-green-500"
                     : usernameStatus.available === false
                     ? "border-red-500"
-                    : "border-neutral-700 focus:border-[#00f3ff]"
+                    : "border-neutral-700 focus:border-cyan-400"
                 }`}
                 required
               />
@@ -283,37 +286,63 @@ function SignupForm() {
           {/* Password */}
           <div>
             <label className="block text-sm text-neutral-400 mb-1.5">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
-              placeholder="Minimum 8 characters"
-              required
-              minLength={8}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full h-11 px-3.5 pr-10 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-all"
+                placeholder="Minimum 8 characters"
+                required
+                minLength={8}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {formData.password && formData.password.length < 8 && (
-              <p className="text-xs text-neutral-500 mt-1">Minimum 8 characters</p>
+              <p className="text-xs text-red-400 mt-1">Password must be at least 8 characters</p>
+            )}
+            {formData.password && formData.password.length >= 8 && (
+              <p className="text-xs text-green-400 mt-1">Password strength: Good</p>
             )}
           </div>
 
           {/* Confirm Password */}
           <div>
             <label className="block text-sm text-neutral-400 mb-1.5">Confirm Password</label>
-            <input
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              className={`w-full h-11 px-3.5 text-sm bg-black border rounded-lg text-white focus:outline-none transition-all ${
-                formData.confirmPassword && formData.password !== formData.confirmPassword
-                  ? "border-red-500"
-                  : "border-neutral-700 focus:border-[#00f3ff]"
-              }`}
-              placeholder="Re-enter your password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className={`w-full h-11 px-3.5 pr-10 text-sm bg-black border rounded-lg text-white focus:outline-none transition-all ${
+                  formData.confirmPassword && formData.password !== formData.confirmPassword
+                    ? "border-red-500"
+                    : formData.confirmPassword && formData.password === formData.confirmPassword
+                    ? "border-green-500"
+                    : "border-neutral-700 focus:border-cyan-400"
+                }`}
+                placeholder="Re-enter your password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {formData.confirmPassword && formData.password !== formData.confirmPassword && (
               <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
+            )}
+            {formData.confirmPassword && formData.password === formData.confirmPassword && (
+              <p className="text-xs text-green-400 mt-1">Passwords match</p>
             )}
           </div>
 
@@ -333,7 +362,7 @@ function SignupForm() {
                     ? "border-green-500"
                     : referralStatus.valid === false
                     ? "border-red-500"
-                    : "border-neutral-700 focus:border-[#00f3ff]"
+                    : "border-neutral-700 focus:border-cyan-400"
                 }`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -364,14 +393,14 @@ function SignupForm() {
               id="terms"
               checked={formData.termsAccepted}
               onChange={(e) => setFormData({ ...formData, termsAccepted: e.target.checked })}
-              className="mt-0.5 w-4 h-4 rounded border-neutral-600 bg-black text-[#00f3ff] focus:ring-[#00f3ff] focus:ring-offset-black cursor-pointer"
+              className="mt-0.5 w-4 h-4 rounded border-neutral-600 bg-black text-cyan-400 focus:ring-cyan-400 focus:ring-offset-black cursor-pointer"
             />
             <label htmlFor="terms" className="text-sm text-neutral-400 cursor-pointer">
               I have read and agree to the{" "}
               <Link
                 href="/terms"
                 target="_blank"
-                className="text-[#00f3ff] hover:underline"
+                className="text-cyan-400 hover:underline"
               >
                 Terms & Conditions
               </Link>
@@ -391,7 +420,7 @@ function SignupForm() {
           <button
             type="submit"
             disabled={isLoading || !isFormValid}
-            className="w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+            className="w-full h-11 bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
@@ -406,7 +435,7 @@ function SignupForm() {
           {/* Login Link */}
           <p className="text-center text-neutral-500 text-sm pt-2">
             Already have an account?{" "}
-            <Link href="/login" className="text-[#00f3ff] hover:underline">
+            <Link href="/login" className="text-cyan-400 hover:underline">
               Log in
             </Link>
           </p>
@@ -420,7 +449,7 @@ export default function SignupPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <LoaderIcon className="w-8 h-8 text-[#00f3ff]" />
+        <LoaderIcon className="w-8 h-8 text-cyan-400" />
       </div>
     }>
       <SignupForm />

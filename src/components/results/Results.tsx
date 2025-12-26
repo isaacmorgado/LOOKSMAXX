@@ -12,6 +12,7 @@ import { OptionsTab } from './tabs/OptionsTab';
 import { SupportTab } from './tabs/SupportTab';
 import { LeaderboardTab } from './tabs/LeaderboardTab';
 import { CommunityTab } from './tabs/CommunityTab';
+import { ReferralsTab } from './tabs/ReferralsTab';
 import { PSLTab } from './tabs/PSLTab';
 import { ArchetypeTab } from './tabs/ArchetypeTab';
 import { api } from '@/lib/api';
@@ -24,7 +25,8 @@ export function Results() {
   // Auto-submit score to leaderboard on first render when score is available
   useEffect(() => {
     // Only submit once, when we have a valid score and haven't submitted yet
-    if (hasSubmittedRef.current || overallScore <= 0 || !leaderboard) return;
+    const numericScore = typeof overallScore === 'number' ? overallScore : 0;
+    if (hasSubmittedRef.current || numericScore <= 0 || !leaderboard) return;
 
     // Check if user is authenticated
     const token = api.getToken();
@@ -38,7 +40,7 @@ export function Results() {
     const topImprovements = flaws.slice(0, 3).map(f => f.flawName);
 
     // Submit to leaderboard
-    leaderboard.submitScore(overallScore, gender, {
+    leaderboard.submitScore(numericScore, gender, {
       ethnicity,
       facePhotoUrl: frontPhoto,
       topStrengths,
@@ -70,6 +72,8 @@ export function Results() {
         return <GuidesTab />;
       case 'community':
         return <CommunityTab />;
+      case 'referrals':
+        return <ReferralsTab />;
       case 'options':
         return <OptionsTab />;
       case 'support':

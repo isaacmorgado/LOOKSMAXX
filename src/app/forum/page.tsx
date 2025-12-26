@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useForum } from '@/contexts/ForumContext';
 import { ForumHeader } from '@/components/forum';
 import { ArrowRight, TrendingUp, Users, MessageSquare, Flame, Clock, Star } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ForumPage() {
   const { categories, isLoadingCategories, fetchCategories, error } = useForum();
@@ -132,17 +133,19 @@ export default function ForumPage() {
             {isLoadingCategories && categories.length === 0 && (
               <div className="space-y-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 animate-pulse">
+                  <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-neutral-800" />
-                      <div className="flex-1">
-                        <div className="h-5 bg-neutral-800 rounded w-1/3 mb-2" />
-                        <div className="h-4 bg-neutral-800 rounded w-2/3 mb-3" />
-                        <div className="flex gap-2">
-                          <div className="h-6 bg-neutral-800 rounded w-16" />
-                          <div className="h-6 bg-neutral-800 rounded w-20" />
+                      <Skeleton className="w-12 h-12 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-1/3" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <div className="flex gap-2 mt-1">
+                          <Skeleton className="h-6 w-16 rounded-lg" />
+                          <Skeleton className="h-6 w-20 rounded-lg" />
+                          <Skeleton className="h-6 w-14 rounded-lg" />
                         </div>
                       </div>
+                      <Skeleton className="h-10 w-12 hidden sm:block" />
                     </div>
                   </div>
                 ))}

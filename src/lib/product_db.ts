@@ -178,6 +178,69 @@ export const PRODUCTS: Product[] = [
     priority: 5,
     baseStackItem: false,
   },
+  // ============================================
+  // HIGH TICKET TOOLS (The "Prescription")
+  // ============================================
+  {
+    id: "jawliner_medium",
+    name: "Jawliner 3.0 (Medium)",
+    brand: "JAWLINER",
+    category: "jawline",
+    affiliateLink: "https://jawliner.de/collections/all-products?ref=looksmaxx",
+    affiliateType: "direct",
+    supplementId: "jaw_chewing_gum", // Mapping to existing ID for now or creating new
+    priority: 15, // Highest priority
+    baseStackItem: false,
+    description: "Medical-grade jaw trainer for masseter hypertrophy."
+  },
+  {
+    id: "gua_sha_set",
+    name: "Stainless Steel Gua Sha",
+    brand: "Sacheu",
+    category: "skin",
+    affiliateLink: "https://amazon.com/dp/B08MPYGL6C?tag=looksmaxx-20",
+    affiliateType: "amazon",
+    supplementId: "gua_sha_tool",
+    priority: 12,
+    baseStackItem: false,
+    description: "Reduces facial puffiness and promotes lymphatic drainage."
+  },
+  {
+    id: "derma_roller_15",
+    name: "Derma Roller 1.5mm",
+    brand: "Koi Beauty",
+    category: "hair",
+    affiliateLink: "https://amazon.com/dp/B07H8K6P8M?tag=looksmaxx-20",
+    affiliateType: "amazon",
+    supplementId: "derma_roller",
+    priority: 14,
+    baseStackItem: false,
+    description: "Stimulates hair follicles and collagen production."
+  },
+  {
+    id: "red_light_mask",
+    name: "Omnilux Contour Face",
+    brand: "Omnilux",
+    category: "skin",
+    affiliateLink: "https://omniluxled.com/products/omnilux-contour-face?ref=looksmaxx",
+    affiliateType: "direct",
+    supplementId: "red_light_device",
+    priority: 13,
+    baseStackItem: false,
+    description: "Clinical-grade LED therapy for skin texture and anti-aging."
+  },
+  {
+    id: "teeth_whitening_kit",
+    name: "3D White Whitestrips",
+    brand: "Crest",
+    category: "dental",
+    affiliateLink: "https://amazon.com/dp/B00AHAW700?tag=looksmaxx-20",
+    affiliateType: "amazon",
+    supplementId: "teeth_whitening",
+    priority: 11,
+    baseStackItem: false,
+    description: "Enamel-safe professional whitening for smile enhancement."
+  },
 ];
 
 // ============================================

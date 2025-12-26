@@ -41,6 +41,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'South Korea', min: 4000, max: 10000, currency: 'USD', notes: 'K-beauty rhinoplasty style' },
       { region: 'Mexico', min: 3000, max: 6000, currency: 'USD' },
       { region: 'UK', min: 5000, max: 12000, currency: 'GBP' },
+      { region: 'Thailand', min: 2500, max: 5500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 3000, max: 6000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     surgeonRecommendations: [
       { name: 'Dr. Sam Rizk', location: 'New York, USA', specialty: 'Preservation rhinoplasty', costRange: '$15,000-25,000' },
@@ -85,6 +87,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 4000, max: 8000, currency: 'USD' },
       { region: 'Turkey', min: 1500, max: 3000, currency: 'USD' },
       { region: 'South Korea', min: 2500, max: 5000, currency: 'USD' },
+      { region: 'Thailand', min: 1800, max: 3500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 2000, max: 4000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Less invasive than full rhinoplasty',
@@ -123,6 +127,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'USA', min: 7000, max: 18000, currency: 'USD' },
       { region: 'Turkey', min: 3000, max: 6000, currency: 'USD' },
+      { region: 'Thailand', min: 3000, max: 6500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 3500, max: 7000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'May be partially covered by insurance if septum is functionally deviated',
@@ -165,6 +171,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 6000, max: 15000, currency: 'USD' },
       { region: 'South Korea', min: 4000, max: 8000, currency: 'USD' },
       { region: 'Turkey', min: 3000, max: 6000, currency: 'USD' },
+      { region: 'Thailand', min: 2500, max: 5000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 3000, max: 6000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     surgeonRecommendations: [
       { name: 'Dr. Barry Eppley', location: 'Indianapolis, USA', specialty: 'Custom facial implants & genioplasty', costRange: '$8,000-15,000' },
@@ -208,6 +216,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 3500, max: 8000, currency: 'USD' },
       { region: 'Turkey', min: 2000, max: 4000, currency: 'USD' },
       { region: 'Mexico', min: 2000, max: 4500, currency: 'USD' },
+      { region: 'Thailand', min: 1500, max: 3000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 2000, max: 4000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Faster recovery than genioplasty',
@@ -249,6 +259,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 8000, max: 20000, currency: 'USD' },
       { region: 'South Korea', min: 6000, max: 12000, currency: 'USD' },
       { region: 'Turkey', min: 4000, max: 8000, currency: 'USD' },
+      { region: 'Thailand', min: 4000, max: 9000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 5000, max: 10000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     surgeonRecommendations: [
       { name: 'Dr. Barry Eppley', location: 'Indianapolis, USA', specialty: 'Custom wrap-around jaw implants', costRange: '$15,000-25,000' },
@@ -293,6 +305,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 25000, max: 50000, currency: 'USD' },
       { region: 'South Korea', min: 15000, max: 25000, currency: 'USD' },
       { region: 'Germany', min: 20000, max: 40000, currency: 'EUR' },
+      { region: 'Thailand', min: 10000, max: 20000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 12000, max: 25000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Usually requires 1-2 years of orthodontics before and after',
@@ -334,6 +348,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'South Korea', min: 20000, max: 35000, currency: 'USD', notes: 'Most popular destination for bimax' },
       { region: 'Germany', min: 30000, max: 50000, currency: 'EUR' },
       { region: 'Spain', min: 20000, max: 35000, currency: 'EUR' },
+      { region: 'Thailand', min: 15000, max: 30000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 18000, max: 35000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     surgeonRecommendations: [
       { name: 'Dr. Alfaro', location: 'Barcelona, Spain', specialty: 'Aesthetic jaw surgery', costRange: '€25,000-35,000' },
@@ -379,6 +395,7 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'South Korea', min: 8000, max: 15000, currency: 'USD', notes: 'V-line surgery capital' },
       { region: 'USA', min: 15000, max: 25000, currency: 'USD' },
+      { region: 'Thailand', min: 6000, max: 12000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
     ],
     notes: [
       'Very popular in East Asia for V-line face shape',
@@ -422,6 +439,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 5000, max: 12000, currency: 'USD' },
       { region: 'Turkey', min: 3000, max: 6000, currency: 'USD' },
       { region: 'South Korea', min: 4000, max: 8000, currency: 'USD' },
+      { region: 'Thailand', min: 2500, max: 5000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 3000, max: 6000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Malar implants: on cheekbone for projection',
@@ -460,6 +479,7 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'South Korea', min: 10000, max: 18000, currency: 'USD' },
       { region: 'USA', min: 15000, max: 25000, currency: 'USD' },
+      { region: 'Thailand', min: 7000, max: 14000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
     ],
     notes: [
       'Popular in East Asia where high cheekbones common',
@@ -499,6 +519,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 25000, max: 45000, currency: 'USD' },
       { region: 'South Korea', min: 12000, max: 20000, currency: 'USD' },
       { region: 'Spain', min: 15000, max: 25000, currency: 'EUR' },
+      { region: 'Thailand', min: 10000, max: 18000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 12000, max: 22000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Often combined with BSSO for bimax surgery',
@@ -542,6 +564,7 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 5000, max: 12000, currency: 'USD' },
       { region: 'South Korea', min: 3000, max: 6000, currency: 'USD' },
       { region: 'Turkey', min: 2500, max: 5000, currency: 'USD' },
+      { region: 'Thailand', min: 2000, max: 4500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
     ],
     surgeonRecommendations: [
       { name: 'Dr. Taban', location: 'Los Angeles, USA', specialty: 'Oculoplastic surgery', costRange: '$8,000-15,000' },
@@ -584,6 +607,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 3000, max: 7000, currency: 'USD' },
       { region: 'Turkey', min: 1500, max: 3000, currency: 'USD' },
       { region: 'South Korea', min: 2000, max: 4000, currency: 'USD' },
+      { region: 'Thailand', min: 1500, max: 3500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 1800, max: 3500, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'One of the most common facial surgeries',
@@ -623,6 +648,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
       { region: 'USA', min: 5000, max: 10000, currency: 'USD' },
       { region: 'Turkey', min: 2000, max: 4000, currency: 'USD' },
       { region: 'South Korea', min: 2500, max: 5000, currency: 'USD' },
+      { region: 'Thailand', min: 2000, max: 4000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 2500, max: 4500, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Transconjunctival approach (inside eyelid) leaves no visible scar',
@@ -703,6 +730,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'USA', min: 6000, max: 12000, currency: 'USD' },
       { region: 'Turkey', min: 3000, max: 6000, currency: 'USD' },
+      { region: 'Thailand', min: 2000, max: 4000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 2500, max: 5000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Less invasive than coronal brow lift',
@@ -741,6 +770,7 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'USA', min: 8000, max: 15000, currency: 'USD' },
       { region: 'Turkey', min: 4000, max: 8000, currency: 'USD' },
+      { region: 'Thailand', min: 3500, max: 7000, currency: 'USD', notes: 'Bangkok medical tourism hub' },
     ],
     notes: [
       'Can lower hairline 2-5 cm depending on scalp laxity',
@@ -823,6 +853,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'USA', min: 4000, max: 8000, currency: 'USD' },
       { region: 'Turkey', min: 2000, max: 4000, currency: 'USD' },
+      { region: 'Thailand', min: 1800, max: 3500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 2000, max: 4000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Ideal philtrum: 11-13mm for women, 13-15mm for men',
@@ -861,6 +893,8 @@ export const SURGICAL_TREATMENTS: Surgery[] = [
     regionalCosts: [
       { region: 'USA', min: 2500, max: 5000, currency: 'USD' },
       { region: 'Turkey', min: 1500, max: 3000, currency: 'USD' },
+      { region: 'Thailand', min: 1200, max: 2500, currency: 'USD', notes: 'Bangkok medical tourism hub' },
+      { region: 'Brazil', min: 1500, max: 3000, currency: 'USD', notes: 'Sao Paulo/Rio de Janeiro' },
     ],
     notes: [
       'Incision hidden inside lip',

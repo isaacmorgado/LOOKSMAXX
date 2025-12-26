@@ -8,9 +8,10 @@ import { getSupplementDetails } from '@/lib/daily-stack';
 interface ProductCardProps {
   recommendation: ProductRecommendation;
   rank?: number;
+  compact?: boolean;
 }
 
-export function ProductCard({ recommendation, rank }: ProductCardProps) {
+export function ProductCard({ recommendation, rank, compact = false }: ProductCardProps) {
   const { product, state, message } = recommendation;
   const supplement = getSupplementDetails(product.supplementId);
 
@@ -24,6 +25,37 @@ export function ProductCard({ recommendation, rank }: ProductCardProps) {
 
   // CTA text
   const ctaText = product.affiliateType === 'amazon' ? 'View on Amazon' : 'Shop Direct';
+
+  // Compact mode for embedded use in WeakPointCard
+  if (compact) {
+    return (
+      <motion.a
+        href={product.affiliateLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 p-3 bg-neutral-800/50 rounded-lg hover:bg-neutral-800 transition-colors group"
+        whileHover={{ scale: 1.02 }}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-medium text-white truncate">{product.name}</h4>
+            <div className={`px-1.5 py-0.5 rounded text-xs font-medium ${stateBadgeColor}`}>
+              {isCorrectiveState ? 'Fix' : 'Protect'}
+            </div>
+          </div>
+          <p className="text-xs text-neutral-400 truncate">{product.brand}</p>
+        </div>
+        {supplement && (
+          <div className="text-right flex-shrink-0">
+            <p className="text-sm font-medium text-white">
+              ${supplement.costPerMonth.min}/mo
+            </p>
+          </div>
+        )}
+        <ExternalLink size={14} className="text-neutral-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+      </motion.a>
+    );
+  }
 
   return (
     <motion.div

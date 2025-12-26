@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
           </p>
           <Link
             href="/login"
-            className="inline-block w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] text-black font-medium rounded-lg transition-all leading-[44px]"
+            className="inline-block w-full h-11 bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] text-black font-medium rounded-lg transition-all leading-[44px]"
           >
             Back to Login
           </Link>
@@ -84,8 +84,8 @@ export default function ForgotPasswordPage() {
         {/* Logo and Header */}
         <div className="mb-10">
           <div className="flex justify-center mb-6">
-            <div className="h-8 w-8 rounded bg-[#00f3ff]/20 flex items-center justify-center">
-              <span className="text-[#00f3ff] text-sm font-bold">L</span>
+            <div className="h-8 w-8 rounded bg-cyan-400/20 flex items-center justify-center">
+              <span className="text-cyan-400 text-sm font-bold">L</span>
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center text-white mb-2">
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-[#00f3ff] transition-all"
+              className="w-full h-11 px-3.5 text-sm bg-black border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-all"
               placeholder="you@example.com"
               required
             />
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 bg-[#00f3ff] hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+            className="w-full h-11 bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none text-black font-medium rounded-lg transition-all flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
@@ -136,7 +136,7 @@ export default function ForgotPasswordPage() {
           {/* Back to Login */}
           <p className="text-center text-neutral-500 text-sm pt-2">
             Remember your password?{" "}
-            <Link href="/login" className="text-[#00f3ff] hover:underline">
+            <Link href="/login" className="text-cyan-400 hover:underline">
               Sign in
             </Link>
           </p>

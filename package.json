@@ -23,7 +23,9 @@
     "react-countup": "^6.5.3",
     "react-dom": "^18",
     "react-dropzone": "^14.3.8",
+    "react-markdown": "^10.1.0",
     "recharts": "^3.6.0",
+    "remark-gfm": "^4.0.1",
     "three": "^0.182.0"
   },
   "devDependencies": {

@@ -20,6 +20,7 @@ import {
   FEMALE_HEIGHT_RATINGS,
   BODY_RATINGS,
   TierInfo,
+  PSLVisionData,
 } from '@/types/psl';
 import { calculateFFMI, FFMIResult } from './ffmi-calculator';
 
@@ -232,13 +233,24 @@ export function getTierPercentile(tier: PSLTier): number {
 function calculateThresholdBonuses(
   faceScore: number,
   heightRating: number,
-  bodyRating: number
+  bodyRating: number,
+  vision?: PSLVisionData
 ): number {
   let bonus = 0;
 
   if (faceScore >= 8.5) bonus += THRESHOLD_BONUSES.face;
   if (heightRating >= 8.5) bonus += THRESHOLD_BONUSES.height;
   if (bodyRating >= 8.5) bonus += THRESHOLD_BONUSES.body;
+
+  // Vision specific bonuses
+  if (vision) {
+    // NW0/NW1 hairline bonus (High attractiveness marker)
+    const hairlineNW = vision.hair?.hairline_nw;
+    if (hairlineNW !== undefined && hairlineNW <= 1) bonus += 0.15;
+    // Flawless skin bonus
+    const skinClarity = vision.skin?.clarity;
+    if (skinClarity !== undefined && skinClarity >= 9) bonus += 0.10;
+  }
 
   return bonus;
 }
@@ -272,7 +284,7 @@ function calculateSynergyBonuses(
 /**
  * Calculate penalties from failos and low body score
  */
-function calculatePenalties(bodyRating: number, failos?: string[]): number {
+function calculatePenalties(bodyRating: number, failos?: string[], vision?: PSLVisionData): number {
   let penalty = 0;
 
   // Body below 5.0 penalty
@@ -285,6 +297,20 @@ function calculatePenalties(bodyRating: number, failos?: string[]): number {
     if (failos.includes('severe_asymmetry')) penalty += 0.5;
     if (failos.includes('negative_canthal_tilt')) penalty += 0.3;
     if (failos.includes('receding_chin')) penalty += 0.4;
+  }
+
+  // Vision specific penalties
+  if (vision) {
+    // Hairline recession penalty
+    const hairlineNW = vision.hair?.hairline_nw;
+    if (hairlineNW !== undefined && hairlineNW >= 3) {
+      penalty += (hairlineNW - 2) * 0.2; // Progressive penalty
+    }
+    // Severe skin issues
+    const skinClarity = vision.skin?.clarity;
+    if (skinClarity !== undefined && skinClarity <= 4) {
+      penalty += 0.25;
+    }
   }
 
   return penalty;
@@ -348,12 +374,12 @@ export function calculatePSL(input: PSLInput): PSLResult {
   const baseScore = faceWeighted + heightWeighted + bodyWeighted;
 
   // 3. Calculate bonuses
-  const thresholdBonus = calculateThresholdBonuses(faceScore, heightRating, bodyRating);
+  const thresholdBonus = calculateThresholdBonuses(faceScore, heightRating, bodyRating, input.vision);
   const synergyBonus = calculateSynergyBonuses(faceScore, heightRating, bodyRating);
   const totalBonus = thresholdBonus + synergyBonus;
 
   // 4. Calculate penalties
-  const penalties = calculatePenalties(bodyRating, failos);
+  const penalties = calculatePenalties(bodyRating, failos, input.vision);
 
   // 5. Final score (clamped 0-10)
   const finalScore = Math.min(10, Math.max(0, baseScore + totalBonus - penalties));
@@ -370,12 +396,12 @@ export function calculatePSL(input: PSLInput): PSLResult {
       method: bodyScoreResult.method,
       ffmiData: bodyScoreResult.ffmiResult
         ? {
-            ffmi: bodyScoreResult.ffmiResult.ffmi,
-            normalizedFFMI: bodyScoreResult.ffmiResult.normalizedFFMI,
-            leanMassKg: bodyScoreResult.ffmiResult.leanMassKg,
-            rating: bodyScoreResult.ffmiResult.rating,
-            category: bodyScoreResult.ffmiResult.category,
-          }
+          ffmi: bodyScoreResult.ffmiResult.ffmi,
+          normalizedFFMI: bodyScoreResult.ffmiResult.normalizedFFMI,
+          leanMassKg: bodyScoreResult.ffmiResult.leanMassKg,
+          rating: bodyScoreResult.ffmiResult.rating,
+          category: bodyScoreResult.ffmiResult.category,
+        }
         : undefined,
     },
     bonuses: {

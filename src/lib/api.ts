@@ -49,6 +49,8 @@ interface LeaderboardEntryResponse {
   gender: 'male' | 'female';
   face_photo_url: string | null;
   is_current_user: boolean;
+  top_strengths: string[];
+  top_improvements: string[];
 }
 
 interface LeaderboardListResponse {
@@ -92,6 +94,8 @@ function transformLeaderboardEntry(data: LeaderboardEntryResponse): LeaderboardE
     gender: data.gender,
     facePhotoUrl: data.face_photo_url,
     isCurrentUser: data.is_current_user,
+    topStrengths: data.top_strengths || [],
+    topImprovements: data.top_improvements || [],
   };
 }
 
@@ -990,6 +994,17 @@ class ApiClient {
 
   async getMyFaceFeatures(): Promise<FaceExtractionResult | null> {
     return this.request('/physique/my-face-features');
+  }
+
+  // === REFERRALS ===
+  async getReferralStats(): Promise<{
+    code: string;
+    referral_link: string;
+    total_invites: number;
+    earnings: number;
+    discount_percent: number;
+  }> {
+    return this.request('/referrals/my-stats');
   }
 }
 

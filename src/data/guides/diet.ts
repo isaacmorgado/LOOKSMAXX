@@ -18,6 +18,14 @@ export const dietGuide: Guide = {
   tags: ['nutrition', 'diet', 'protein', 'calories', 'macros'],
   relatedGuides: ['body-fat', 'training', 'v-taper'],
   productIds: ['food_scale', 'creatine_mono', 'omega3_fish_oil', 'collagen_peptides', 'vitamin_d3_k2', 'magnesium_glycinate'],
+  forumCategory: 'body-composition',
+  heroMedia: {
+    id: 'diet-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&q=80',
+    alt: 'Healthy meal prep and nutrition',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',
@@ -46,6 +54,16 @@ Nutrition is simpler than the internet makes it seem. Most of the complexity is 
 - Nutrient timing around workouts
 
 Let's cover the 80% first.`,
+      media: [
+        {
+          id: 'diet-intro',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80',
+          alt: 'Healthy food and nutrition',
+          caption: 'Your physique is built in the kitchen',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'calories',
@@ -202,6 +220,16 @@ This keeps you sane while getting results.
 
 **The Why:**
 Whole foods are more filling per calorie, have more micronutrients, and are harder to overeat. You can lose weight on junk food (calories are calories), but you'll be hungrier and less healthy.`,
+      media: [
+        {
+          id: 'whole-foods',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+          alt: 'Whole foods and vegetables',
+          caption: '80% whole foods, 20% whatever you want',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'meal-structure',
@@ -414,6 +442,16 @@ Each meal: 6-8oz protein + 1 cup carbs + vegetables
 - Skip the bread basket
 - Don't drink calories
 - It's not that complicated`,
+      media: [
+        {
+          id: 'meal-prep',
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1532768778661-1b2b2df1d79d?w=800&q=80',
+          alt: 'Meal prep containers',
+          caption: 'Meal prep: 2 hours saves you all week',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'common-mistakes',
