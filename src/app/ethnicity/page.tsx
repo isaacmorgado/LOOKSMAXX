@@ -24,7 +24,7 @@ export default function EthnicityPage() {
 
   const handleContinue = () => {
     if (ethnicities.length > 0) {
-      router.push('/upload');
+      router.push('/height');
     }
   };
 

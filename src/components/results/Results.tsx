@@ -11,6 +11,8 @@ import { OptionsTab } from './tabs/OptionsTab';
 import { SupportTab } from './tabs/SupportTab';
 import { LeaderboardTab } from './tabs/LeaderboardTab';
 import { CommunityTab } from './tabs/CommunityTab';
+import { PSLTab } from './tabs/PSLTab';
+import { ArchetypeTab } from './tabs/ArchetypeTab';
 import { api } from '@/lib/api';
 
 export function Results() {
@@ -57,6 +59,10 @@ export function Results() {
         return <SideRatiosTab />;
       case 'leaderboard':
         return <LeaderboardTab />;
+      case 'psl':
+        return <PSLTab />;
+      case 'archetype':
+        return <ArchetypeTab />;
       case 'plan':
         return <PlanTab />;
       case 'community':

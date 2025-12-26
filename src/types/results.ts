@@ -196,6 +196,8 @@ export type ResultsTab =
   | 'front-ratios'
   | 'side-ratios'
   | 'leaderboard'
+  | 'psl'
+  | 'archetype'
   | 'plan'
   | 'community'
   | 'options'

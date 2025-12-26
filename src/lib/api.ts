@@ -232,6 +232,13 @@ interface RecommendedForumApiResponse {
   priority: number;
 }
 
+interface ArchetypeForumRecommendationApiResponse {
+  category: CategoryListApiResponse;
+  archetype: string;
+  reason: string | null;
+  priority: number;
+}
+
 // === FORUM TRANSFORM FUNCTIONS ===
 
 function transformSubForum(data: SubForumApiResponse): SubForum {
@@ -368,6 +375,22 @@ function transformRecommendedForum(data: RecommendedForumApiResponse): Recommend
   return {
     category: transformCategoryListItem(data.category),
     matchedFlaws: data.matched_flaws,
+    priority: data.priority,
+  };
+}
+
+export interface ArchetypeForumRecommendation {
+  category: CategoryListItem;
+  archetype: string;
+  reason: string | null;
+  priority: number;
+}
+
+function transformArchetypeForumRecommendation(data: ArchetypeForumRecommendationApiResponse): ArchetypeForumRecommendation {
+  return {
+    category: transformCategoryListItem(data.category),
+    archetype: data.archetype,
+    reason: data.reason,
     priority: data.priority,
   };
 }
@@ -603,6 +626,14 @@ class ApiClient {
     return response.map(transformRecommendedForum);
   }
 
+  // Recommended forums based on archetype
+  async getArchetypeForumRecommendations(archetype: string): Promise<ArchetypeForumRecommendation[]> {
+    const params = new URLSearchParams();
+    params.set('archetype', archetype);
+    const response = await this.request<ArchetypeForumRecommendationApiResponse[]>(`/forum/archetype-recommendations?${params}`);
+    return response.map(transformArchetypeForumRecommendation);
+  }
+
   // Posts
   async getForumPosts(
     categorySlug: string,
@@ -715,6 +746,299 @@ class ApiClient {
     });
     return transformReport(response);
   }
+
+  // === PSL ===
+
+  async calculatePSL(data: {
+    face_score: number;
+    height_cm: number;
+    gender: 'male' | 'female';
+    body_fat_percent?: number;
+    muscle_level?: string;
+    failos?: string[];
+  }): Promise<{
+    score: number;
+    tier: string;
+    percentile: number;
+    breakdown: {
+      face: { raw: number; weighted: number };
+      height: { raw: number; weighted: number };
+      body: { raw: number; weighted: number };
+      bonuses: { threshold: number; synergy: number; total: number };
+      penalties: number;
+    };
+    potential: number;
+  }> {
+    return this.request('/psl/calculate', { method: 'POST', body: data });
+  }
+
+  async getHeightRating(height_cm: number, gender: 'male' | 'female'): Promise<{
+    height_cm: number;
+    height_rating: number;
+    height_display: string;
+  }> {
+    return this.request(`/psl/height-rating?height_cm=${height_cm}&gender=${gender}`);
+  }
+
+  async updateUserHeight(height_cm: number): Promise<{
+    height_cm: number;
+    height_rating: number;
+    height_display: string;
+  }> {
+    return this.request('/psl/height', { method: 'PUT', body: { height_cm } });
+  }
+
+  async getMyHeight(): Promise<{
+    height_cm: number;
+    height_rating: number;
+    height_display: string;
+  } | null> {
+    return this.request('/psl/my-height');
+  }
+
+  async updateUserWeight(weight_kg: number): Promise<{
+    weight_kg: number;
+    weight_display: string;
+    bmi: number | null;
+  }> {
+    return this.request('/psl/weight', { method: 'PUT', body: { weight_kg } });
+  }
+
+  async getMyWeight(): Promise<{
+    weight_kg: number;
+    weight_display: string;
+    bmi: number | null;
+  } | null> {
+    return this.request('/psl/my-weight');
+  }
+
+  async getPSLTiers(): Promise<{
+    tiers: Array<{ name: string; min: number; max: number; percentile: number }>;
+    weights: { face: number; height: number; body: number };
+  }> {
+    return this.request('/psl/tiers');
+  }
+
+  // === ARCHETYPE ===
+
+  async classifyArchetype(data: {
+    gonial_angle?: number;
+    fwhr?: number;
+    canthal_tilt?: number;
+    cheekbone_height?: number;
+    brow_ridge?: number;
+    jaw_width_ratio?: number;
+    gender: 'male' | 'female';
+    ethnicity: string;
+  }): Promise<{
+    primary: {
+      category: string;
+      sub_archetype: string;
+      confidence: number;
+      traits: string[];
+    };
+    secondary: {
+      category: string;
+      sub_archetype: string;
+      confidence: number;
+      traits: string[];
+    } | null;
+    all_scores: Array<{ category: string; score: number; confidence: number }>;
+    dimorphism_level: string;
+    style_guide: {
+      clothing: string[];
+      hair: string[];
+      colors: string[];
+    };
+    transition_path: {
+      target: string;
+      requirements: string[];
+    } | null;
+  }> {
+    return this.request('/archetype/classify', { method: 'POST', body: data });
+  }
+
+  async getArchetypeDefinitions(): Promise<{
+    archetypes: Array<{
+      id: string;
+      name: string;
+      description: string;
+      traits: string[];
+      ideal_metrics: {
+        gonial_angle: { min: number; max: number };
+        fwhr: { min: number; max: number };
+        canthal_tilt: { min: number; max: number };
+      };
+    }>;
+  }> {
+    return this.request('/archetype/definitions');
+  }
+
+  async getArchetypeDefinition(archetypeId: string): Promise<{
+    id: string;
+    name: string;
+    description: string;
+    traits: string[];
+    ideal_metrics: {
+      gonial_angle: { min: number; max: number };
+      fwhr: { min: number; max: number };
+      canthal_tilt: { min: number; max: number };
+    };
+  }> {
+    return this.request(`/archetype/definitions/${archetypeId}`);
+  }
+
+  async getDimorphismInfo(): Promise<{
+    levels: Record<string, {
+      gonial_angle_min?: number;
+      gonial_angle_max?: number;
+      description: string;
+    }>;
+  }> {
+    return this.request('/archetype/dimorphism');
+  }
+
+  // === PHYSIQUE ===
+
+  async uploadPhysiquePhotos(
+    front?: File,
+    side?: File,
+    back?: File
+  ): Promise<{
+    front_photo_url: string | null;
+    side_photo_url: string | null;
+    back_photo_url: string | null;
+    created_at: string;
+    updated_at: string;
+  }> {
+    const formData = new FormData();
+    if (front) formData.append('front', front);
+    if (side) formData.append('side', side);
+    if (back) formData.append('back', back);
+
+    const authToken = this.getToken();
+    const headers: Record<string, string> = {};
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    const response = await fetch(`${API_URL}/physique/upload`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async getMyPhysiquePhotos(): Promise<{
+    front_photo_url: string | null;
+    side_photo_url: string | null;
+    back_photo_url: string | null;
+    created_at: string;
+    updated_at: string;
+  } | null> {
+    return this.request('/physique/my-photos');
+  }
+
+  async analyzePhysique(gender: 'male' | 'female'): Promise<BodyAnalysisResult> {
+    return this.request('/physique/analyze', {
+      method: 'POST',
+      body: { gender },
+    });
+  }
+
+  async getMyPhysiqueAnalysis(): Promise<{
+    front_photo_url: string | null;
+    side_photo_url: string | null;
+    back_photo_url: string | null;
+    estimated_body_fat: number | null;
+    muscle_mass: string | null;
+    frame_size: string | null;
+    shoulder_width: string | null;
+    waist_definition: string | null;
+    posture: string | null;
+    analysis_confidence: number | null;
+    analysis_notes: string | null;
+    analyzed_at: string | null;
+  } | null> {
+    return this.request('/physique/my-analysis');
+  }
+
+  async extractFaceFeatures(frontFaceUrl: string, sideFaceUrl?: string): Promise<FaceExtractionResult> {
+    return this.request('/physique/extract-face', {
+      method: 'POST',
+      body: {
+        front_face_url: frontFaceUrl,
+        side_face_url: sideFaceUrl,
+      },
+    });
+  }
+
+  async getMyFaceFeatures(): Promise<FaceExtractionResult | null> {
+    return this.request('/physique/my-face-features');
+  }
+}
+
+// === TYPES ===
+
+export interface SkinAnalysis {
+  clarity: number;
+  tone: string;
+  acne_level: string;
+  acne_scarring: string;
+  pore_visibility: string;
+  texture_issues: string[];
+}
+
+export interface HairAnalysis {
+  hairline_nw: number;
+  density: string;
+  texture: string;
+  color: string;
+}
+
+export interface EyesAnalysis {
+  color: string;
+  under_eye_darkness: number;
+  under_eye_puffiness: number;
+}
+
+export interface FacialFeaturesAnalysis {
+  hollow_cheeks: number;
+  eyebrow_density: string;
+  facial_hair_potential: string;
+}
+
+export interface TeethAnalysis {
+  color: string;
+  alignment: string;
+  visible_in_photo: boolean;
+}
+
+export interface FaceExtractionResult {
+  skin: SkinAnalysis;
+  hair: HairAnalysis;
+  eyes: EyesAnalysis;
+  facial_features: FacialFeaturesAnalysis;
+  teeth: TeethAnalysis;
+  confidence: number;
+}
+
+export interface BodyAnalysisResult {
+  estimated_body_fat: number;
+  muscle_mass: string;
+  frame_size: string;
+  shoulder_width: string;
+  waist_definition: string;
+  posture: string;
+  confidence: number;
+  notes: string | null;
 }
 
 // Export singleton instance

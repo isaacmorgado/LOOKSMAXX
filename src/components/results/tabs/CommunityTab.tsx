@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useResults } from '@/contexts/ResultsContext';
 import { TabContent } from '../ResultsLayout';
-import { api } from '@/lib/api';
+import { api, ArchetypeForumRecommendation } from '@/lib/api';
 import { RecommendedForum, Category } from '@/types/forum';
+import { classifyFromRatios } from '@/lib/archetype-classifier';
+import { Ethnicity, Gender } from '@/lib/harmony-scoring';
 import {
   Users,
   ArrowRight,
@@ -14,14 +16,33 @@ import {
   Target,
   TrendingUp,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 
 export function CommunityTab() {
-  const { flaws } = useResults();
+  const { flaws, frontRatios, sideRatios, gender, ethnicity } = useResults();
   const [recommendedForums, setRecommendedForums] = useState<RecommendedForum[]>([]);
+  const [archetypeForums, setArchetypeForums] = useState<ArchetypeForumRecommendation[]>([]);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Classify archetype from ratios
+  const archetypeClassification = useMemo(() => {
+    if (!frontRatios || frontRatios.length === 0 || !gender || !ethnicity) {
+      return null;
+    }
+    try {
+      return classifyFromRatios(
+        frontRatios,
+        sideRatios || [],
+        gender as Gender,
+        ethnicity as Ethnicity
+      );
+    } catch {
+      return null;
+    }
+  }, [frontRatios, sideRatios, gender, ethnicity]);
 
   useEffect(() => {
     async function fetchData() {
@@ -36,12 +57,17 @@ export function CommunityTab() {
           return id;
         });
 
-        const [recommended, all] = await Promise.all([
+        // Get archetype category for recommendations
+        const archetypeCategory = archetypeClassification?.primary?.category;
+
+        const [recommended, archetype, all] = await Promise.all([
           flawIds.length > 0 ? api.getRecommendedForums(flawIds) : Promise.resolve([]),
+          archetypeCategory ? api.getArchetypeForumRecommendations(archetypeCategory) : Promise.resolve([]),
           api.getForumCategories(),
         ]);
 
         setRecommendedForums(recommended);
+        setArchetypeForums(archetype);
         setAllCategories(all);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load communities');
@@ -51,7 +77,7 @@ export function CommunityTab() {
     }
 
     fetchData();
-  }, [flaws]);
+  }, [flaws, archetypeClassification]);
 
   return (
     <TabContent
@@ -107,6 +133,63 @@ export function CommunityTab() {
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
             <p className="text-red-400">{error}</p>
           </div>
+        )}
+
+        {/* Archetype-Based Recommendations */}
+        {!isLoading && !error && archetypeForums.length > 0 && archetypeClassification && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="w-5 h-5 text-amber-400" />
+              <h3 className="text-lg font-semibold text-white">Based on Your Archetype</h3>
+              <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-400 rounded">
+                {archetypeClassification.primary.category}
+              </span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {archetypeForums.map((af) => {
+                // Filter out duplicates from flaw-based recommendations
+                const isDuplicate = recommendedForums.some(rf => rf.category.id === af.category.id);
+                if (isDuplicate) return null;
+
+                return (
+                  <Link key={af.category.id} href={`/forum/${af.category.slug}`}>
+                    <div className="group bg-neutral-900/50 border border-neutral-800 hover:border-amber-500/30 rounded-xl p-5 transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                          {af.category.icon || '💬'}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-white group-hover:text-amber-400 transition-colors">
+                              {af.category.name}
+                            </h4>
+                            <Crown className="w-4 h-4 text-amber-400" />
+                          </div>
+                          <p className="text-sm text-neutral-400 line-clamp-2 mb-3">
+                            {af.reason || af.category.description}
+                          </p>
+
+                          {/* Archetype tag */}
+                          <div className="flex flex-wrap gap-1.5">
+                            <span className="px-2 py-0.5 text-xs bg-amber-500/10 text-amber-400 rounded">
+                              {af.archetype} archetype
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Arrow */}
+                        <ArrowRight className="w-5 h-5 text-neutral-600 group-hover:text-amber-400 transition-colors flex-shrink-0" />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {/* Recommended Forums */}

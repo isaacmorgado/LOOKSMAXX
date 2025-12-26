@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { User, ScanFace, Sparkles, ChevronRight, TrendingUp, TrendingDown, Lightbulb } from 'lucide-react';
+import { User, ScanFace, Sparkles, ChevronRight, TrendingUp, TrendingDown, Lightbulb, Ruler } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
+import { useHeightOptional } from '@/contexts/HeightContext';
 import { TabContent } from '../ResultsLayout';
 import { ScoreBar, AnimatedScore, ShareButton, ExportButton } from '../shared';
 import { KeyStrengthsSection, AreasOfImprovementSection } from '../cards/KeyStrengthsFlaws';
@@ -12,6 +13,7 @@ import { RatioDetailModal } from '../modals/RatioDetailModal';
 import { getScoreColor, ResponsibleRatio, Ratio } from '@/types/results';
 import { MetricScoreResult } from '@/lib/harmony-scoring';
 import { RankedMetric, getWeightTierColor } from '@/lib/looksmax-scoring';
+import { calculatePSL, getTierColor } from '@/lib/psl-calculator';
 import { useState, useCallback, useMemo } from 'react';
 
 // ============================================
@@ -75,6 +77,78 @@ function ProfileScoreCard({ title, score, icon, photo, ratioCount, onClick }: Pr
       {/* Score bar */}
       <div className="mt-3">
         <ScoreBar score={score} height={6} />
+      </div>
+    </motion.button>
+  );
+}
+
+// ============================================
+// PSL PREVIEW CARD
+// ============================================
+
+interface PSLPreviewCardProps {
+  score: number;
+  tier: string;
+  tierColor: string;
+  hasHeight: boolean;
+  onClick: () => void;
+}
+
+function PSLPreviewCard({ score, tier, tierColor, hasHeight, onClick }: PSLPreviewCardProps) {
+  if (!hasHeight) {
+    // Prompt to enter height
+    return (
+      <motion.button
+        onClick={onClick}
+        className="bg-neutral-900/80 border border-dashed border-neutral-700 rounded-xl p-4 hover:border-cyan-500/50 transition-all text-left w-full"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+            <Ruler size={24} className="text-cyan-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-white mb-1">Get Your PSL Rating</h3>
+            <p className="text-xs text-neutral-400">Enter your height to calculate your Pretty Scale Level score</p>
+          </div>
+          <ChevronRight size={20} className="text-cyan-400" />
+        </div>
+      </motion.button>
+    );
+  }
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-cyan-500/30 transition-all text-left w-full"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <div className="flex items-center gap-4">
+        {/* PSL Score */}
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${tierColor}20` }}>
+          <span className="text-2xl font-bold" style={{ color: tierColor }}>
+            {score.toFixed(1)}
+          </span>
+        </div>
+
+        {/* Info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-sm font-medium text-neutral-400">PSL Rating</h3>
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${tierColor}20`, color: tierColor }}>
+              {tier}
+            </span>
+          </div>
+          <p className="text-xs text-neutral-500">Face (75%) + Height (20%) + Body (5%)</p>
+        </div>
+
+        {/* Arrow */}
+        <div className="flex flex-col items-end">
+          <span className="text-xs text-neutral-500 mb-1">View Details</span>
+          <ChevronRight size={20} className="text-neutral-600" />
+        </div>
       </div>
     </motion.button>
   );
@@ -394,8 +468,30 @@ export function OverviewTab() {
     setSelectedVisualizationMetric,
   } = useResults();
 
+  const heightContext = useHeightOptional();
   const [selectedRatio, setSelectedRatio] = useState<MetricScoreResult | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Calculate PSL for the preview card
+  const pslPreviewData = useMemo(() => {
+    const heightCm = heightContext?.heightCm;
+    if (!heightCm || !overallScore) {
+      return { hasHeight: false, score: 0, tier: 'Unknown', tierColor: '#6b7280' };
+    }
+
+    const pslResult = calculatePSL({
+      faceScore: overallScore,
+      heightCm,
+      gender: gender || 'male',
+    });
+
+    return {
+      hasHeight: true,
+      score: pslResult.score,
+      tier: pslResult.tier,
+      tierColor: getTierColor(pslResult.tier),
+    };
+  }, [heightContext?.heightCm, overallScore, gender]);
 
   // All ratios combined for modal navigation
   const allRatios = useMemo(() => [...frontRatios, ...sideRatios], [frontRatios, sideRatios]);
@@ -515,7 +611,7 @@ export function OverviewTab() {
         </div>
 
         {/* Profile Scores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <ProfileScoreCard
             title="Front Profile"
             score={frontScore}
@@ -531,6 +627,17 @@ export function OverviewTab() {
             photo={sidePhoto || undefined}
             ratioCount={sideRatios.length}
             onClick={() => setActiveTab('side-ratios')}
+          />
+        </div>
+
+        {/* PSL Preview Card */}
+        <div className="mb-8">
+          <PSLPreviewCard
+            score={pslPreviewData.score}
+            tier={pslPreviewData.tier}
+            tierColor={pslPreviewData.tierColor}
+            hasHeight={pslPreviewData.hasHeight}
+            onClick={() => setActiveTab('psl')}
           />
         </div>
 

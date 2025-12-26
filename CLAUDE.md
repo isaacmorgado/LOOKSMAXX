@@ -29,6 +29,19 @@ npm run lint && npx tsc --noEmit
 | **Before/After Preview** | `src/components/results/visualization/BeforeAfterPreview.tsx` | Visual overlay showing potential improvements |
 | **Treatment Timeline** | `src/components/results/visualization/TreatmentTimeline.tsx` | Phase-based treatment sequencing UI |
 
+## Archetype Classification ✅
+
+| Component | File | Details |
+|-----------|------|---------|
+| **Archetype Data** | `src/data/archetypes.json` | 6 categories, sub-archetypes, style guides |
+| **Classifier** | `src/lib/archetype-classifier.ts` | Scoring based on gonialAngle, FWHR, canthalTilt |
+| **ArchetypeCard** | `src/components/psl/archetype/ArchetypeCard.tsx` | Display archetype with confidence, traits |
+| **ArchetypeTraits** | `src/components/psl/archetype/ArchetypeTraits.tsx` | Trait badges, dimorphism levels |
+| **ArchetypeTab** | `src/components/results/tabs/ArchetypeTab.tsx` | Full archetype analysis page |
+| **API Methods** | `src/lib/api.ts` | classifyArchetype, getArchetypeDefinitions |
+
+**Categories**: Softboy, Prettyboy, RobustPrettyboy, Chad, Hypermasculine (Warrior), Exotic
+
 ## Female Analysis ✅
 
 | Component | Status | Details |

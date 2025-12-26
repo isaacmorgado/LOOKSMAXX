@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Trophy,
   Users,
+  Gauge,
+  Shapes,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
@@ -37,6 +39,8 @@ const TABS: TabConfig[] = [
   { id: 'front-ratios', label: 'Front Ratios', icon: <User size={18} /> },
   { id: 'side-ratios', label: 'Side Ratios', icon: <ScanFace size={18} /> },
   { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy size={18} /> },
+  { id: 'psl', label: 'PSL Rating', icon: <Gauge size={18} /> },
+  { id: 'archetype', label: 'Archetype', icon: <Shapes size={18} /> },
   { id: 'plan', label: 'Your Plan', icon: <Sparkles size={18} /> },
   { id: 'community', label: 'Community', icon: <Users size={18} /> },
   { id: 'options', label: 'Options', icon: <Settings size={18} /> },

@@ -59,7 +59,7 @@ export default function UploadPage() {
     if (currentStep === 'side') {
       setCurrentStep('front');
     } else {
-      router.push('/ethnicity');
+      router.push('/physique');
     }
   };
 
