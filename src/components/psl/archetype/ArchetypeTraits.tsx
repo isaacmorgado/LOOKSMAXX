@@ -91,15 +91,15 @@ const DIMORPHISM_COLORS: Record<DimorphismLevel, { label: string; color: string 
  */
 export function DimorphismBadge({ level, size = 'md' }: DimorphismBadgeProps) {
   const config = DIMORPHISM_COLORS[level];
-  const sizeClasses = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1';
+  const sizeClasses = size === 'sm' ? 'text-[10px] font-black uppercase tracking-wider px-3 py-1.5' : 'text-xs font-black uppercase tracking-wider px-4 py-2';
 
   return (
     <span
-      className={`${sizeClasses} rounded-full font-medium`}
+      className={`${sizeClasses} rounded-xl`}
       style={{
-        backgroundColor: `${config.color}20`,
+        backgroundColor: `${config.color}15`,
         color: config.color,
-        border: `1px solid ${config.color}40`,
+        border: `1px solid ${config.color}30`,
       }}
     >
       {config.label} Dimorphism
@@ -116,7 +116,7 @@ function TraitBadge({ trait, index }: { trait: string; index: number }) {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
-      className="px-3 py-1.5 rounded-full bg-neutral-800 text-neutral-300 text-sm border border-neutral-700 hover:border-neutral-600 transition-colors"
+      className="px-4 py-2 rounded-xl bg-neutral-900 text-neutral-300 text-sm font-medium border border-white/10 hover:border-white/20 transition-colors"
     >
       {trait}
     </motion.span>
@@ -131,9 +131,9 @@ export function CategoryIcon({ category }: { category: ArchetypeCategory }) {
 
   return (
     <div
-      className="w-10 h-10 rounded-lg flex items-center justify-center"
+      className="w-12 h-12 rounded-xl flex items-center justify-center"
       style={{
-        backgroundColor: colors.bg,
+        background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.primary}05 100%)`,
         border: `1px solid ${colors.border}`,
         color: colors.primary,
       }}

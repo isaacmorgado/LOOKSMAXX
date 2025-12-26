@@ -60,7 +60,7 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                             <ShieldCheck className="text-white w-7 h-7" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black tracking-tighter text-white">FACEIQ <span className="text-cyan-400">LABS</span></h1>
+                            <h1 className="text-2xl font-black tracking-tighter text-white">LOOKS<span className="text-cyan-400">MAXX</span></h1>
                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">Scientific Aesthetic Validation</p>
                         </div>
                     </div>
@@ -169,7 +169,7 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <LockBlur isUnlocked={isUnlocked} overlayText="Join FaceIQ Pro to reveal the complete list of 60+ biometric ratios and their exact scientific measurements.">
+                                    <LockBlur isUnlocked={isUnlocked} overlayText="Join LooksMaxx Pro to reveal the complete list of 60+ biometric ratios and their exact scientific measurements.">
                                         {measurements.slice(0, 12).map((m: any, idx: number) => {
                                             return (
                                                 <tr key={idx} className="border-b border-neutral-800/20 hover:bg-white/[0.02] transition-colors">
@@ -219,7 +219,7 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                         <p className="text-[10px] font-black italic text-neutral-600 mb-1 leading-none uppercase tracking-tighter">Generated on looksmaxx.app</p>
                         <div className="flex items-center gap-2 justify-end">
                             <ShieldCheck size={12} className="text-cyan-500" />
-                            <span className="text-[10px] text-white font-black tracking-tight uppercase">FaceIQ Advanced Analysis v4.2</span>
+                            <span className="text-[10px] text-white font-black tracking-tight uppercase">LooksMaxx Advanced Analysis v4.2</span>
                         </div>
                     </div>
                 </div>

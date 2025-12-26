@@ -25,26 +25,26 @@ export function PSLScoreCard({
 
   if (compact) {
     return (
-      <div className="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+      <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5 hover:border-white/10 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div
-              className="text-4xl font-bold"
+              className="text-4xl font-black italic"
               style={{ color: tierColor }}
             >
               {psl.score.toFixed(2)}
             </div>
             <div>
               <PSLTierBadge tier={psl.tier} size="sm" />
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-2">
                 Top {(100 - psl.percentile).toFixed(1)}%
               </p>
             </div>
           </div>
           {showPotential && potentialGain > 0 && (
-            <div className="flex items-center gap-1 text-green-400 text-sm">
-              <TrendingUp size={14} />
-              <span>+{potentialGain.toFixed(2)}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/15 border border-green-500/20">
+              <TrendingUp size={14} className="text-green-400" />
+              <span className="text-green-400 text-xs font-black">+{potentialGain.toFixed(2)}</span>
             </div>
           )}
         </div>
@@ -56,16 +56,22 @@ export function PSLScoreCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-neutral-900 rounded-xl p-6 border border-neutral-800"
+      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-8 relative overflow-hidden"
     >
+      {/* Background decoration */}
+      <div
+        className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none"
+        style={{ backgroundColor: tierColor }}
+      />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">PSL Rating</h2>
+      <div className="flex items-center justify-between mb-8 relative z-10">
+        <h2 className="text-xl font-black italic uppercase text-white">PSL Rating</h2>
         <PSLTierBadge tier={psl.tier} showDescription />
       </div>
 
       {/* Main Score Display */}
-      <div className="flex items-center gap-6 mb-6">
+      <div className="flex items-center gap-8 mb-8 relative z-10">
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
@@ -74,39 +80,39 @@ export function PSLScoreCard({
         >
           {/* Circular background */}
           <div
-            className="w-28 h-28 rounded-full flex items-center justify-center"
+            className="w-32 h-32 rounded-full flex items-center justify-center border-2"
             style={{
-              background: `radial-gradient(circle, ${tierColor}15 0%, transparent 70%)`,
-              border: `3px solid ${tierColor}40`,
+              background: `linear-gradient(135deg, ${tierColor}20 0%, ${tierColor}05 100%)`,
+              borderColor: `${tierColor}40`,
             }}
           >
             <div className="text-center">
               <span
-                className="text-4xl font-bold"
+                className="text-5xl font-black italic"
                 style={{ color: tierColor }}
               >
                 {psl.score.toFixed(2)}
               </span>
-              <p className="text-xs text-neutral-500 mt-1">/10</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">/10</p>
             </div>
           </div>
 
           {/* Glowing ring */}
           <div
-            className="absolute inset-0 rounded-full opacity-30 blur-md"
+            className="absolute inset-0 rounded-full opacity-20 blur-xl"
             style={{ backgroundColor: tierColor }}
           />
         </motion.div>
 
-        <div className="flex-1">
-          <div className="mb-2">
-            <span className="text-neutral-400 text-sm">Tier</span>
-            <p className="text-2xl font-bold text-white">{psl.tier}</p>
+        <div className="flex-1 space-y-4">
+          <div className="rounded-xl bg-neutral-900/50 border border-white/5 p-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-2">Tier</p>
+            <p className="text-2xl font-black italic uppercase text-white">{psl.tier}</p>
           </div>
-          <div>
-            <span className="text-neutral-400 text-sm">Percentile</span>
-            <p className="text-lg text-white">
-              Top <span className="text-cyan-400 font-semibold">{(100 - psl.percentile).toFixed(2)}%</span>
+          <div className="rounded-xl bg-neutral-900/50 border border-white/5 p-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-2">Percentile</p>
+            <p className="text-lg font-black text-white">
+              Top <span className="text-cyan-400">{(100 - psl.percentile).toFixed(2)}%</span>
             </p>
           </div>
         </div>
@@ -114,7 +120,7 @@ export function PSLScoreCard({
 
       {/* Breakdown */}
       {showBreakdown && (
-        <div className="mb-6">
+        <div className="mb-8 relative z-10">
           <PSLBreakdown breakdown={psl.breakdown} />
         </div>
       )}
@@ -125,32 +131,36 @@ export function PSLScoreCard({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-cyan-500/10 border border-green-500/20"
+          className="rounded-2xl bg-gradient-to-r from-green-500/10 to-cyan-500/10 border border-green-500/20 p-6 relative z-10"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-400" />
-              <span className="text-neutral-300">Potential with improvements</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-green-500/30 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="text-white font-black uppercase tracking-wider">Potential</span>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-bold text-green-400">
+              <span className="text-3xl font-black italic text-green-400">
                 {psl.potential.toFixed(2)}
               </span>
-              <span className="text-green-400/70 text-sm ml-2">
+              <span className="text-green-400/70 text-sm font-black ml-2">
                 (+{potentialGain.toFixed(2)})
               </span>
             </div>
           </div>
-          <p className="text-xs text-neutral-500 mt-2">
+          <p className="text-xs text-neutral-500 font-medium">
             Based on achievable improvements to body composition and soft tissue optimization
           </p>
         </motion.div>
       )}
 
-      {/* Info tooltip */}
-      <div className="mt-4 flex items-start gap-2 text-xs text-neutral-500">
-        <Info size={14} className="flex-shrink-0 mt-0.5" />
-        <p>
+      {/* Info section */}
+      <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-neutral-900/30 border border-white/5 relative z-10">
+        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center flex-shrink-0">
+          <Info size={14} className="text-neutral-600" />
+        </div>
+        <p className="text-xs text-neutral-500 font-medium leading-relaxed">
           PSL = (Face x 0.75) + (Height x 0.20) + (Body x 0.05) + Bonuses.
           Bonuses apply when components exceed 8.5.
         </p>
@@ -164,21 +174,21 @@ export function PSLScorePreview({ psl }: { psl: PSLResult }) {
   const tierColor = getTierColor(psl.tier);
 
   return (
-    <div className="bg-neutral-900/50 rounded-lg p-4 border border-neutral-800 hover:border-neutral-700 transition-colors">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-neutral-400">PSL Rating</span>
+    <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5 hover:border-white/10 transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600">PSL Rating</span>
         <PSLTierBadge tier={psl.tier} size="sm" />
       </div>
       <div className="flex items-baseline gap-2">
         <span
-          className="text-3xl font-bold"
+          className="text-4xl font-black italic"
           style={{ color: tierColor }}
         >
           {psl.score.toFixed(2)}
         </span>
-        <span className="text-neutral-500 text-sm">/10</span>
+        <span className="text-neutral-600 text-sm font-bold">/10</span>
       </div>
-      <p className="text-xs text-neutral-500 mt-1">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-3">
         Top {(100 - psl.percentile).toFixed(1)}% of population
       </p>
     </div>

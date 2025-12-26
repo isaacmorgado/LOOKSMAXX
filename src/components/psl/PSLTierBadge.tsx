@@ -34,36 +34,36 @@ export function PSLTierBadge({
   const icon = TIER_ICONS[tier];
 
   const sizeClasses = {
-    sm: 'px-2 py-1 text-xs',
-    md: 'px-3 py-1.5 text-sm',
-    lg: 'px-4 py-2 text-base',
+    sm: 'px-3 py-1.5 text-[10px] font-black uppercase tracking-wider',
+    md: 'px-4 py-2 text-xs font-black uppercase tracking-wider',
+    lg: 'px-5 py-2.5 text-sm font-black uppercase tracking-wider',
   };
 
   const iconSizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base',
   };
 
   return (
-    <div className="inline-flex flex-col items-center gap-1">
+    <div className="inline-flex flex-col items-center gap-1.5">
       <div
         className={`
-          inline-flex items-center gap-1.5 rounded-full font-semibold
+          inline-flex items-center gap-2 rounded-xl
           ${sizeClasses[size]}
           ${animate ? 'animate-pulse-slow' : ''}
         `}
         style={{
-          backgroundColor: `${color}20`,
+          backgroundColor: `${color}15`,
           color: color,
-          border: `1px solid ${color}40`,
+          border: `1px solid ${color}30`,
         }}
       >
         <span className={iconSizes[size]}>{icon}</span>
         <span>{tier}</span>
       </div>
       {showDescription && (
-        <span className="text-xs text-neutral-500">{description}</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">{description}</span>
       )}
     </div>
   );
@@ -76,10 +76,11 @@ export function PSLTierBadgeCompact({ tier }: { tier: PSLTier }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider"
       style={{
         backgroundColor: `${color}15`,
         color: color,
+        border: `1px solid ${color}20`,
       }}
     >
       {icon} {tier}

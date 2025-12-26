@@ -81,7 +81,7 @@ export default function HomePage() {
       highlighted: false,
     },
     {
-      name: 'FaceIQ Pro',
+      name: 'LooksMaxx Pro',
       price: '$49',
       period: 'Lifetime',
       badge: 'Recommended',

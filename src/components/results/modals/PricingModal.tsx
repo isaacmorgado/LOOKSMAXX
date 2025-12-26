@@ -14,7 +14,7 @@ type PlanId = 'weekly' | 'action';
 const plans: { id: PlanId; name: string; price: string; period: string; description: string; tag: string; features: string[] }[] = [
     {
         id: 'weekly',
-        name: 'FaceIQ Pro',
+        name: 'LooksMaxx Pro',
         price: '6.99',
         period: 'Weekly',
         description: 'Billed weekly. Cancel anytime.',
