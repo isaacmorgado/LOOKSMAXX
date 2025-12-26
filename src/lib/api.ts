@@ -26,7 +26,7 @@ import type {
   PostAuthor,
 } from '@/types/forum';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').trim();
 
 // API Response types (snake_case from backend)
 interface LeaderboardApiResponse {
@@ -442,26 +442,46 @@ class ApiClient {
     const url = `${API_URL}${endpoint}`;
     console.log(`[API] ${method} ${url}`);
 
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    try {
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
 
-    console.log(`[API] Response status: ${response.status}`);
+      console.log(`[API] Response status: ${response.status}`);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-      console.error('[API] Error response:', error);
-      throw new Error(error.detail || `HTTP ${response.status}`);
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+        console.error('[API] Error response:', {
+          endpoint,
+          method,
+          status: response.status,
+          error,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(error.detail || `HTTP ${response.status}`);
+      }
+
+      // Handle empty responses (204 No Content)
+      if (response.status === 204) {
+        return undefined as T;
+      }
+
+      return response.json();
+    } catch (err) {
+      // Network errors, CORS issues, etc.
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        console.error('[Network Error]', {
+          endpoint,
+          method,
+          error: 'Failed to fetch - possible network or CORS issue',
+          timestamp: new Date().toISOString()
+        });
+        throw new Error('Network error - please check your internet connection');
+      }
+      throw err;
     }
-
-    // Handle empty responses (204 No Content)
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return response.json();
   }
 
   // Health check
