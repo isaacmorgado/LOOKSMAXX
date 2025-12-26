@@ -101,19 +101,19 @@ function MediaRenderer({ media }: MediaRendererProps) {
   if (hasError) {
     return (
       <figure className={`my-10 ${placementClasses[media.placement || 'inline']}`}>
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800">
+        <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 border border-white/5">
           <div className="aspect-video flex items-center justify-center p-8">
             <div className="text-center max-w-sm">
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
+              <div className="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
                 {isGif ? (
                   <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Sparkles size={28} className="text-cyan-400" />
                 )}
               </div>
-              <p className="text-neutral-300 font-medium mb-2">{media.alt}</p>
+              <p className="text-neutral-300 font-black uppercase tracking-wider text-sm mb-2">{media.alt}</p>
               {media.caption && (
-                <p className="text-neutral-500 text-sm">{media.caption}</p>
+                <p className="text-neutral-600 text-xs">{media.caption}</p>
               )}
             </div>
           </div>
@@ -124,10 +124,10 @@ function MediaRenderer({ media }: MediaRendererProps) {
 
   return (
     <figure className={`my-10 ${placementClasses[media.placement || 'inline']}`}>
-      <div className="relative rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-800">
+      <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 border border-white/5">
         {/* Loading skeleton */}
         {isLoading && (
-          <div className="absolute inset-0 bg-neutral-900 animate-pulse flex items-center justify-center">
+          <div className="absolute inset-0 bg-neutral-900/40 animate-pulse flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
@@ -156,7 +156,7 @@ function MediaRenderer({ media }: MediaRendererProps) {
         )}
       </div>
       {media.caption && (
-        <figcaption className="mt-4 text-center text-sm text-neutral-500 italic">
+        <figcaption className="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-neutral-600">
           {media.caption}
         </figcaption>
       )}
@@ -181,11 +181,11 @@ function ProductCallout({ productId }: ProductCalloutProps) {
   const link = getLink(product.regionLinks, product.directLink);
 
   return (
-    <div className="my-6 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl">
+    <div className="my-6 p-5 rounded-2xl bg-neutral-900/40 border border-white/5 hover:border-cyan-500/20 transition-all">
       <div className="flex items-center gap-4">
         {/* Product Image */}
         {product.imageUrl && (
-          <div className="w-16 h-16 bg-neutral-800 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 rounded-xl bg-neutral-900 border border-white/10 overflow-hidden flex-shrink-0">
             <Image
               src={product.imageUrl}
               alt={product.name}
@@ -198,13 +198,13 @@ function ProductCallout({ productId }: ProductCalloutProps) {
 
         {/* Product Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h4 className="font-semibold text-white truncate">{product.name}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-black uppercase tracking-wide text-white truncate">{product.name}</h4>
             {product.brand && (
-              <span className="text-xs text-neutral-500">{product.brand}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">{product.brand}</span>
             )}
           </div>
-          <p className="text-sm text-cyan-300 italic">&ldquo;{product.tagline}&rdquo;</p>
+          <p className="text-sm text-cyan-400 italic">&ldquo;{product.tagline}&rdquo;</p>
         </div>
 
         {/* CTA Button */}
@@ -212,10 +212,10 @@ function ProductCallout({ productId }: ProductCalloutProps) {
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-lg transition-colors"
+          className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black uppercase tracking-wider text-xs transition-colors"
         >
-          <ShoppingCart size={16} />
-          <span className="hidden sm:inline">Buy Now</span>
+          <ShoppingCart size={14} />
+          <span className="hidden sm:inline">BUY</span>
         </a>
       </div>
     </div>
@@ -235,29 +235,29 @@ function ForumDiscussionLink({ forumCategory, guideTitle }: ForumDiscussionLinkP
   if (!forumCategory) return null;
 
   return (
-    <div className="mt-8 p-6 bg-neutral-900/50 border border-neutral-800 rounded-xl">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+    <div className="mt-8 p-6 rounded-2xl bg-neutral-900/40 border border-white/5">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
           <MessageSquare size={20} className="text-purple-400" />
         </div>
         <div>
-          <h3 className="font-semibold text-white">Discuss This Guide</h3>
-          <p className="text-sm text-neutral-400">Join the community conversation</p>
+          <h3 className="font-black uppercase tracking-wide text-white">DISCUSS THIS GUIDE</h3>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Join the community conversation</p>
         </div>
       </div>
 
-      <p className="text-sm text-neutral-400 mb-4">
+      <p className="text-sm text-neutral-400 mb-5">
         Have questions about {guideTitle.toLowerCase()}? Want to share your experience?
         Join the discussion in our community forum.
       </p>
 
       <Link
         href={`/forum/${forumCategory}`}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-900/50 border border-white/5 hover:border-purple-500/30 text-purple-400 font-black uppercase tracking-wider text-xs transition-all"
       >
-        <MessageSquare size={16} />
-        Go to Forum
-        <ExternalLink size={14} />
+        <MessageSquare size={14} />
+        GO TO FORUM
+        <ExternalLink size={12} />
       </Link>
     </div>
   );
@@ -273,31 +273,31 @@ function GuideStatsCard() {
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-2xl p-6 mb-6"
+      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center">
-          <BookOpen size={20} className="text-cyan-400" />
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center">
+          <BookOpen size={22} className="text-cyan-400" />
         </div>
         <div>
-          <h2 className="font-semibold text-white">Product Guides</h2>
-          <p className="text-sm text-neutral-400">Evidence-based looksmaxxing resources</p>
+          <h2 className="text-xl font-black italic uppercase tracking-tight text-white">PRODUCT <span className="text-cyan-400">GUIDES</span></h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600">EVIDENCE-BASED LOOKSMAXXING RESOURCES</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-neutral-900/50 rounded-xl p-4">
-          <div className="text-2xl font-bold text-white mb-1">{totalGuides}</div>
-          <div className="text-xs text-neutral-500">Total Guides</div>
+        <div className="rounded-xl bg-neutral-900/50 border border-white/5 p-4">
+          <div className="text-3xl font-black text-white mb-1">{totalGuides}</div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-neutral-600">TOTAL GUIDES</div>
         </div>
-        <div className="bg-neutral-900/50 rounded-xl p-4">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Clock size={16} className="text-cyan-400" />
-            <div className="text-2xl font-bold text-white">{totalMinutes}</div>
+        <div className="rounded-xl bg-neutral-900/50 border border-white/5 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock size={18} className="text-cyan-400" />
+            <div className="text-3xl font-black text-white">{totalMinutes}</div>
           </div>
-          <div className="text-xs text-neutral-500">Minutes of Content</div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-neutral-600">MINUTES OF CONTENT</div>
         </div>
       </div>
     </motion.div>
@@ -331,30 +331,30 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-neutral-950"
+      className="fixed inset-0 z-50 bg-black"
     >
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-neutral-950/95 backdrop-blur-md border-b border-neutral-900">
+      <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-md border-b border-neutral-900">
         <div className="flex items-center justify-between px-4 lg:px-8 py-3">
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-neutral-500 hover:text-cyan-400 text-xs font-black uppercase tracking-widest transition-colors"
           >
-            <ArrowLeft size={20} />
-            <span className="hidden sm:inline text-sm">Back to Guides</span>
+            <ArrowLeft size={14} />
+            <span className="hidden sm:inline">BACK TO GUIDES</span>
           </button>
 
           {/* Progress bar */}
           <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
-            <div className="flex-1 h-1 bg-neutral-800 rounded-full overflow-hidden">
+            <div className="flex-1 h-1 bg-neutral-900 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <span className="text-xs text-neutral-500 whitespace-nowrap">
+            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600 whitespace-nowrap">
               {currentSection + 1} / {guide.sections.length}
             </span>
           </div>
@@ -363,15 +363,15 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 hover:bg-neutral-900 rounded-lg transition-colors"
+              className="lg:hidden p-2 rounded-xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors"
             >
-              <BookOpen size={20} className="text-neutral-400" />
+              <BookOpen size={18} className="text-neutral-400" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-neutral-900 rounded-lg transition-colors"
+              className="p-2 rounded-xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors"
             >
-              <X size={20} className="text-neutral-400" />
+              <X size={18} className="text-neutral-400" />
             </button>
           </div>
         </div>
@@ -383,7 +383,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
         <aside
           className={`
             fixed lg:relative inset-y-0 left-0 z-30 lg:z-0
-            w-72 lg:w-80 bg-neutral-950 lg:bg-neutral-950/50
+            w-72 lg:w-80 bg-black lg:bg-neutral-950/50
             border-r border-neutral-900
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -393,26 +393,27 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
           {/* Sidebar Header */}
           <div className="p-6 border-b border-neutral-900">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center text-cyan-400">
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-cyan-400">
                 {getIconComponent(guide.icon, 20)}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="font-semibold text-white truncate">{guide.title}</h2>
-                <div className="flex items-center gap-2 text-xs text-neutral-500">
-                  <Clock size={12} />
-                  <span>{guide.estimatedReadTime} min</span>
+                <h2 className="font-black uppercase tracking-tight text-white truncate text-sm">{guide.title}</h2>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                  <Clock size={10} />
+                  <span>{guide.estimatedReadTime} MIN</span>
                 </div>
               </div>
             </div>
             {guide.subtitle && (
-              <p className="text-sm text-neutral-500 italic">{guide.subtitle}</p>
+              <p className="text-xs text-neutral-500 italic">{guide.subtitle}</p>
             )}
           </div>
 
           {/* Section List */}
           <nav className="flex-1 overflow-y-auto p-4">
-            <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wider mb-3 px-2">
-              Sections
+            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 px-2 flex items-center gap-3">
+              SECTIONS
+              <div className="flex-1 h-px bg-neutral-800" />
             </div>
             <ul className="space-y-1">
               {guide.sections.map((s, idx) => (
@@ -426,26 +427,26 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                       w-full text-left px-3 py-3 rounded-xl transition-all
                       flex items-start gap-3 group
                       ${currentSection === idx
-                        ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20'
-                        : 'hover:bg-neutral-900 border border-transparent'
+                        ? 'bg-neutral-900/50 border border-cyan-500/20'
+                        : 'hover:bg-neutral-900/30 border border-transparent'
                       }
                     `}
                   >
                     {/* Section number */}
                     <span
                       className={`
-                        flex-shrink-0 w-6 h-6 rounded-lg text-xs font-bold
+                        flex-shrink-0 w-6 h-6 rounded-lg text-[10px] font-black
                         flex items-center justify-center transition-colors
                         ${currentSection === idx
                           ? 'bg-cyan-500 text-black'
                           : idx < currentSection
                             ? 'bg-green-500/20 text-green-400'
-                            : 'bg-neutral-800 text-neutral-500 group-hover:bg-neutral-700'
+                            : 'bg-neutral-900 border border-white/10 text-neutral-500 group-hover:border-white/20'
                         }
                       `}
                     >
                       {idx < currentSection ? (
-                        <CheckCircle2 size={14} />
+                        <CheckCircle2 size={12} />
                       ) : (
                         idx + 1
                       )}
@@ -454,7 +455,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                     {/* Section info */}
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm font-medium truncate ${currentSection === idx ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-200'
+                        className={`text-xs font-bold uppercase tracking-wide truncate ${currentSection === idx ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-300'
                           }`}
                       >
                         {s.title}
@@ -462,9 +463,9 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                       {/* Show media indicator if section has media */}
                       {s.media && s.media.length > 0 && (
                         <div className="flex items-center gap-1 mt-1">
-                          <Sparkles size={10} className="text-amber-400" />
-                          <span className="text-xs text-neutral-600">
-                            {s.media.length} visual{s.media.length > 1 ? 's' : ''}
+                          <Sparkles size={8} className="text-amber-400" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-700">
+                            {s.media.length} VISUAL{s.media.length > 1 ? 'S' : ''}
                           </span>
                         </div>
                       )}
@@ -477,11 +478,11 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
 
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-neutral-900">
-            <div className="flex items-center justify-between text-xs text-neutral-600 mb-2">
-              <span>Progress</span>
+            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-neutral-600 mb-2">
+              <span>PROGRESS</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <div className="h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-neutral-900 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-cyan-500 to-green-500"
                 animate={{ width: `${progress}%` }}
@@ -493,7 +494,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
         {/* Mobile sidebar overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -511,16 +512,16 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
             {/* Article Header (only on first section) */}
             {currentSection === 0 && (
               <header className="mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-medium mb-4">
-                  {getIconComponent(guide.icon, 14)}
-                  <span className="uppercase tracking-wider">Guide</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-6">
+                  {getIconComponent(guide.icon, 12)}
+                  <span>GUIDE</span>
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-                  {guide.title}
+                <h1 className="text-3xl md:text-4xl font-black tracking-tighter italic uppercase text-white mb-4 leading-tight">
+                  {guide.title.split(' ').slice(0, -1).join(' ')} <span className="text-cyan-400">{guide.title.split(' ').slice(-1)}</span>
                 </h1>
 
-                <p className="text-neutral-300 text-lg leading-relaxed">
+                <p className="text-neutral-400 text-base leading-relaxed">
                   {guide.description}
                 </p>
               </header>
@@ -536,23 +537,24 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                 transition={{ duration: 0.3 }}
               >
                 {/* Section Title - Largest heading in section content */}
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 pb-4 border-b border-neutral-900">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-8 flex items-center gap-4">
                   {section.title}
+                  <div className="flex-1 h-px bg-neutral-800" />
                 </h2>
 
                 {/* Tips Callout */}
                 {section.tips && section.tips.length > 0 && (
-                  <aside className="mb-10 p-6 bg-gradient-to-br from-cyan-500/5 to-cyan-600/5 border-l-4 border-cyan-500 rounded-r-xl">
-                    <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-4">
-                      Quick Tips
+                  <aside className="mb-10 p-6 rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400 mb-4">
+                      QUICK TIPS
                     </h4>
                     <ul className="space-y-3">
                       {section.tips.map((tip, i) => (
                         <li key={i} className="flex items-start gap-3 text-neutral-300">
-                          <span className="flex-shrink-0 w-5 h-5 bg-cyan-500/20 rounded-full flex items-center justify-center mt-0.5">
-                            <span className="text-cyan-400 text-xs font-bold">{i + 1}</span>
+                          <span className="flex-shrink-0 w-5 h-5 bg-cyan-500/20 rounded-lg flex items-center justify-center mt-0.5">
+                            <span className="text-cyan-400 text-[10px] font-black">{i + 1}</span>
                           </span>
-                          <span className="leading-relaxed">{tip}</span>
+                          <span className="leading-relaxed text-sm">{tip}</span>
                         </li>
                       ))}
                     </ul>
@@ -561,15 +563,15 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
 
                 {/* Warnings Callout */}
                 {section.warnings && section.warnings.length > 0 && (
-                  <aside className="mb-10 p-6 bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-l-4 border-amber-500 rounded-r-xl">
-                    <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-4">
-                      ⚠️ Important
+                  <aside className="mb-10 p-6 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400 mb-4">
+                      IMPORTANT
                     </h4>
                     <ul className="space-y-3">
                       {section.warnings.map((warning, i) => (
                         <li key={i} className="flex items-start gap-3 text-neutral-300">
-                          <span className="text-amber-400 mt-1">•</span>
-                          <span className="leading-relaxed">{warning}</span>
+                          <span className="text-amber-400 mt-1">*</span>
+                          <span className="leading-relaxed text-sm">{warning}</span>
                         </li>
                       ))}
                     </ul>
@@ -590,35 +592,35 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                     components={{
                       // Paragraphs with generous spacing
                       p: ({ children }) => (
-                        <p className="text-neutral-300 text-lg leading-[1.8] mb-6">
+                        <p className="text-neutral-400 text-base leading-[1.8] mb-6 font-medium">
                           {children}
                         </p>
                       ),
                       // Headers with clear hierarchy (smaller than section title)
                       h1: ({ children }) => (
-                        <h3 className="text-2xl md:text-3xl font-bold text-white mt-12 mb-6">
+                        <h3 className="text-xl font-black italic uppercase text-white mt-12 mb-6 tracking-tight">
                           {children}
                         </h3>
                       ),
                       h2: ({ children }) => (
-                        <h4 className="text-xl md:text-2xl font-bold text-white mt-10 mb-5 pb-3 border-b border-neutral-800">
+                        <h4 className="text-lg font-black italic uppercase text-white mt-10 mb-5 pb-3 border-b border-neutral-900 tracking-tight">
                           {children}
                         </h4>
                       ),
                       h3: ({ children }) => (
-                        <h5 className="text-lg md:text-xl font-semibold text-white mt-8 mb-4">
+                        <h5 className="text-base font-black uppercase text-white mt-8 mb-4 tracking-wide">
                           {children}
                         </h5>
                       ),
                       // Strong text
                       strong: ({ children }) => (
-                        <strong className="font-semibold text-white">
+                        <strong className="font-black text-white">
                           {children}
                         </strong>
                       ),
                       // Emphasis
                       em: ({ children }) => (
-                        <em className="text-neutral-400 not-italic">
+                        <em className="text-neutral-500 not-italic">
                           {children}
                         </em>
                       ),
@@ -634,26 +636,26 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                         </ol>
                       ),
                       li: ({ children }) => (
-                        <li className="text-neutral-300 text-lg leading-[1.8] flex items-start gap-3">
-                          <span className="text-cyan-500 mt-1.5 flex-shrink-0">•</span>
+                        <li className="text-neutral-400 text-base leading-[1.8] flex items-start gap-3 font-medium">
+                          <span className="text-cyan-500 mt-1.5 flex-shrink-0">*</span>
                           <span>{children}</span>
                         </li>
                       ),
                       // Tables - styled beautifully
                       table: ({ children }) => (
-                        <div className="my-8 overflow-x-auto rounded-xl border border-neutral-800">
+                        <div className="my-8 overflow-x-auto rounded-2xl border border-white/5">
                           <table className="w-full text-left">
                             {children}
                           </table>
                         </div>
                       ),
                       thead: ({ children }) => (
-                        <thead className="bg-neutral-900/80 border-b border-neutral-800">
+                        <thead className="bg-neutral-900/80 border-b border-white/5">
                           {children}
                         </thead>
                       ),
                       tbody: ({ children }) => (
-                        <tbody className="divide-y divide-neutral-800/50">
+                        <tbody className="divide-y divide-white/5">
                           {children}
                         </tbody>
                       ),
@@ -663,24 +665,24 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                         </tr>
                       ),
                       th: ({ children }) => (
-                        <th className="px-4 py-3 text-sm font-semibold text-cyan-400 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-400">
                           {children}
                         </th>
                       ),
                       td: ({ children }) => (
-                        <td className="px-4 py-3 text-neutral-300">
+                        <td className="px-4 py-3 text-neutral-400 text-sm font-medium">
                           {children}
                         </td>
                       ),
                       // Blockquotes
                       blockquote: ({ children }) => (
-                        <blockquote className="my-8 pl-6 border-l-4 border-cyan-500 bg-neutral-900/50 py-4 pr-6 rounded-r-lg">
+                        <blockquote className="my-8 pl-6 border-l-2 border-cyan-500 bg-neutral-900/30 py-4 pr-6 rounded-r-xl">
                           {children}
                         </blockquote>
                       ),
                       // Code
                       code: ({ children }) => (
-                        <code className="text-cyan-400 bg-neutral-900 px-2 py-1 rounded text-base">
+                        <code className="text-cyan-400 bg-neutral-900 px-2 py-1 rounded-lg text-sm font-mono">
                           {children}
                         </code>
                       ),
@@ -688,7 +690,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                       a: ({ href, children }) => (
                         <a
                           href={href}
-                          className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 decoration-cyan-500/30 hover:decoration-cyan-400 transition-colors"
+                          className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 decoration-cyan-500/30 hover:decoration-cyan-400 transition-colors font-bold"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -697,7 +699,7 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                       ),
                       // Horizontal rule
                       hr: () => (
-                        <hr className="my-10 border-neutral-800" />
+                        <hr className="my-10 border-neutral-900" />
                       ),
                     }}
                   >
@@ -715,8 +717,9 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                 {/* Product Recommendations */}
                 {section.products && section.products.length > 0 && (
                   <div className="mt-12 pt-8 border-t border-neutral-900">
-                    <h4 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-6">
-                      Recommended Products
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-6 flex items-center gap-4">
+                      RECOMMENDED PRODUCTS
+                      <div className="flex-1 h-px bg-neutral-800" />
                     </h4>
                     <div className="space-y-4">
                       {section.products.map(productId => (
@@ -732,18 +735,18 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                     onClick={() => setCurrentSection(Math.max(0, currentSection - 1))}
                     disabled={currentSection === 0}
                     className={`flex items-center gap-3 group transition-all ${currentSection === 0
-                      ? 'text-neutral-700 cursor-not-allowed'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'text-neutral-800 cursor-not-allowed'
+                      : 'text-neutral-500 hover:text-white'
                       }`}
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${currentSection === 0 ? 'bg-neutral-900' : 'bg-neutral-900 group-hover:bg-neutral-800'
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${currentSection === 0 ? 'bg-neutral-900/30' : 'bg-neutral-900/50 border border-white/5 group-hover:border-white/10'
                       }`}>
-                      <ArrowLeft size={20} />
+                      <ArrowLeft size={18} />
                     </div>
                     <div className="hidden sm:block text-left">
-                      <div className="text-xs text-neutral-600 uppercase tracking-wider mb-1">Previous</div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-neutral-700 mb-1">PREVIOUS</div>
                       {currentSection > 0 && (
-                        <div className="text-sm font-medium text-neutral-300">{guide.sections[currentSection - 1].title}</div>
+                        <div className="text-xs font-bold uppercase tracking-wide text-neutral-400">{guide.sections[currentSection - 1].title}</div>
                       )}
                     </div>
                   </button>
@@ -752,21 +755,21 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                     onClick={() => setCurrentSection(Math.min(guide.sections.length - 1, currentSection + 1))}
                     disabled={currentSection === guide.sections.length - 1}
                     className={`flex items-center gap-3 group transition-all ${currentSection === guide.sections.length - 1
-                      ? 'text-neutral-700 cursor-not-allowed'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'text-neutral-800 cursor-not-allowed'
+                      : 'text-neutral-500 hover:text-white'
                       }`}
                   >
                     <div className="hidden sm:block text-right">
-                      <div className="text-xs text-neutral-600 uppercase tracking-wider mb-1">Next</div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-neutral-700 mb-1">NEXT</div>
                       {currentSection < guide.sections.length - 1 && (
-                        <div className="text-sm font-medium text-neutral-300">{guide.sections[currentSection + 1].title}</div>
+                        <div className="text-xs font-bold uppercase tracking-wide text-neutral-400">{guide.sections[currentSection + 1].title}</div>
                       )}
                     </div>
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${currentSection === guide.sections.length - 1
-                      ? 'bg-neutral-900'
-                      : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 group-hover:from-cyan-500/30 group-hover:to-blue-500/30'
+                      ? 'bg-neutral-900/30'
+                      : 'bg-cyan-500/10 border border-cyan-500/20 group-hover:bg-cyan-500/20'
                       }`}>
-                      <ChevronRight size={20} className={currentSection === guide.sections.length - 1 ? '' : 'text-cyan-400'} />
+                      <ChevronRight size={18} className={currentSection === guide.sections.length - 1 ? '' : 'text-cyan-400'} />
                     </div>
                   </button>
                 </nav>
@@ -807,64 +810,100 @@ function GuideCard({ guide, index, onOpen }: GuideCardProps) {
       blue: 'cyan',
       purple: 'purple',
       amber: 'amber',
+      pink: 'pink',
+      emerald: 'emerald',
+      red: 'red',
     };
     return colorMap[category.color] || 'cyan';
   };
 
   const color = getCategoryColor(guide.id);
 
-  const colorClasses = {
-    cyan: 'from-cyan-500/10 to-cyan-600/10 border-cyan-500/20 text-cyan-400',
-    purple: 'from-purple-500/10 to-purple-600/10 border-purple-500/20 text-purple-400',
-    amber: 'from-amber-500/10 to-amber-600/10 border-amber-500/20 text-amber-400',
+  const colorClasses: Record<string, { bg: string; border: string; text: string; iconBg: string }> = {
+    cyan: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-cyan-500/20',
+      text: 'text-cyan-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
+    purple: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-purple-500/20',
+      text: 'text-purple-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
+    amber: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-amber-500/20',
+      text: 'text-amber-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
+    pink: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-pink-500/20',
+      text: 'text-pink-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
+    emerald: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-emerald-500/20',
+      text: 'text-emerald-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
+    red: {
+      bg: 'bg-neutral-900/40',
+      border: 'border-white/5 hover:border-red-500/20',
+      text: 'text-red-400',
+      iconBg: 'bg-neutral-900 border border-white/10',
+    },
   };
 
-  const iconColorClasses = {
-    cyan: 'bg-cyan-500/10 text-cyan-400',
-    purple: 'bg-purple-500/10 text-purple-400',
-    amber: 'bg-amber-500/10 text-amber-400',
-  };
+  const styles = colorClasses[color] || colorClasses.cyan;
 
   return (
     <motion.div
       onClick={() => onOpen(guide)}
-      className={`bg-gradient-to-br ${colorClasses[color as keyof typeof colorClasses]} border rounded-xl p-5 hover:border-opacity-50 transition-all cursor-pointer group`}
+      className={`${styles.bg} ${styles.border} border rounded-2xl p-5 transition-all cursor-pointer group`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -2 }}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-10 h-10 ${iconColorClasses[color as keyof typeof iconColorClasses]} rounded-xl flex items-center justify-center`}>
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-10 h-10 ${styles.iconBg} rounded-xl flex items-center justify-center ${styles.text}`}>
           {getIconComponent(guide.icon)}
         </div>
-        <div className="flex items-center gap-1 text-neutral-500 text-xs">
-          <Clock size={12} />
-          <span>{guide.estimatedReadTime} min</span>
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-neutral-900/50 border border-white/5">
+          <Clock size={10} className="text-neutral-600" />
+          <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">{guide.estimatedReadTime} MIN</span>
         </div>
       </div>
 
-      <h3 className="font-semibold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+      <h3 className="font-black uppercase tracking-tight text-white mb-1 group-hover:text-cyan-400 transition-colors">
         {guide.title}
       </h3>
 
       {guide.subtitle && (
-        <p className="text-xs text-neutral-400 mb-2 italic">{guide.subtitle}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-2">{guide.subtitle}</p>
       )}
 
-      <p className="text-sm text-neutral-400 mb-3 line-clamp-2">{guide.description}</p>
+      <p className="text-sm text-neutral-500 mb-4 line-clamp-2 font-medium">{guide.description}</p>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-xs text-neutral-500">
-          <span>{guide.sections.length} sections</span>
+      <div className="flex items-center justify-between pt-3 border-t border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+            {guide.sections.length} SECTIONS
+          </span>
           {guide.productIds && guide.productIds.length > 0 && (
             <>
-              <span>-</span>
-              <span>{guide.productIds.length} products</span>
+              <span className="w-1 h-1 rounded-full bg-neutral-800" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                {guide.productIds.length} PRODUCTS
+              </span>
             </>
           )}
         </div>
-        <ChevronRight size={16} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+        <ChevronRight size={16} className="text-neutral-700 group-hover:text-cyan-400 transition-colors" />
       </div>
     </motion.div>
   );
@@ -889,25 +928,31 @@ function CategorySection({ category, onOpenGuide, gender }: CategorySectionProps
 
   if (guides.length === 0) return null;
 
-  const colorClasses: Record<string, string> = {
-    blue: 'text-cyan-400 bg-cyan-500/10',
-    purple: 'text-purple-400 bg-purple-500/10',
-    pink: 'text-pink-400 bg-pink-500/10',
-    cyan: 'text-cyan-400 bg-cyan-500/10',
-    emerald: 'text-emerald-400 bg-emerald-500/10',
-    red: 'text-red-400 bg-red-500/10',
-    amber: 'text-amber-400 bg-amber-500/10',
+  const colorClasses: Record<string, { text: string; iconBg: string }> = {
+    blue: { text: 'text-cyan-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    purple: { text: 'text-purple-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    pink: { text: 'text-pink-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    cyan: { text: 'text-cyan-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    emerald: { text: 'text-emerald-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    red: { text: 'text-red-400', iconBg: 'bg-neutral-900 border border-white/10' },
+    amber: { text: 'text-amber-400', iconBg: 'bg-neutral-900 border border-white/10' },
   };
 
+  const styles = colorClasses[category.color] || colorClasses.cyan;
+
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-8 h-8 ${colorClasses[category.color as keyof typeof colorClasses]} rounded-lg flex items-center justify-center`}>
+    <div className="mb-12">
+      {/* Category Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className={`w-10 h-10 ${styles.iconBg} rounded-xl flex items-center justify-center ${styles.text}`}>
           {getIconComponent(category.icon)}
         </div>
-        <div>
-          <h3 className="font-semibold text-white">{category.name}</h3>
-          <p className="text-xs text-neutral-500">{category.description}</p>
+        <div className="flex-1">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 flex items-center gap-4">
+            {category.name}
+            <div className="flex-1 h-px bg-neutral-800" />
+          </h3>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-700 mt-1">{category.description}</p>
         </div>
       </div>
 
@@ -931,14 +976,14 @@ interface SearchBarProps {
 
 function SearchBar({ query, onQueryChange }: SearchBarProps) {
   return (
-    <div className="relative mb-6">
-      <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
+    <div className="relative mb-8">
+      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-600" />
       <input
         type="text"
-        placeholder="Search guides..."
+        placeholder="SEARCH GUIDES..."
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
-        className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-11 pr-4 py-3 text-white placeholder:text-neutral-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+        className="w-full bg-neutral-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 placeholder:font-black placeholder:uppercase placeholder:tracking-widest placeholder:text-xs focus:outline-none focus:border-cyan-500/30 transition-colors font-medium text-sm"
       />
     </div>
   );
@@ -987,8 +1032,8 @@ export function GuidesTab() {
           {filteredGuides ? (
             // Search Results
             <div>
-              <p className="text-sm text-neutral-400 mb-4">
-                Found {filteredGuides.length} guide{filteredGuides.length !== 1 ? 's' : ''} matching &ldquo;{searchQuery}&rdquo;
+              <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600 mb-6">
+                FOUND {filteredGuides.length} GUIDE{filteredGuides.length !== 1 ? 'S' : ''} MATCHING &ldquo;{searchQuery.toUpperCase()}&rdquo;
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredGuides.map((guide, idx) => (
@@ -996,11 +1041,11 @@ export function GuidesTab() {
                 ))}
               </div>
               {filteredGuides.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search size={24} className="text-neutral-600" />
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                    <Search size={24} className="text-neutral-700" />
                   </div>
-                  <p className="text-neutral-500">No guides found matching your search</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">NO GUIDES FOUND MATCHING YOUR SEARCH</p>
                 </div>
               )}
             </div>

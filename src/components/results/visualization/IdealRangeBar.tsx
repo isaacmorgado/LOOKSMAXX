@@ -109,27 +109,28 @@ export function IdealRangeBar({
           style={{ left: `${idealEndPercent}%` }}
         />
 
-        {/* Value marker - CENTERED properly */}
-        <motion.div
-          className="absolute top-1/2 flex flex-col items-center"
-          style={{
-            left: `${valuePercent}%`,
-            transform: 'translate(-50%, -50%)'
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+        {/* Value marker - CENTERED properly with wrapper */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+          style={{ left: `${valuePercent}%` }}
         >
-          {/* Marker pill */}
-          <div
-            className="w-1.5 rounded-full shadow-lg"
-            style={{
-              height: height + 10,
-              backgroundColor: markerColor,
-              boxShadow: `0 0 12px ${markerColor}80`,
-            }}
-          />
-        </motion.div>
+          <motion.div
+            className="flex flex-col items-center"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            {/* Marker pill */}
+            <div
+              className="w-1.5 rounded-full shadow-lg"
+              style={{
+                height: height + 10,
+                backgroundColor: markerColor,
+                boxShadow: `0 0 12px ${markerColor}80`,
+              }}
+            />
+          </motion.div>
+        </div>
       </div>
 
       {/* Value badge below bar - Premium style */}
@@ -207,19 +208,22 @@ export function CompactIdealRangeBar({
           width: `${idealWidthPercent}%`,
         }}
       />
-      {/* Value marker - CENTERED */}
-      <motion.div
-        className="absolute top-1/2 w-2.5 h-2.5 rounded-full border-2 border-neutral-900"
-        style={{
-          left: `${valuePercent}%`,
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: markerColor,
-          boxShadow: `0 0 8px ${markerColor}80`,
-        }}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3 }}
-      />
+      {/* Value marker - CENTERED with wrapper */}
+      <div
+        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+        style={{ left: `${valuePercent}%` }}
+      >
+        <motion.div
+          className="w-2.5 h-2.5 rounded-full border-2 border-neutral-900"
+          style={{
+            backgroundColor: markerColor,
+            boxShadow: `0 0 8px ${markerColor}80`,
+          }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
     </div>
   );
 }

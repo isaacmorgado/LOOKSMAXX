@@ -62,9 +62,52 @@ export function FaceOverlay({
   compact = false,
 }: FaceOverlayProps) {
   const [zoom, setZoom] = useState(1);
+  const [transformOrigin, setTransformOrigin] = useState({ x: 50, y: 50 });
   const [showAllLandmarks, setShowAllLandmarks] = useState(initialShowAllLandmarks);
   const [imageDimensions, setImageDimensions] = useState<ImageDimensions | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasAutoZoomed = useRef(false);
+
+  useEffect(() => {
+    // Reset auto-zoom flag when photo changes
+    hasAutoZoomed.current = false;
+  }, [photo]);
+
+  useEffect(() => {
+    // Auto-zoom to face when landmarks are available and we haven't zoomed yet
+    if (landmarks.length > 0 && !hasAutoZoomed.current && !compact) {
+      // Calculate face bounding box
+      let minX = 1, minY = 1, maxX = 0, maxY = 0;
+      landmarks.forEach(l => {
+        if (l.x < minX) minX = l.x;
+        if (l.y < minY) minY = l.y;
+        if (l.x > maxX) maxX = l.x;
+        if (l.y > maxY) maxY = l.y;
+      });
+
+      // Add padding
+      const padding = 0.2; // 20% padding
+      const width = maxX - minX;
+      const height = maxY - minY;
+
+      // Calculate center
+      const centerX = minX + width / 2;
+      const centerY = minY + height / 2;
+
+      // Calculate needed zoom to fit face with padding
+      // We want the face (plus padding) to fill the viewport
+      // scale = 1 / (size + padding)
+      const scaleX = 1 / (width + padding);
+      const scaleY = 1 / (height + padding);
+
+      // Use the smaller scale to ensure fit, capped at 2x and min 1x
+      const targetZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 1), 2.5);
+
+      setTransformOrigin({ x: centerX * 100, y: centerY * 100 });
+      setZoom(targetZoom);
+      hasAutoZoomed.current = true;
+    }
+  }, [landmarks, compact, photo]);
 
   useEffect(() => {
     setShowAllLandmarks(initialShowAllLandmarks);
@@ -356,11 +399,10 @@ export function FaceOverlay({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowAllLandmarks(!showAllLandmarks)}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-              showAllLandmarks
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                : 'bg-neutral-800/50 text-neutral-500 border border-white/5 hover:border-white/10'
-            }`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showAllLandmarks
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'bg-neutral-800/50 text-neutral-500 border border-white/5 hover:border-white/10'
+              }`}
             title={showAllLandmarks ? 'Hide landmarks' : 'Show landmarks'}
           >
             <Crosshair size={14} />
@@ -405,7 +447,7 @@ export function FaceOverlay({
           className="absolute inset-0 transition-transform duration-200 ease-out"
           style={{
             transform: `scale(${zoom})`,
-            transformOrigin: 'center center'
+            transformOrigin: `${transformOrigin.x}% ${transformOrigin.y}%`
           }}
         >
           <Image

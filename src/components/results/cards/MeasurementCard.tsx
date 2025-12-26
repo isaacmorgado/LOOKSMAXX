@@ -123,17 +123,19 @@ export function MeasurementCard({
               Ideal: {formatValue(ratio.idealMin, ratio.unit)} - {formatValue(ratio.idealMax, ratio.unit)}
             </span>
           </div>
-          {/* Compact range bar */}
-          <div className="mt-3">
-            <CompactIdealRangeBar
-              value={numericValue}
-              idealMin={ratio.idealMin}
-              idealMax={ratio.idealMax}
-              rangeMin={ratio.rangeMin}
-              rangeMax={ratio.rangeMax}
-              score={numericScore}
-            />
-          </div>
+          {/* Compact range bar - hidden when expanded */}
+          {!isExpanded && (
+            <div className="mt-3">
+              <CompactIdealRangeBar
+                value={numericValue}
+                idealMin={ratio.idealMin}
+                idealMax={ratio.idealMax}
+                rangeMin={ratio.rangeMin}
+                rangeMax={ratio.rangeMax}
+                score={numericScore}
+              />
+            </div>
+          )}
         </div>
 
         {/* Expand indicator */}

@@ -336,7 +336,7 @@ export function ResultsLayout({ children }: ResultsLayoutProps) {
 // ============================================
 
 interface TabContentProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   children: React.ReactNode;
   rightContent?: React.ReactNode;
@@ -344,10 +344,16 @@ interface TabContentProps {
 }
 
 export function TabContent({ title, subtitle, children, rightContent, actions }: TabContentProps) {
-  // Split title to highlight last word in cyan
-  const titleWords = title.split(' ');
-  const lastWord = titleWords.pop();
-  const firstWords = titleWords.join(' ');
+  // Handle both string titles (auto-highlight last word) and ReactNode titles (custom styling)
+  const renderTitle = () => {
+    if (typeof title === 'string') {
+      const titleWords = title.split(' ');
+      const lastWord = titleWords.pop();
+      const firstWords = titleWords.join(' ');
+      return <>{firstWords} <span className="text-cyan-400">{lastWord}</span></>;
+    }
+    return title;
+  };
 
   return (
     <div className="p-6 md:p-10 lg:p-12 max-w-6xl mx-auto">
@@ -355,7 +361,7 @@ export function TabContent({ title, subtitle, children, rightContent, actions }:
       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-14">
         <div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter italic uppercase mb-3">
-            {firstWords} <span className="text-cyan-400">{lastWord}</span>
+            {renderTitle()}
           </h1>
           {subtitle && (
             <p className="text-neutral-500 font-medium uppercase text-xs tracking-[0.2em] max-w-lg">

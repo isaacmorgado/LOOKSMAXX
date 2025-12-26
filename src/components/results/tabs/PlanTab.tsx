@@ -10,8 +10,6 @@ import {
   ChevronRight,
   Lock,
   CheckCircle,
-  AlertCircle,
-  CheckCircle2,
   Scale,
   Dumbbell,
   Salad,
@@ -50,6 +48,22 @@ import {
 } from '@/lib/recommendations/engine';
 
 // ============================================
+// SECTION HEADER COMPONENT
+// ============================================
+
+function SectionHeader({ title, children }: { title: string; children?: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-4 mb-6">
+      <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 whitespace-nowrap">
+        {title}
+      </h2>
+      <div className="flex-1 h-px bg-neutral-800" />
+      {children}
+    </div>
+  );
+}
+
+// ============================================
 // POTENTIAL SCORE CARD
 // ============================================
 
@@ -68,43 +82,50 @@ function PotentialScoreCard() {
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-2xl p-6"
+      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 md:p-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles size={20} className="text-cyan-400" />
-        <h3 className="font-semibold text-white">Your Potential</h3>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center">
+          <Sparkles size={18} className="text-cyan-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-wider text-white">Your Potential</h3>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Maximum Achievable Score</p>
+        </div>
       </div>
 
-      <div className="flex items-center justify-center gap-8 mb-6">
+      <div className="flex items-center justify-center gap-6 md:gap-10 mb-6">
         {/* Current */}
         <div className="text-center">
-          <p className="text-xs text-neutral-500 mb-2">Current</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-3">Current</p>
           <ScoreCircle score={overallScore} size="lg" animate={false} />
         </div>
 
         {/* Arrow */}
-        <div className="flex flex-col items-center gap-1">
-          <ChevronRight size={24} className="text-cyan-400" />
-          <span className="text-xs text-green-400">+{potentialImprovement.toFixed(1)}</span>
+        <div className="flex flex-col items-center gap-2">
+          <ChevronRight size={28} className="text-cyan-400" />
+          <span className="px-2 py-1 rounded-lg bg-green-500/20 border border-green-500/30 text-xs font-black uppercase tracking-wider text-green-400">
+            +{potentialImprovement.toFixed(1)}
+          </span>
         </div>
 
         {/* Potential */}
         <div className="text-center">
-          <p className="text-xs text-neutral-500 mb-2">Potential</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-3">Potential</p>
           <div className="relative">
             <ScoreCircle score={potentialScore} size="lg" animate={false} />
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-              <TrendingUp size={12} className="text-black" />
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/30">
+              <TrendingUp size={14} className="text-black" />
             </div>
           </div>
         </div>
       </div>
 
-      <p className="text-sm text-neutral-400 text-center">
+      <p className="text-sm text-neutral-400 text-center leading-relaxed">
         Following our recommendations could improve your harmony score by up to{' '}
-        <span className="text-green-400 font-medium">+{potentialImprovement.toFixed(1)} points</span>
+        <span className="text-green-400 font-black">+{potentialImprovement.toFixed(1)} points</span>
       </p>
     </motion.div>
   );
@@ -127,9 +148,9 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
     <div className="flex flex-wrap gap-2">
       <button
         onClick={() => onSelect(null)}
-        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedPhase === null
-          ? 'bg-cyan-500 text-black'
-          : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+        className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${selectedPhase === null
+          ? 'bg-cyan-500 text-black border-cyan-400'
+          : 'bg-neutral-900/50 text-neutral-400 border-white/5 hover:border-white/10 hover:text-white'
           }`}
       >
         All ({Object.values(counts).reduce((a, b) => a + b, 0)})
@@ -138,9 +159,9 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
         <button
           key={phase}
           onClick={() => onSelect(phase)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${selectedPhase === phase
-            ? 'bg-neutral-700 text-white'
-            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+          className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 border ${selectedPhase === phase
+            ? 'bg-neutral-800 text-white border-white/10'
+            : 'bg-neutral-900/50 text-neutral-400 border-white/5 hover:border-white/10 hover:text-white'
             }`}
         >
           <PhaseBadge phase={phase} size="sm" />
@@ -174,25 +195,25 @@ function BeforeAfterPreviewSection() {
   if (!frontPhoto) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Mode Toggle */}
-      <div className="flex items-center justify-center gap-1 p-1 bg-black/40 rounded-lg border border-white/10">
+      <div className="flex items-center justify-center gap-1 p-1 bg-neutral-900/50 rounded-xl border border-white/5">
         <button
           onClick={() => setPreviewMode('morphing')}
-          className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`flex-1 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
             previewMode === 'morphing'
-              ? 'bg-cyan-500/20 text-cyan-400'
-              : 'text-neutral-500 hover:text-white'
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'text-neutral-500 hover:text-white border border-transparent'
           }`}
         >
           Face Morphing
         </button>
         <button
           onClick={() => setPreviewMode('static')}
-          className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`flex-1 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
             previewMode === 'static'
-              ? 'bg-neutral-700 text-white'
-              : 'text-neutral-500 hover:text-white'
+              ? 'bg-neutral-800 text-white border border-white/10'
+              : 'text-neutral-500 hover:text-white border border-transparent'
           }`}
         >
           Static Preview
@@ -244,37 +265,39 @@ function BeforeAfterPreviewSection() {
 
 function OrderOfOperations() {
   return (
-    <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4">
-      <h4 className="font-medium text-white mb-3 flex items-center gap-2">
-        <Target size={16} className="text-cyan-400" />
+    <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
+      <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center">
+          <Target size={14} className="text-cyan-400" />
+        </div>
         Recommended Order
       </h4>
-      <div className="space-y-3">
-        <div className="flex items-start gap-3">
-          <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-bold text-green-400">1</span>
+      <div className="space-y-4">
+        <div className="flex items-start gap-4">
+          <div className="w-7 h-7 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-xs font-black text-green-400">1</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-white">Start with Foundational</p>
-            <p className="text-xs text-neutral-500">Low-cost, no-risk improvements that anyone can do</p>
+            <p className="text-sm font-black uppercase tracking-wider text-white">Start with Foundational</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Low-cost, no-risk improvements</p>
           </div>
         </div>
-        <div className="flex items-start gap-3">
-          <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-bold text-yellow-400">2</span>
+        <div className="flex items-start gap-4">
+          <div className="w-7 h-7 rounded-lg bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-xs font-black text-yellow-400">2</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-white">Consider Minimally Invasive</p>
-            <p className="text-xs text-neutral-500">Temporary or reversible options with moderate impact</p>
+            <p className="text-sm font-black uppercase tracking-wider text-white">Consider Minimally Invasive</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Temporary or reversible options</p>
           </div>
         </div>
-        <div className="flex items-start gap-3">
-          <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-bold text-red-400">3</span>
+        <div className="flex items-start gap-4">
+          <div className="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-xs font-black text-red-400">3</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-white">Evaluate Surgical Options</p>
-            <p className="text-xs text-neutral-500">Permanent solutions for significant improvements</p>
+            <p className="text-sm font-black uppercase tracking-wider text-white">Evaluate Surgical Options</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Permanent solutions for significant improvements</p>
           </div>
         </div>
       </div>
@@ -300,7 +323,7 @@ function YourPhaseCard({ bodyFatPercent, gender }: YourPhaseCardProps) {
       return {
         phase: 'maintain',
         message: 'Complete your physique analysis to get personalized phase recommendations.',
-        color: 'from-neutral-700 to-neutral-800',
+        color: 'from-neutral-800 to-neutral-900',
         icon: <Scale size={24} className="text-neutral-400" />,
       };
     }
@@ -343,27 +366,27 @@ function YourPhaseCard({ bodyFatPercent, gender }: YourPhaseCardProps) {
 
   return (
     <motion.div
-      className={`bg-gradient-to-br ${color} rounded-2xl p-6 border border-white/10`}
+      className={`bg-gradient-to-br ${color} rounded-[2rem] p-6 md:p-8 border border-white/10`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+      <div className="flex items-start gap-5">
+        <div className="w-14 h-14 rounded-2xl bg-white/20 border border-white/20 flex items-center justify-center flex-shrink-0 shadow-xl">
           {icon}
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-white text-lg">Your Phase</h3>
-            <div className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium text-white">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="text-lg font-black uppercase tracking-wider text-white">Your Phase</h3>
+            <div className="px-3 py-1 bg-white/20 border border-white/20 rounded-lg text-[10px] font-black uppercase tracking-wider text-white">
               {phaseLabels[phase]}
             </div>
           </div>
-          <p className="text-sm text-white/80 mb-4">{message}</p>
+          <p className="text-sm text-white/80 leading-relaxed mb-5">{message}</p>
 
           {/* Phase-specific tips */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-black/20 rounded-lg p-2 text-center">
-              <div className="flex items-center justify-center gap-1 mb-0.5">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-black/20 rounded-xl p-3 text-center border border-white/10">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
                 {phase === 'bulk' ? (
                   <ArrowUp size={12} className="text-green-300" />
                 ) : phase === 'cut' ? (
@@ -371,21 +394,21 @@ function YourPhaseCard({ bodyFatPercent, gender }: YourPhaseCardProps) {
                 ) : (
                   <Minus size={12} className="text-blue-300" />
                 )}
-                <span className="text-xs text-white/60">Calories</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/60">Calories</span>
               </div>
-              <span className="text-sm font-medium text-white">
-                {phase === 'bulk' ? '+300' : phase === 'cut' ? '-500' : '±0'}
+              <span className="text-sm font-black uppercase text-white">
+                {phase === 'bulk' ? '+300' : phase === 'cut' ? '-500' : '+/-0'}
               </span>
             </div>
-            <div className="bg-black/20 rounded-lg p-2 text-center">
-              <span className="text-xs text-white/60 block mb-0.5">Protein</span>
-              <span className="text-sm font-medium text-white">
+            <div className="bg-black/20 rounded-xl p-3 text-center border border-white/10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 block mb-1">Protein</span>
+              <span className="text-sm font-black uppercase text-white">
                 {phase === 'cut' ? '1.2g/lb' : '1g/lb'}
               </span>
             </div>
-            <div className="bg-black/20 rounded-lg p-2 text-center">
-              <span className="text-xs text-white/60 block mb-0.5">Cardio</span>
-              <span className="text-sm font-medium text-white">
+            <div className="bg-black/20 rounded-xl p-3 text-center border border-white/10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 block mb-1">Cardio</span>
+              <span className="text-sm font-black uppercase text-white">
                 {phase === 'bulk' ? 'Minimal' : phase === 'cut' ? '4-5x/wk' : '2-3x/wk'}
               </span>
             </div>
@@ -419,38 +442,42 @@ function ProductBundleCard({ products, title = 'Recommended Bundle' }: ProductBu
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-purple-900/50 to-violet-950/50 border border-purple-500/30 rounded-2xl p-6"
+      className="rounded-[2rem] bg-gradient-to-br from-purple-900/50 to-violet-950/50 border border-purple-500/30 p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Package size={20} className="text-purple-400" />
-        <h3 className="font-semibold text-white">{title}</h3>
-        <div className="ml-auto px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs font-medium rounded-full">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+          <Package size={18} className="text-purple-400" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-black uppercase tracking-wider text-white">{title}</h3>
+        </div>
+        <div className="px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-black uppercase tracking-wider rounded-lg">
           Save 15%
         </div>
       </div>
 
-      <p className="text-sm text-neutral-300 mb-4">
+      <p className="text-sm text-neutral-300 mb-5 leading-relaxed">
         Your analysis recommends these {bundleProducts.length} supplements - optimized for your specific weak points.
       </p>
 
       {/* Bundle Items */}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-2 mb-5">
         {bundleProducts.map((rec, index) => (
           <div
             key={rec.product.id}
-            className="flex items-center gap-3 p-2 bg-black/20 rounded-lg"
+            className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5"
           >
-            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-purple-300">{index + 1}</span>
+            <div className="w-7 h-7 rounded-lg bg-purple-500/30 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-black text-purple-300">{index + 1}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{rec.product.name}</p>
-              <p className="text-xs text-neutral-400 truncate">Targets: {rec.targetMetric}</p>
+              <p className="text-sm font-black uppercase tracking-wider text-white truncate">{rec.product.name}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 truncate">Targets: {rec.targetMetric}</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-sm text-white">
+              <p className="text-sm font-black text-white">
                 ${SUPPLEMENTS.find(s => s.id === rec.product.supplementId)?.costPerMonth.min || 0}/mo
               </p>
             </div>
@@ -459,18 +486,18 @@ function ProductBundleCard({ products, title = 'Recommended Bundle' }: ProductBu
       </div>
 
       {/* Total & CTA */}
-      <div className="border-t border-purple-500/20 pt-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-neutral-400">Bundle Total</span>
+      <div className="border-t border-purple-500/20 pt-5">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Bundle Total</span>
           <div className="text-right">
-            <span className="text-lg font-bold text-white">${totalCost}/mo</span>
-            <span className="text-xs text-neutral-500 ml-2 line-through">${Math.round(totalCost * 1.15)}/mo</span>
+            <span className="text-xl font-black text-white">${totalCost}/mo</span>
+            <span className="text-xs font-bold text-neutral-500 ml-2 line-through">${Math.round(totalCost * 1.15)}/mo</span>
           </div>
         </div>
         <button
-          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+          className="w-full flex items-center justify-center gap-3 py-3.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-opacity border border-purple-400/30"
         >
-          <ShoppingCart size={18} />
+          <ShoppingCart size={16} />
           Get Your Bundle
         </button>
       </div>
@@ -681,9 +708,9 @@ export function PlanTab() {
       title="Your Plan & Potential"
       subtitle="Personalized recommendations based on your analysis"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-10">
           {/* Your Phase Card - Body Composition Phase */}
           <YourPhaseCard bodyFatPercent={bodyFatPercent} gender={gender} />
 
@@ -695,15 +722,13 @@ export function PlanTab() {
 
           {/* Fix Your Weak Points Section */}
           {flawsWithProducts.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <AlertCircle size={20} className="text-red-400" />
-                <h3 className="text-lg font-semibold text-white">Fix Your Weak Points</h3>
-                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+            <section>
+              <SectionHeader title="Fix Your Weak Points">
+                <span className="px-3 py-1.5 bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
                   {flawsWithProducts.length} Issues
                 </span>
-              </div>
-              <div className="space-y-3">
+              </SectionHeader>
+              <div className="space-y-4">
                 {flawsWithProducts.map((item, index) => (
                   <WeakPointCard
                     key={item.flaw.id}
@@ -715,48 +740,47 @@ export function PlanTab() {
                   />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Targeted Product Recommendations - Corrective */}
           {flawProducts.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Package size={20} className="text-cyan-400" />
-                <h3 className="text-lg font-semibold text-white">Recommended Products</h3>
-                <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-full border border-cyan-500/30">
+            <section>
+              <SectionHeader title="Recommended Products">
+                <span className="px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
                   Corrective
                 </span>
-              </div>
+              </SectionHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {flawProducts.slice(0, 6).map((rec, index) => (
                   <ProductCard key={rec.product.id} recommendation={rec} rank={index + 1} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Targeted Product Recommendations - Maintenance */}
           {idealProducts.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={20} className="text-green-400" />
-                <h3 className="text-lg font-semibold text-white">Protect Your Strengths</h3>
-                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
+            <section>
+              <SectionHeader title="Protect Your Strengths">
+                <span className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
                   Maintenance
                 </span>
-              </div>
+              </SectionHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {idealProducts.slice(0, 4).map((rec) => (
                   <ProductCard key={rec.product.id} recommendation={rec} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Treatment Timeline */}
           {recommendations.length > 0 && (
-            <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
+            <section>
+              <SectionHeader title="Treatment Timeline" />
+              <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
+            </section>
           )}
 
           {/* Treatment Conflict Warnings */}
@@ -768,12 +792,15 @@ export function PlanTab() {
             />
           )}
 
-          {/* Phase Filter */}
-          <PhaseFilter
-            selectedPhase={selectedPhase}
-            onSelect={setSelectedPhase}
-            counts={phaseCounts}
-          />
+          {/* Phase Filter Section */}
+          <section>
+            <SectionHeader title="Treatment Options" />
+            <PhaseFilter
+              selectedPhase={selectedPhase}
+              onSelect={setSelectedPhase}
+              counts={phaseCounts}
+            />
+          </section>
 
           {/* Recommendations List */}
           {hasRecommendations ? (
@@ -806,10 +833,12 @@ export function PlanTab() {
               </AnimatePresence>
             </motion.div>
           ) : (
-            <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-8 text-center">
-              <Sparkles size={48} className="mx-auto text-neutral-700 mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No Recommendations Yet</h3>
-              <p className="text-neutral-500 mb-4">
+            <div className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-10 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-5">
+                <Sparkles size={28} className="text-neutral-600" />
+              </div>
+              <h3 className="text-lg font-black uppercase tracking-wider text-white mb-2">No Recommendations Yet</h3>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
                 Complete a facial analysis to get personalized recommendations
               </p>
             </div>
@@ -850,41 +879,43 @@ export function PlanTab() {
           <OrderOfOperations />
 
           {/* My Plan Summary */}
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4">
-            <h4 className="font-medium text-white mb-3 flex items-center gap-2">
-              <Zap size={16} className="text-yellow-400" />
+          <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center">
+                <Zap size={14} className="text-yellow-400" />
+              </div>
               My Plan
             </h4>
-            <div className="text-center py-6">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-neutral-800 flex items-center justify-center">
+            <div className="text-center py-8">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center">
                 <Lock size={20} className="text-neutral-600" />
               </div>
-              <p className="text-sm text-neutral-500 mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-2">
                 Add recommendations to build your personalized plan
               </p>
-              <p className="text-xs text-neutral-600">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-700">
                 0 items selected
               </p>
             </div>
           </div>
 
           {/* Issues Summary */}
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4">
-            <h4 className="font-medium text-white mb-3">Detected Issues</h4>
+          <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4">Detected Issues</h4>
             <div className="space-y-2">
               {flaws.slice(0, 5).map(flaw => (
                 <div
                   key={flaw.id}
-                  className="flex items-center justify-between p-2 bg-neutral-800/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-neutral-900/50 border border-white/5 rounded-xl hover:border-white/10 transition-colors"
                 >
-                  <span className="text-sm text-neutral-300 truncate">{flaw.flawName}</span>
-                  <span className="text-xs text-red-400 flex-shrink-0">
+                  <span className="text-sm font-bold text-neutral-300 truncate">{flaw.flawName}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-red-400 flex-shrink-0 px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-lg">
                     -{flaw.harmonyPercentageLost.toFixed(1)}%
                   </span>
                 </div>
               ))}
               {flaws.length === 0 && (
-                <p className="text-sm text-neutral-500 text-center py-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 text-center py-6">
                   No issues detected
                 </p>
               )}
@@ -894,38 +925,42 @@ export function PlanTab() {
           {/* Upgrade CTA or Premium Badge */}
           {hasPaidPlan ? (
             <motion.div
-              className="bg-gradient-to-br from-green-500/10 to-emerald-600/10 border border-green-500/30 rounded-xl p-4"
+              className="rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-600/10 border border-green-500/30 p-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle size={16} className="text-green-400" />
-                <span className="text-sm font-medium text-white">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                  <CheckCircle size={14} className="text-green-400" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider text-white">
                   {user?.plan === 'pro' ? 'Pro Plan' : 'Basic Plan'} Active
                 </span>
               </div>
-              <p className="text-xs text-neutral-400">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 You have full access to all {user?.plan === 'pro' ? 'features' : 'non-surgical recommendations'}.
               </p>
             </motion.div>
           ) : (
             <motion.div
-              className="bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 rounded-xl p-4"
+              className="rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 p-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles size={16} className="text-cyan-400" />
-                <span className="text-sm font-medium text-white">Unlock Full Plan</span>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
+                  <Sparkles size={14} className="text-cyan-400" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider text-white">Unlock Full Plan</span>
               </div>
-              <p className="text-xs text-neutral-400 mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-4">
                 Get detailed treatment guides, cost estimates, and provider recommendations.
               </p>
               <button
                 onClick={() => openPricingModal('plan_sidebar')}
-                className="block w-full py-2 bg-cyan-500 text-black text-sm font-medium rounded-lg text-center hover:bg-cyan-400 transition-colors"
+                className="block w-full py-3 bg-cyan-500 text-black text-xs font-black uppercase tracking-wider rounded-xl text-center hover:bg-cyan-400 transition-colors"
               >
                 Upgrade Now
               </button>

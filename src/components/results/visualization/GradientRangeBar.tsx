@@ -118,22 +118,22 @@ export function GradientRangeBar({
           style={{ background: gradient }}
         />
 
-        {/* Value marker - CENTERED properly */}
-        <motion.div
-          className="absolute top-1/2 z-10"
-          style={{
-            left: `${markerPos}%`,
-            transform: 'translate(-50%, -50%)'
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+        {/* Value marker - CENTERED properly with wrapper */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
+          style={{ left: `${markerPos}%` }}
         >
-          {/* Marker dot with ring */}
-          <div className="w-5 h-5 rounded-full bg-white shadow-lg border-2 border-neutral-900 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-neutral-900" />
-          </div>
-        </motion.div>
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            {/* Marker dot with ring */}
+            <div className="w-5 h-5 rounded-full bg-white shadow-lg border-2 border-neutral-900 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-neutral-900" />
+            </div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Value display below - Premium style */}
