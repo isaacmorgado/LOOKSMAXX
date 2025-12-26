@@ -124,11 +124,7 @@ export default function ForumPage() {
             {/* Error State */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
-                <p className="text-red-400 text-sm font-semibold mb-2">Error loading communities:</p>
                 <p className="text-red-400 text-sm">{error}</p>
-                <p className="text-red-300/60 text-xs mt-2">
-                  API URL: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
-                </p>
               </div>
             )}
 

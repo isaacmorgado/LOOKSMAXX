@@ -439,27 +439,15 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    const url = `${API_URL}${endpoint}`;
-    console.log(`[API] ${method} ${url}`);
-
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
       });
 
-      console.log(`[API] Response status: ${response.status}`);
-
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-        console.error('[API] Error response:', {
-          endpoint,
-          method,
-          status: response.status,
-          error,
-          timestamp: new Date().toISOString()
-        });
         throw new Error(error.detail || `HTTP ${response.status}`);
       }
 
@@ -472,12 +460,6 @@ class ApiClient {
     } catch (err) {
       // Network errors, CORS issues, etc.
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        console.error('[Network Error]', {
-          endpoint,
-          method,
-          error: 'Failed to fetch - possible network or CORS issue',
-          timestamp: new Date().toISOString()
-        });
         throw new Error('Network error - please check your internet connection');
       }
       throw err;
