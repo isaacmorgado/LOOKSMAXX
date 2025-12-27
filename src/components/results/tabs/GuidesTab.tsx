@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
@@ -286,11 +286,8 @@ function GuideStatsCard() {
   const totalMinutes = getTotalReadTime();
 
   return (
-    <motion.div
-      className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 mb-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <div className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 mb-8">
+
       <div className="flex items-center gap-4 mb-6">
         <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center">
           <BookOpen size={22} className="text-cyan-400" />
@@ -314,7 +311,7 @@ function GuideStatsCard() {
           <div className="text-[10px] font-black uppercase tracking-widest text-neutral-600">MINUTES OF CONTENT</div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -338,6 +335,18 @@ function GuideViewer({ guide, onClose, onSwitchGuide, allGuides, gender }: Guide
     const currentCategory = GUIDE_CATEGORIES.find(c => c.guideIds.includes(guide.id));
     return currentCategory ? [currentCategory.id] : [];
   });
+
+  // Reset to first section when switching guides
+  useEffect(() => {
+    setCurrentSection(0);
+    // Also expand the new guide's category
+    const newCategory = GUIDE_CATEGORIES.find(c => c.guideIds.includes(guide.id));
+    if (newCategory) {
+      setExpandedCategories(prev =>
+        prev.includes(newCategory.id) ? prev : [...prev, newCategory.id]
+      );
+    }
+  }, [guide.id]);
 
   const section = guide.sections[currentSection];
 
@@ -975,11 +984,10 @@ function GuideCard({ guide, index, onOpen }: GuideCardProps) {
   return (
     <motion.div
       onClick={() => onOpen(guide)}
-      className={`${styles.bg} ${styles.border} border rounded-2xl p-5 transition-all cursor-pointer group`}
+      className={`${styles.bg} ${styles.border} border rounded-2xl p-5 transition-all cursor-pointer group hover:-translate-y-0.5`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      whileHover={{ y: -2 }}
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-10 h-10 ${styles.iconBg} rounded-xl flex items-center justify-center ${styles.text}`}>

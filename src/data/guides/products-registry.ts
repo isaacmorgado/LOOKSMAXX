@@ -689,6 +689,44 @@ export const GUIDE_PRODUCTS: GuideProduct[] = [
     isBaseStack: false,
   },
   {
+    id: 'l_theanine',
+    name: 'L-Theanine 200mg',
+    brand: 'NOW Foods',
+    category: 'supplements',
+    tagline: "The chill without the drowsy. Pairs with caffeine for focus without the jitters.",
+    description: 'Amino acid from green tea that promotes calm focus. Take 100-200mg with coffee to smooth out the stimulant edge. No grogginess, just clarity.',
+    priority: 2,
+    priceRange: { min: 10, max: 18, currency: 'USD' },
+    regionLinks: buildRegionLinks({
+      us: 'B0013OQEO0',
+      uk: 'B0013OQEO0',
+      de: 'B0013OQEO0',
+      fr: 'B0013OQEO0',
+      au: 'B0013OQEO0',
+    }),
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop',
+    isBaseStack: false,
+  },
+  {
+    id: 'protein_powder',
+    name: 'Whey Protein Isolate',
+    brand: 'Optimum Nutrition',
+    category: 'supplements',
+    tagline: "1g per pound of bodyweight is the goal. This is the most efficient way to hit it.",
+    description: 'Gold standard whey isolate. 25g protein per scoop, low carb, fast absorbing. Take post-workout or whenever you need to hit your protein macro.',
+    priority: 1,
+    priceRange: { min: 30, max: 50, currency: 'USD' },
+    regionLinks: buildRegionLinks({
+      us: 'B000QSNYGI',
+      uk: 'B000QSNYGI',
+      de: 'B000QSNYGI',
+      fr: 'B000QSNYGI',
+      au: 'B000QSNYGI',
+    }),
+    imageUrl: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=200&h=200&fit=crop',
+    isBaseStack: true,
+  },
+  {
     id: 'nmn_supplement',
     name: 'NMN 250mg',
     brand: 'ProHealth Longevity',
@@ -1263,10 +1301,25 @@ export const GUIDE_PRODUCTS: GuideProduct[] = [
 // ============================================
 
 /**
- * Get product by ID
+ * Product ID aliases for backwards compatibility
+ * Maps shorthand IDs to full product IDs
+ */
+const PRODUCT_ID_ALIASES: Record<string, string> = {
+  // Supplements
+  ashwagandha: 'ashwagandha_ksm66',
+  creatine: 'creatine_mono',
+  omega_3: 'omega3_fish_oil',
+  zinc: 'zinc_picolinate',
+  // Add more as needed
+};
+
+/**
+ * Get product by ID (supports aliases)
  */
 export function getGuideProductById(id: string): GuideProduct | undefined {
-  return GUIDE_PRODUCTS.find(p => p.id === id);
+  // Resolve alias if it exists
+  const resolvedId = PRODUCT_ID_ALIASES[id] || id;
+  return GUIDE_PRODUCTS.find(p => p.id === resolvedId);
 }
 
 /**
