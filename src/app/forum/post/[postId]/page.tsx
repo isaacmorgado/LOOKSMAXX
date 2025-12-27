@@ -10,12 +10,39 @@ import {
   MessageSquare,
   Share2,
   Bookmark,
+  BookmarkCheck,
   Flag,
   Trash2,
   Pin,
   Sparkles,
-  Send
+  Send,
+  Check
 } from 'lucide-react';
+import { ReportModal } from '@/components/forum';
+
+// ============================================
+// SAVED POSTS HELPER
+// ============================================
+function getSavedPosts(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('saved_posts') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function toggleSavedPost(postId: string): boolean {
+  const saved = getSavedPosts();
+  const isSaved = saved.includes(postId);
+  if (isSaved) {
+    localStorage.setItem('saved_posts', JSON.stringify(saved.filter(id => id !== postId)));
+    return false;
+  } else {
+    localStorage.setItem('saved_posts', JSON.stringify([...saved, postId]));
+    return true;
+  }
+}
 
 // ============================================
 // COMMENT SKELETON
@@ -89,11 +116,43 @@ export default function PostDetailPage() {
 
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     fetchPost(postId);
     fetchComments(postId);
   }, [postId, fetchPost, fetchComments]);
+
+  // Check saved state on mount
+  useEffect(() => {
+    setIsSaved(getSavedPosts().includes(postId));
+  }, [postId]);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSave = () => {
+    const newSavedState = toggleSavedPost(postId);
+    setIsSaved(newSavedState);
+  };
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
@@ -224,15 +283,32 @@ export default function PostDetailPage() {
                     <MessageSquare size={14} />
                     {currentPost.commentCount} Comments
                   </span>
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
-                    <Share2 size={14} />
-                    Share
+                  <button
+                    onClick={handleShare}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      copied
+                        ? 'text-emerald-400 bg-emerald-500/10'
+                        : 'text-neutral-500 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {copied ? <Check size={14} /> : <Share2 size={14} />}
+                    {copied ? 'Copied!' : 'Share'}
                   </button>
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
-                    <Bookmark size={14} />
-                    Save
+                  <button
+                    onClick={handleSave}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      isSaved
+                        ? 'text-cyan-400 bg-cyan-500/10'
+                        : 'text-neutral-500 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {isSaved ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                    {isSaved ? 'Saved' : 'Save'}
                   </button>
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
+                  <button
+                    onClick={() => setShowReportModal(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-red-400 transition-all"
+                  >
                     <Flag size={14} />
                     Report
                   </button>
@@ -341,6 +417,14 @@ export default function PostDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetType="post"
+        targetId={postId}
+      />
     </div>
   );
 }

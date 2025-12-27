@@ -1,18 +1,82 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MessageSquare, Share2, Bookmark, MoreHorizontal, Pin, Sparkles } from 'lucide-react';
+import { MessageSquare, Share2, Bookmark, BookmarkCheck, MoreHorizontal, Pin, Sparkles, Check, Flag } from 'lucide-react';
 import { PostListItem, VoteType } from '@/types/forum';
 import { formatDistanceToNow } from '@/lib/utils';
 import { VoteButtons } from './VoteButtons';
+
+// ============================================
+// SAVED POSTS HELPER
+// ============================================
+function getSavedPosts(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('saved_posts') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function toggleSavedPost(postId: string): boolean {
+  const saved = getSavedPosts();
+  const isSaved = saved.includes(postId);
+  if (isSaved) {
+    localStorage.setItem('saved_posts', JSON.stringify(saved.filter(id => id !== postId)));
+    return false;
+  } else {
+    localStorage.setItem('saved_posts', JSON.stringify([...saved, postId]));
+    return true;
+  }
+}
 
 interface PostCardProps {
   post: PostListItem;
   onVote?: (postId: string, voteType: VoteType) => void;
   showSubForum?: boolean;
+  onReport?: (postId: string) => void;
 }
 
-export function PostCard({ post, onVote, showSubForum = false }: PostCardProps) {
+export function PostCard({ post, onVote, showSubForum = false, onReport }: PostCardProps) {
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Check saved state on mount
+  useEffect(() => {
+    setIsSaved(getSavedPosts().includes(post.id));
+  }, [post.id]);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/forum/post/${post.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSave = () => {
+    const newSavedState = toggleSavedPost(post.id);
+    setIsSaved(newSavedState);
+  };
+
+  const handleReport = () => {
+    setShowMenu(false);
+    onReport?.(post.id);
+  };
+
   return (
     <article className="group relative rounded-2xl bg-neutral-900/30 border border-white/5 hover:border-cyan-500/20 transition-all overflow-hidden">
       <div className="flex">
@@ -80,17 +144,53 @@ export function PostCard({ post, onVote, showSubForum = false }: PostCardProps) 
               <MessageSquare size={14} />
               <span>{post.commentCount} Comments</span>
             </Link>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
-              <Share2 size={14} />
-              <span className="hidden sm:inline">Share</span>
+            <button
+              onClick={handleShare}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                copied
+                  ? 'text-emerald-400 bg-emerald-500/10'
+                  : 'text-neutral-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              {copied ? <Check size={14} /> : <Share2 size={14} />}
+              <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
-              <Bookmark size={14} />
-              <span className="hidden sm:inline">Save</span>
+            <button
+              onClick={handleSave}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                isSaved
+                  ? 'text-cyan-400 bg-cyan-500/10'
+                  : 'text-neutral-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              {isSaved ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+              <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
             </button>
-            <button className="flex items-center gap-2 p-1.5 rounded-lg text-neutral-500 hover:bg-white/5 hover:text-white transition-all">
-              <MoreHorizontal size={14} />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="flex items-center gap-2 p-1.5 rounded-lg text-neutral-500 hover:bg-white/5 hover:text-white transition-all"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+              {showMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowMenu(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[140px] rounded-xl bg-neutral-900 border border-white/10 shadow-xl overflow-hidden">
+                    <button
+                      onClick={handleReport}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 hover:bg-white/5 hover:text-red-400 transition-all"
+                    >
+                      <Flag size={12} />
+                      Report
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -4,3 +4,4 @@ export { VoteButtons } from './VoteButtons';
 export { CommentThread } from './CommentThread';
 export { CreatePostForm } from './CreatePostForm';
 export { ForumHeader, ForumBreadcrumb } from './ForumHeader';
+export { ReportModal } from './ReportModal';
