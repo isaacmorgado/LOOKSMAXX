@@ -293,6 +293,64 @@ export function ExpandableSection({ isExpanded, children }: ExpandableSectionPro
 }
 
 // ============================================
+// RISK PERCENTAGE BADGE
+// ============================================
+
+interface RiskPercentageBadgeProps {
+  percentage: number;
+  size?: 'sm' | 'md' | 'lg';
+  showBar?: boolean;
+}
+
+/**
+ * Displays risk percentage with color coding
+ * - 0-10%: Green (Minimal)
+ * - 10-20%: Blue (Low)
+ * - 20-35%: Yellow (Moderate)
+ * - 35-50%: Orange (High)
+ * - 50-60%: Red (Very High)
+ */
+export function RiskPercentageBadge({ percentage, size = 'md', showBar = false }: RiskPercentageBadgeProps) {
+  const getRiskConfig = (pct: number) => {
+    if (pct <= 10) return { color: '#22c55e', label: 'Minimal', bg: 'bg-green-500/10', border: 'border-green-500/20' };
+    if (pct <= 20) return { color: '#3b82f6', label: 'Low', bg: 'bg-blue-500/10', border: 'border-blue-500/20' };
+    if (pct <= 35) return { color: '#eab308', label: 'Moderate', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' };
+    if (pct <= 50) return { color: '#f97316', label: 'High', bg: 'bg-orange-500/10', border: 'border-orange-500/20' };
+    return { color: '#ef4444', label: 'Very High', bg: 'bg-red-500/10', border: 'border-red-500/20' };
+  };
+
+  const config = getRiskConfig(percentage);
+  const sizeClasses = {
+    sm: 'px-1.5 py-0.5 text-[9px] gap-1',
+    md: 'px-2 py-0.5 text-[10px] gap-1.5',
+    lg: 'px-2.5 py-1 text-xs gap-2',
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`inline-flex items-center font-bold uppercase tracking-wider rounded-md ${sizeClasses[size]} ${config.bg} ${config.border} border`}
+        style={{ color: config.color }}
+      >
+        <span>{percentage}%</span>
+        <span className="opacity-70">Risk</span>
+      </span>
+      {showBar && (
+        <div className="flex-1 max-w-24 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundColor: config.color }}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(percentage, 60) / 60 * 100}%` }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
 // CATEGORY TAG - Premium Style
 // ============================================
 

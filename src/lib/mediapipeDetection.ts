@@ -288,14 +288,36 @@ export async function detectFromImageUrl(
     // Front profile uses MediaPipe mapping
     const mapping = MEDIAPIPE_FRONT_MAPPING;
 
-    // Neck landmarks need +5% yOffset per cephalometric landmarkers.js
-    const NECK_Y_OFFSET = 0.05;
-    const NECK_LANDMARKS = ['left_cervical_lateralis', 'right_cervical_lateralis'];
+    // Exact landmark offsets for cephalometric accuracy
+    // These offsets correct MediaPipe's raw positions to match cephalometric standards
+    const LANDMARK_OFFSETS: Record<string, { xOffset?: number; yOffset?: number }> = {
+      // Hairline offset: MediaPipe index 10 is forehead/glabella, not actual hairline
+      trichion: { yOffset: -0.06 },
 
-    // Hairline (trichion) offset: MediaPipe index 10 is forehead/glabella, not actual hairline
-    // Apply negative Y offset to move up toward the actual hairline
-    // FaceIQ parity: Hairline is approximately 8% of face height above glabella
-    const TRICHION_Y_OFFSET = -0.08;
+      // Pupil offsets: small adjustments for accurate pupil center
+      left_pupila: { xOffset: 0.0015, yOffset: -0.005 },
+      right_pupila: { xOffset: -0.0015, yOffset: -0.005 },
+
+      // Nose side offsets: widen nose detection slightly
+      left_ala_nasi: { xOffset: 0.0025 },
+      right_ala_nasi: { xOffset: -0.0025 },
+
+      // Temple offsets: move temples up slightly
+      left_temporal: { yOffset: -0.01 },
+      right_temporal: { yOffset: -0.01 },
+
+      // Outer ear offsets: push ears outward for accurate face width
+      left_auricular_lateral: { xOffset: -0.04 },
+      right_auricular_lateral: { xOffset: 0.04 },
+
+      // Neck offsets: move neck points down
+      left_cervical_lateralis: { yOffset: 0.05 },
+      right_cervical_lateralis: { yOffset: 0.05 },
+
+      // Upper eyelid crease offsets: move crease up slightly
+      left_pretarsal_skin_crease: { yOffset: -0.015 },
+      right_pretarsal_skin_crease: { yOffset: -0.015 },
+    };
 
     // Map keypoints to our landmarks
     const landmarks = Object.entries(mapping).map(([id, index]) => {
@@ -303,18 +325,16 @@ export async function detectFromImageUrl(
       const safeIndex = Math.min(index, faceLandmarks.length - 1);
       const landmark = faceLandmarks[safeIndex];
 
-      // Apply yOffset for special landmarks
-      let yOffset = 0;
-      if (NECK_LANDMARKS.includes(id)) {
-        yOffset = NECK_Y_OFFSET;
-      } else if (id === 'trichion') {
-        yOffset = TRICHION_Y_OFFSET;
-      }
+      // Apply cephalometric offsets
+      const offsets = LANDMARK_OFFSETS[id] || {};
+      const xOffset = offsets.xOffset || 0;
+      const yOffset = offsets.yOffset || 0;
 
       return {
         id,
         // MediaPipe returns normalized coordinates (0-1)
-        x: landmark ? landmark.x : 0.5,
+        // Apply offsets and clamp to valid range
+        x: landmark ? Math.max(0, Math.min(landmark.x + xOffset, 1)) : 0.5,
         y: landmark ? Math.max(0, Math.min(landmark.y + yOffset, 1)) : 0.5,
       };
     });

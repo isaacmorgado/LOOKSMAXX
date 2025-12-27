@@ -16,8 +16,8 @@ export const cuttingGuideGuide: Guide = {
   estimatedReadTime: 5,
   order: 71,
   tags: ['cutting', 'fat-loss', 'diet', 'deficit', 'lean'],
-  relatedGuides: ['nutrition-basics', 'body-fat-basics', 'cardio'],
-  productIds: [],
+  relatedGuides: ['nutrition-basics', 'body-fat', 'cardio'],
+  productIds: ['food_scale', 'magnesium_glycinate'],
   forumCategory: 'nutrition',
   heroMedia: {
     id: 'cutting-hero',

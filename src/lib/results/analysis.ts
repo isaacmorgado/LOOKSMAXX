@@ -15,6 +15,10 @@
 
 import { HarmonyAnalysis, METRIC_CONFIGS, scoreMeasurement, Ethnicity, Gender } from '@/lib/harmony-scoring';
 import { Strength, Flaw, Recommendation, Ratio } from '@/types/results';
+import {
+  calculateStandardizedImpactFromScore,
+  calculateRollingStandardizedImpact
+} from '@/lib/insights-engine';
 
 // ============================================
 // STRENGTH GROUPINGS
@@ -658,6 +662,7 @@ export function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
   const flaws: Flaw[] = [];
   const usedMetricIds = new Set<string>();
   let rollingLost = 0;
+  const rollingImpacts: number[] = [];
 
   // First pass: Create grouped flaws from related low-scoring metrics
   Object.entries(FLAW_GROUPINGS).forEach(([groupId, groupConfig]) => {
@@ -677,13 +682,19 @@ export function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
       const totalImpact = groupMeasurements.reduce((sum, m) => sum + (10 - m.score) * 0.4, 0);
       rollingLost += totalImpact;
 
+      // Calculate normalized standardizedImpact from average score (0.07-1.29 range)
+      const avgScore = groupMeasurements.reduce((sum, m) => sum + m.score, 0) / groupMeasurements.length;
+      const standardizedImpact = calculateStandardizedImpactFromScore(avgScore);
+      rollingImpacts.push(standardizedImpact);
+      const rollingStandardizedImpact = calculateRollingStandardizedImpact(rollingImpacts);
+
       // Create grouped flaw with multiple contributing ratios
       flaws.push({
         id: `flaw_group_${groupId}`,
         flawName: groupConfig.name,
         summary: groupConfig.description,
         harmonyPercentageLost: totalImpact,
-        standardizedImpact: totalImpact / 10,
+        standardizedImpact,
         categoryName: groupConfig.category,
         responsibleRatios: groupMeasurements.map(m => ({
           ratioName: m.name,
@@ -697,7 +708,7 @@ export function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
         })),
         rollingPointsDeducted: rollingLost,
         rollingHarmonyPercentageLost: rollingLost,
-        rollingStandardizedImpact: rollingLost / 10,
+        rollingStandardizedImpact,
       });
     }
   });
@@ -710,17 +721,23 @@ export function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
     const impact = matchingMeasurement ? (10 - matchingMeasurement.score) * 0.5 : 2;
     rollingLost += impact;
 
+    // Calculate normalized standardizedImpact (0.07-1.29 range)
+    const score = matchingMeasurement?.score || 3;
+    const standardizedImpact = calculateStandardizedImpactFromScore(score);
+    rollingImpacts.push(standardizedImpact);
+    const rollingStandardizedImpact = calculateRollingStandardizedImpact(rollingImpacts);
+
     flaws.push({
       id: `flaw_${i}`,
       flawName: f.metricName,
       summary: f.reasoning,
       harmonyPercentageLost: impact,
-      standardizedImpact: impact / 10,
+      standardizedImpact,
       categoryName: f.category,
       responsibleRatios: [{
         ratioName: f.metricName,
         ratioId: f.metricId,
-        score: matchingMeasurement?.score || 3,
+        score,
         value: matchingMeasurement?.value || 0,
         idealMin: matchingMeasurement?.idealMin || 0,
         idealMax: matchingMeasurement?.idealMax || 1,
@@ -729,16 +746,17 @@ export function generateFlawsFromAnalysis(analysis: HarmonyAnalysis): Flaw[] {
       }],
       rollingPointsDeducted: rollingLost,
       rollingHarmonyPercentageLost: rollingLost,
-      rollingStandardizedImpact: rollingLost / 10,
+      rollingStandardizedImpact,
     });
   });
 
-  // Sort by impact (highest first) then by number of contributing ratios
+  // Sort by standardizedImpact (highest first) then by number of contributing ratios
+  // This uses the normalized 0.07-1.29 scale for consistent ranking
   return flaws.sort((a, b) => {
     if (b.responsibleRatios.length !== a.responsibleRatios.length) {
       return b.responsibleRatios.length - a.responsibleRatios.length;
     }
-    return b.harmonyPercentageLost - a.harmonyPercentageLost;
+    return b.standardizedImpact - a.standardizedImpact;
   });
 }
 

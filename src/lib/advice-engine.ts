@@ -12,7 +12,7 @@ import type { ExclusiveCategory } from './recommendations/types';
 
 /**
  * Treatment exclusivity configuration
- * Based on FaceIQ logic for mutually exclusive procedures
+ * Defines mutually exclusive procedures
  */
 export interface TreatmentExclusivity {
   exclusiveCategory?: ExclusiveCategory;
@@ -312,9 +312,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 4, confidence: 0.85 },
       ratios_impacted: {
-        "Gonial Angle": { direction: "decrease", percentage: 3 },
-        "Bigonial Width": { direction: "increase", percentage: 4 },
-        "Ramus to Mandible Ratio": { direction: "increase", percentage: 2 }
+        "Gonial Angle": { direction: "decrease", percentage: 1 },
+        "Bigonial Width": { direction: "increase", percentage: 1.2 },
+        "Ramus to Mandible Ratio": { direction: "increase", percentage: 0.8 }
       },
       pillars: ["angularity", "masculinity", "bone_structure"]
     }
@@ -342,9 +342,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 5, confidence: 0.85 },
       ratios_impacted: {
-        "Cheekbone Height": { direction: "increase", percentage: 4 },
-        "Face Width to Height Ratio": { direction: "increase", percentage: 2 },
-        "Midface Ratio": { direction: "decrease", percentage: 2 }
+        "Cheekbone Height": { direction: "increase", percentage: 1.2 },
+        "Face Width to Height Ratio": { direction: "increase", percentage: 0.8 },
+        "Midface Ratio": { direction: "decrease", percentage: 0.8 }
       },
       pillars: ["angularity", "harmony", "youthfulness"]
     }
@@ -372,8 +372,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 2,
       effectiveness: { level: 'medium', score: 3, confidence: 0.70 },
       ratios_impacted: {
-        "Chin to Philtrum Ratio": { direction: "increase", percentage: 5 },
-        "Gonial Angle": { direction: "decrease", percentage: 3 }
+        "Chin to Philtrum Ratio": { direction: "increase", percentage: 1.5 },
+        "Gonial Angle": { direction: "decrease", percentage: 1 }
       },
       pillars: ["masculinity", "camouflage"]
     }
@@ -400,7 +400,7 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'high', score: 4, confidence: 0.80 },
       ratios_impacted: {
-        "Lower Lip to Upper Lip Ratio": { direction: "increase", percentage: 15 }
+        "Lower Lip to Upper Lip Ratio": { direction: "increase", percentage: 3.5 }
       },
       pillars: ["harmony", "femininity", "youthfulness"]
     }
@@ -428,9 +428,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 5,
       effectiveness: { level: 'high', score: 4, confidence: 0.90 },
       ratios_impacted: {
-        "Cheekbone Height": { direction: "increase", percentage: 8 },
-        "Jaw Slope": { direction: "decrease", percentage: 5 },
-        "Bigonial Width": { direction: "increase", percentage: 3 }
+        "Cheekbone Height": { direction: "increase", percentage: 2 },
+        "Jaw Slope": { direction: "decrease", percentage: 1.5 },
+        "Bigonial Width": { direction: "increase", percentage: 1 }
       },
       pillars: ["angularity", "bone_structure", "definition"]
     }
@@ -458,9 +458,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'low', score: 2, confidence: 0.50 },
       ratios_impacted: {
-        "Midface Ratio": { direction: "decrease", percentage: 2 },
-        "Nasolabial Angle": { direction: "increase", percentage: 3 },
-        "Gonial Angle": { direction: "decrease", percentage: 2 }
+        "Midface Ratio": { direction: "decrease", percentage: 0.8 },
+        "Nasolabial Angle": { direction: "increase", percentage: 1 },
+        "Gonial Angle": { direction: "decrease", percentage: 0.8 }
       },
       pillars: ["bone_structure", "posture", "long_term"]
     }
@@ -489,10 +489,10 @@ export const PLANS: RawPlan[] = [
       priority_score: 5,
       effectiveness: { level: 'high', score: 5, confidence: 0.90 },
       ratios_impacted: {
-        "Nasal Projection": { direction: "decrease", percentage: 10 },
-        "Nasal W to H Ratio": { direction: "decrease", percentage: 8 },
-        "Nasolabial Angle": { direction: "increase", percentage: 12 },
-        "Nasal Index": { direction: "decrease", percentage: 6 }
+        "Nasal Projection": { direction: "decrease", percentage: 2.5 },
+        "Nasal W to H Ratio": { direction: "decrease", percentage: 2 },
+        "Nasolabial Angle": { direction: "increase", percentage: 3 },
+        "Nasal Index": { direction: "decrease", percentage: 1.8 }
       },
       pillars: ["harmony", "profile", "ethnicity_specific"]
     }
@@ -520,9 +520,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 5,
       effectiveness: { level: 'high', score: 5, confidence: 0.92 },
       ratios_impacted: {
-        "Chin to Philtrum Ratio": { direction: "increase", percentage: 20 },
-        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 15 },
-        "Facial Convexity (Nasion)": { direction: "increase", percentage: 5 }
+        "Chin to Philtrum Ratio": { direction: "increase", percentage: 4.5 },
+        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 3.5 },
+        "Facial Convexity (Nasion)": { direction: "increase", percentage: 1.5 }
       },
       pillars: ["profile", "masculinity", "bone_structure"]
     }
@@ -550,8 +550,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 4, confidence: 0.80 },
       ratios_impacted: {
-        "Lateral Canthal Tilt": { direction: "increase", percentage: 40 },
-        "Eye Aspect Ratio": { direction: "increase", percentage: 10 }
+        "Lateral Canthal Tilt": { direction: "increase", percentage: 4.5 },
+        "Eye Aspect Ratio": { direction: "increase", percentage: 2.5 }
       },
       pillars: ["youthfulness", "alertness", "femininity"]
     }
@@ -579,8 +579,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'medium', score: 4, confidence: 0.75 },
       ratios_impacted: {
-        "Eyebrow Low Setedness": { direction: "decrease", percentage: 30 },
-        "Browridge Inclination Angle": { direction: "increase", percentage: 20 }
+        "Eyebrow Low Setedness": { direction: "decrease", percentage: 4 },
+        "Browridge Inclination Angle": { direction: "increase", percentage: 4.5 }
       },
       pillars: ["youthfulness", "masculinity", "upper_third"]
     }
@@ -611,8 +611,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'medium', score: 3, confidence: 0.75 },
       ratios_impacted: {
-        "Submental Cervical Angle": { direction: "decrease", percentage: 15 },
-        "Neck Width": { direction: "decrease", percentage: 10 }
+        "Submental Cervical Angle": { direction: "decrease", percentage: 3.5 },
+        "Neck Width": { direction: "decrease", percentage: 2.5 }
       },
       pillars: ["definition", "youthfulness", "neck"]
     }
@@ -640,8 +640,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 2,
       effectiveness: { level: 'medium', score: 3, confidence: 0.70 },
       ratios_impacted: {
-        "Submental Cervical Angle": { direction: "decrease", percentage: 12 },
-        "Neck Width": { direction: "decrease", percentage: 8 }
+        "Submental Cervical Angle": { direction: "decrease", percentage: 3 },
+        "Neck Width": { direction: "decrease", percentage: 2 }
       },
       pillars: ["definition", "non_invasive", "neck"]
     }
@@ -670,9 +670,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 4, confidence: 0.88 },
       ratios_impacted: {
-        "Chin to Philtrum Ratio": { direction: "increase", percentage: 18 },
-        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 12 },
-        "Facial Convexity (Nasion)": { direction: "increase", percentage: 4 }
+        "Chin to Philtrum Ratio": { direction: "increase", percentage: 4 },
+        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 3 },
+        "Facial Convexity (Nasion)": { direction: "increase", percentage: 1.2 }
       },
       pillars: ["profile", "masculinity", "bone_structure"]
     }
@@ -700,8 +700,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'high', score: 4, confidence: 0.80 },
       ratios_impacted: {
-        "Cheekbone Height": { direction: "increase", percentage: 6 },
-        "Face Width to Height Ratio": { direction: "decrease", percentage: 3 }
+        "Cheekbone Height": { direction: "increase", percentage: 1.8 },
+        "Face Width to Height Ratio": { direction: "decrease", percentage: 1 }
       },
       pillars: ["angularity", "definition", "bone_structure"]
     }
@@ -729,8 +729,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'high', score: 4, confidence: 0.85 },
       ratios_impacted: {
-        "Nasal W to H Ratio": { direction: "decrease", percentage: 12 },
-        "Nasal Index": { direction: "decrease", percentage: 8 }
+        "Nasal W to H Ratio": { direction: "decrease", percentage: 3 },
+        "Nasal Index": { direction: "decrease", percentage: 2 }
       },
       pillars: ["harmony", "profile", "ethnicity_specific"]
     }
@@ -758,7 +758,7 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'medium', score: 3, confidence: 0.75 },
       ratios_impacted: {
-        "Lateral Canthal Tilt": { direction: "increase", percentage: 20 }
+        "Lateral Canthal Tilt": { direction: "increase", percentage: 4.5 }
       },
       pillars: ["youthfulness", "alertness", "eye_area"]
     }
@@ -786,8 +786,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 5, confidence: 0.90 },
       ratios_impacted: {
-        "Submental Cervical Angle": { direction: "decrease", percentage: 25 },
-        "Neck Width": { direction: "decrease", percentage: 15 }
+        "Submental Cervical Angle": { direction: "decrease", percentage: 5 },
+        "Neck Width": { direction: "decrease", percentage: 3.5 }
       },
       pillars: ["definition", "youthfulness", "neck"]
     }
@@ -815,8 +815,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 2,
       effectiveness: { level: 'medium', score: 3, confidence: 0.75 },
       ratios_impacted: {
-        "Nasal Deviation": { direction: "decrease", percentage: 80 },
-        "Nasal Symmetry": { direction: "increase", percentage: 10 }
+        "Nasal Deviation": { direction: "decrease", percentage: 5 },
+        "Nasal Symmetry": { direction: "increase", percentage: 2.5 }
       },
       pillars: ["symmetry", "function", "breathing"]
     }
@@ -845,8 +845,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 5, confidence: 0.88 },
       ratios_impacted: {
-        "Chin to Philtrum Ratio": { direction: "increase", percentage: 25 },
-        "Midface Ratio": { direction: "decrease", percentage: 8 }
+        "Chin to Philtrum Ratio": { direction: "increase", percentage: 5 },
+        "Midface Ratio": { direction: "decrease", percentage: 2 }
       },
       pillars: ["youthfulness", "harmony", "lip_area"]
     }
@@ -875,9 +875,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 5,
       effectiveness: { level: 'high', score: 5, confidence: 0.90 },
       ratios_impacted: {
-        "Bigonial Width": { direction: "increase", percentage: 12 },
-        "Gonial Angle": { direction: "decrease", percentage: 8 },
-        "Ramus to Mandible Ratio": { direction: "increase", percentage: 6 }
+        "Bigonial Width": { direction: "increase", percentage: 3 },
+        "Gonial Angle": { direction: "decrease", percentage: 2 },
+        "Ramus to Mandible Ratio": { direction: "increase", percentage: 1.8 }
       },
       pillars: ["angularity", "masculinity", "bone_structure"]
     }
@@ -906,9 +906,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 5, confidence: 0.88 },
       ratios_impacted: {
-        "Cheekbone Height": { direction: "increase", percentage: 10 },
-        "Midface Ratio": { direction: "decrease", percentage: 6 },
-        "Face Width to Height Ratio": { direction: "increase", percentage: 4 }
+        "Cheekbone Height": { direction: "increase", percentage: 2.5 },
+        "Midface Ratio": { direction: "decrease", percentage: 1.8 },
+        "Face Width to Height Ratio": { direction: "increase", percentage: 1.2 }
       },
       pillars: ["angularity", "harmony", "bone_structure"]
     }
@@ -936,8 +936,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'medium', score: 4, confidence: 0.82 },
       ratios_impacted: {
-        "Submental Cervical Angle": { direction: "decrease", percentage: 15 },
-        "Neck Width": { direction: "decrease", percentage: 10 }
+        "Submental Cervical Angle": { direction: "decrease", percentage: 3.5 },
+        "Neck Width": { direction: "decrease", percentage: 2.5 }
       },
       pillars: ["definition", "youthfulness", "neck"]
     }
@@ -965,8 +965,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 4, confidence: 0.85 },
       ratios_impacted: {
-        "Submental Cervical Angle": { direction: "decrease", percentage: 20 },
-        "Neck Width": { direction: "decrease", percentage: 12 }
+        "Submental Cervical Angle": { direction: "decrease", percentage: 4.5 },
+        "Neck Width": { direction: "decrease", percentage: 3 }
       },
       pillars: ["definition", "youthfulness", "neck"]
     }
@@ -995,8 +995,8 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'medium', score: 3, confidence: 0.70 },
       ratios_impacted: {
-        "Cheekbone Height": { direction: "increase", percentage: 5 },
-        "Tear Trough Depth": { direction: "decrease", percentage: 40 }
+        "Cheekbone Height": { direction: "increase", percentage: 1.5 },
+        "Tear Trough Depth": { direction: "decrease", percentage: 4.5 }
       },
       pillars: ["youthfulness", "volume", "natural"]
     }
@@ -1024,7 +1024,7 @@ export const PLANS: RawPlan[] = [
       priority_score: 3,
       effectiveness: { level: 'high', score: 4, confidence: 0.80 },
       ratios_impacted: {
-        "Browridge Inclination Angle": { direction: "increase", percentage: 30 }
+        "Browridge Inclination Angle": { direction: "increase", percentage: 4 }
       },
       pillars: ["masculinity", "bone_structure", "upper_third"]
     }
@@ -1052,7 +1052,7 @@ export const PLANS: RawPlan[] = [
       priority_score: 2,
       effectiveness: { level: 'high', score: 4, confidence: 0.85 },
       ratios_impacted: {
-        "Lower Lip to Upper Lip Ratio": { direction: "decrease", percentage: 20 }
+        "Lower Lip to Upper Lip Ratio": { direction: "decrease", percentage: 4.5 }
       },
       pillars: ["harmony", "balance", "lip_area"]
     }
@@ -1081,9 +1081,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 4,
       effectiveness: { level: 'high', score: 5, confidence: 0.90 },
       ratios_impacted: {
-        "Bigonial Width": { direction: "decrease", percentage: 15 },
-        "Gonial Angle": { direction: "increase", percentage: 10 },
-        "Face Width to Height Ratio": { direction: "decrease", percentage: 8 }
+        "Bigonial Width": { direction: "decrease", percentage: 3.5 },
+        "Gonial Angle": { direction: "increase", percentage: 2.5 },
+        "Face Width to Height Ratio": { direction: "decrease", percentage: 2 }
       },
       pillars: ["femininity", "harmony", "bone_structure"]
     }
@@ -1112,9 +1112,9 @@ export const PLANS: RawPlan[] = [
       priority_score: 5,
       effectiveness: { level: 'high', score: 5, confidence: 0.92 },
       ratios_impacted: {
-        "Facial Convexity (Nasion)": { direction: "increase", percentage: 15 },
-        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 20 },
-        "Midface Ratio": { direction: "decrease", percentage: 10 }
+        "Facial Convexity (Nasion)": { direction: "increase", percentage: 3.5 },
+        "Recession Relative to Frankfort Plane": { direction: "decrease", percentage: 4.5 },
+        "Midface Ratio": { direction: "decrease", percentage: 2.5 }
       },
       pillars: ["profile", "bone_structure", "comprehensive"]
     }

@@ -17,7 +17,7 @@ export const sleepEnvironmentGuide: Guide = {
   order: 22,
   tags: ['sleep', 'environment', 'recovery', 'biohacking', 'bedroom'],
   relatedGuides: ['sleep-drivers', 'circadian-rhythm', 'recovery-protocols'],
-  productIds: ['magnesium_glycinate'],
+  productIds: ['magnesium_glycinate', 'sleep_mask', 'silk_pillowcase', 'blue_light_glasses'],
   forumCategory: 'lifestyle',
   heroMedia: {
     id: 'sleep-environment-hero',

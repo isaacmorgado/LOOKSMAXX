@@ -61,7 +61,7 @@ export function LandmarkAnalysisTool({
     initialLandmarks || defaultLandmarks
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(2); // FaceIQ parity: 2x/4x/8x discrete levels
+  const [zoomLevel, setZoomLevel] = useState(2); // 2x/4x/8x discrete levels
 
   // Reset state when mode changes (fixes side profile starting at step 52)
   useEffect(() => {
@@ -72,7 +72,7 @@ export function LandmarkAnalysisTool({
     setDetectionFailed(false);
     setLandmarks(newLandmarks);
     setPan({ x: 0, y: 0 });
-    setZoomLevel(2); // FaceIQ parity: start at 2x
+    setZoomLevel(2); // Reset to 2x
   }, [mode]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -242,7 +242,7 @@ export function LandmarkAnalysisTool({
   }, []);
 
   const handleResetZoom = useCallback(() => {
-    setZoomLevel(2); // FaceIQ parity: reset to 2x
+    setZoomLevel(2); // Reset to 2x
     setPan({ x: 0, y: 0 });
   }, []);
 
@@ -281,6 +281,75 @@ export function LandmarkAnalysisTool({
     }
   }, [currentStepIndex, handleResetZoom, onBack]);
 
+  // Landmark-specific zoom levels for optimal precision
+  // Fine detail landmarks (pupils, eyelids) get higher zoom, larger areas get lower zoom
+  const LANDMARK_ZOOM_LEVELS: Record<string, number> = {
+    // 2x zoom - larger landmarks
+    trichion: 2,
+    left_temporal: 2, right_temporal: 2,
+    left_auricular_lateral: 2, right_auricular_lateral: 2,
+
+    // 4x zoom - medium detail landmarks
+    left_pupila: 4, right_pupila: 4,
+    left_canthus_medialis: 4, left_canthus_lateralis: 4,
+    right_canthus_medialis: 4, right_canthus_lateralis: 4,
+    left_sulcus_palpebralis_lateralis: 4, right_sulcus_palpebralis_lateralis: 4,
+    left_supercilium_medialis: 4, left_supercilium_medial_corner: 4,
+    left_supercilium_superior: 4, left_supercilium_apex: 4, left_supercilium_lateralis: 4,
+    right_supercilium_medialis: 4, right_supercilium_medial_corner: 4,
+    right_supercilium_superior: 4, right_supercilium_apex: 4, right_supercilium_lateralis: 4,
+    left_ala_nasi: 4, right_ala_nasi: 4,
+    nasal_base: 4, subnasale: 4,
+    left_dorsum_nasi: 4, right_dorsum_nasi: 4,
+    labrale_superius: 4, cupids_bow: 4, mouth_middle: 4,
+    labrale_inferius: 4, left_cheilion: 4, right_cheilion: 4,
+    left_gonion_superior: 4, left_gonion_inferior: 4,
+    right_gonion_superior: 4, right_gonion_inferior: 4,
+    left_mentum_lateralis: 4, right_mentum_lateralis: 4, menton: 4,
+    left_zygion: 2, right_zygion: 2,
+    left_cervical_lateralis: 4, right_cervical_lateralis: 4,
+
+    // 8x zoom - fine detail landmarks (eyelids)
+    left_palpebra_superior: 8, left_palpebra_inferior: 8,
+    right_palpebra_superior: 8, right_palpebra_inferior: 8,
+    left_pretarsal_skin_crease: 8, right_pretarsal_skin_crease: 8,
+
+    // ========== SIDE PROFILE LANDMARKS ==========
+    // Note: Some IDs shared with front profile (trichion, subnasale, menton) - zoom applies to both
+    // 2x zoom - larger side landmarks
+    vertex: 2,
+    occiput: 2,
+    neckPoint: 2,
+    forehead: 2, // Separate from glabella
+
+    // 4x zoom - medium detail side landmarks
+    porion: 4,
+    orbitale: 4,
+    tragus: 4,
+    intertragicNotch: 4,
+    cornealApex: 4,
+    eyelidEnd: 4, // Lateral eyelid end in side profile
+    lowerEyelid: 4, // Lower eyelid margin in side profile
+    cheekbone: 4,
+    glabella: 4,
+    nasion: 4,
+    pronasale: 4,
+    rhinion: 4,
+    supratip: 4,
+    infratip: 4,
+    columella: 4,
+    subalare: 4,
+    labraleSuperius: 4,
+    cheilion: 4,
+    labraleInferius: 4,
+    sublabiale: 4,
+    pogonion: 4,
+    // menton: 4 already defined in front section (applies to both profiles)
+    cervicalPoint: 4,
+    gonionTop: 4,
+    gonionBottom: 4,
+  };
+
   // Auto-zoom to the current landmark's region - centers the landmark under the fixed orb
   const zoomToLandmark = useCallback((landmarkId: string) => {
     if (!autoZoomEnabled || !containerRef.current || !containerSize || !imageDimensions) return;
@@ -291,8 +360,8 @@ export function LandmarkAnalysisTool({
     const bounds = getImageBounds();
     if (bounds.renderedWidth <= 1 || bounds.renderedHeight <= 1) return; // Bounds not ready
 
-    // FaceIQ parity: Zoom to 2x for good precision
-    const newZoom = 2;
+    // Use landmark-specific zoom level, default to 2x
+    const newZoom = LANDMARK_ZOOM_LEVELS[landmarkId] || 2;
     setZoomLevel(newZoom);
 
     // Calculate pan so the landmark appears at container center (under the fixed orb)
@@ -609,7 +678,7 @@ export function LandmarkAnalysisTool({
                 Zoom Level
               </p>
               <div className="flex gap-2">
-                {/* FaceIQ parity: 2x/4x/8x discrete zoom levels */}
+                {/* 2x/4x/8x discrete zoom levels */}
                 {[2, 4, 8].map((level) => (
                   <button
                     key={level}

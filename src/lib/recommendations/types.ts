@@ -76,6 +76,7 @@ export interface Treatment {
 
   // Risk
   riskLevel: RiskLevel;
+  riskPercentage?: number; // 0-60 range, explicit percentage (derived from riskLevel if not provided)
   sideEffects: string[];
   contraindications: string[];
 
@@ -143,6 +144,7 @@ export interface Supplement {
 
   // Safety
   riskLevel: RiskLevel;
+  riskPercentage?: number; // 0-60 range, explicit percentage (derived from riskLevel if not provided)
   sideEffects: string[];
   interactions: string[];
   contraindications: string[];
@@ -277,3 +279,35 @@ export const PSL_TIERS: PSLRating[] = [
   { score: 3.5, tier: 'Below Average', percentile: 30.0, description: 'Below average' },
   { score: 3.0, tier: 'Subpar', percentile: 15.0, description: 'Noticeably below average' },
 ];
+
+// ============================================
+// RISK PERCENTAGE MAPPING
+// ============================================
+
+/**
+ * Maps riskLevel to a percentage value for FaceIQ parity
+ * - 'none' -> 0%
+ * - 'very_low' -> 5%
+ * - 'low' -> 10-15%
+ * - 'medium' -> 20-35%
+ * - 'high' -> 40-50%
+ * - 'very_high' -> 55-60%
+ */
+export const RISK_LEVEL_TO_PERCENTAGE: Record<RiskLevel, number> = {
+  'none': 0,
+  'very_low': 5,
+  'low': 12,
+  'medium': 28,
+  'high': 45,
+  'very_high': 55,
+};
+
+/**
+ * Get risk percentage for a treatment, either from explicit value or derived from riskLevel
+ */
+export function getRiskPercentage(treatment: { riskLevel: RiskLevel; riskPercentage?: number }): number {
+  if (treatment.riskPercentage !== undefined) {
+    return treatment.riskPercentage;
+  }
+  return RISK_LEVEL_TO_PERCENTAGE[treatment.riskLevel];
+}

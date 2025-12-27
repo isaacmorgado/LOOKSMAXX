@@ -1,22 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   HelpCircle,
   Book,
-  MessageCircle,
   Mail,
-  ExternalLink,
   ChevronRight,
   FileText,
-  Video,
   Users,
-  CheckCircle,
+  Ruler,
+  FlaskConical,
+  Sparkles,
 } from 'lucide-react';
 import { TabContent } from '../ResultsLayout';
 
-const DISCORD_URL = 'https://discord.gg/looksmaxx';
 const SUPPORT_EMAIL = 'support@looksmaxx.app';
 
 // ============================================
@@ -29,10 +27,9 @@ interface SupportCardProps {
   description: string;
   action?: string;
   onClick?: () => void;
-  external?: boolean;
 }
 
-function SupportCard({ icon, title, description, action, onClick, external }: SupportCardProps) {
+function SupportCard({ icon, title, description, action, onClick }: SupportCardProps) {
   return (
     <motion.button
       onClick={onClick}
@@ -50,7 +47,7 @@ function SupportCard({ icon, title, description, action, onClick, external }: Su
           {action && (
             <div className="flex items-center gap-1 mt-2 text-sm text-cyan-400">
               {action}
-              {external ? <ExternalLink size={14} /> : <ChevronRight size={14} />}
+              <ChevronRight size={14} />
             </div>
           )}
         </div>
@@ -82,23 +79,10 @@ function FAQItem({ question, answer }: FAQItemProps) {
 // ============================================
 
 export function SupportTab() {
-  const [toast, setToast] = useState<string | null>(null);
-
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3000);
-  };
+  const router = useRouter();
 
   const handleDocs = () => {
-    showToast('Documentation coming soon!');
-  };
-
-  const handleVideos = () => {
-    window.open('https://youtube.com/@looksmaxx', '_blank');
-  };
-
-  const handleDiscord = () => {
-    window.open(DISCORD_URL, '_blank');
+    router.push('/docs');
   };
 
   const handleEmail = () => {
@@ -110,44 +94,15 @@ export function SupportTab() {
       title="Support"
       subtitle="Get help and learn more about facial analysis"
     >
-      {/* Toast notification */}
-      {toast && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="fixed top-4 right-4 z-50 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg flex items-center gap-2"
-        >
-          <CheckCircle size={16} className="text-cyan-400" />
-          <span className="text-sm text-white">{toast}</span>
-        </motion.div>
-      )}
-
       <div className="max-w-3xl space-y-8">
         {/* Quick Help */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SupportCard
             icon={<Book size={24} className="text-cyan-400" />}
             title="Documentation"
-            description="Learn about facial measurements and what they mean"
+            description="Learn about facial measurements, scoring, and enhancement methods"
             action="Read docs"
             onClick={handleDocs}
-          />
-          <SupportCard
-            icon={<Video size={24} className="text-purple-400" />}
-            title="Video Tutorials"
-            description="Watch step-by-step guides on using the app"
-            action="Watch videos"
-            onClick={handleVideos}
-            external
-          />
-          <SupportCard
-            icon={<MessageCircle size={24} className="text-green-400" />}
-            title="Community"
-            description="Connect with others and share experiences"
-            action="Join Discord"
-            onClick={handleDiscord}
-            external
           />
           <SupportCard
             icon={<Mail size={24} className="text-yellow-400" />}
@@ -192,30 +147,54 @@ export function SupportTab() {
         <div>
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <FileText size={20} className="text-cyan-400" />
-            Additional Resources
+            Learning Resources
           </h3>
           <div className="space-y-2">
-            <a
-              href="#"
-              className="flex items-center justify-between p-3 bg-neutral-900/40 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors"
+            <button
+              onClick={() => router.push('/docs#proportions')}
+              className="w-full flex items-center justify-between p-4 bg-neutral-900/40 border border-neutral-800 rounded-xl hover:border-cyan-500/30 transition-colors group"
             >
-              <span className="text-sm text-neutral-300">Understanding Facial Proportions</span>
-              <ExternalLink size={14} className="text-neutral-500" />
-            </a>
-            <a
-              href="#"
-              className="flex items-center justify-between p-3 bg-neutral-900/40 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors"
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
+                  <Ruler size={16} className="text-cyan-400" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-bold text-white block">Understanding Facial Proportions</span>
+                  <span className="text-[10px] text-neutral-500">Golden ratios, facial thirds, angular measurements</span>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+            </button>
+            <button
+              onClick={() => router.push('/docs#harmony')}
+              className="w-full flex items-center justify-between p-4 bg-neutral-900/40 border border-neutral-800 rounded-xl hover:border-purple-500/30 transition-colors group"
             >
-              <span className="text-sm text-neutral-300">The Science of Facial Harmony</span>
-              <ExternalLink size={14} className="text-neutral-500" />
-            </a>
-            <a
-              href="#"
-              className="flex items-center justify-between p-3 bg-neutral-900/40 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors"
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                  <FlaskConical size={16} className="text-purple-400" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-bold text-white block">The Science of Facial Harmony</span>
+                  <span className="text-[10px] text-neutral-500">Scoring algorithms, PSL ratings, bezier curves</span>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-neutral-600 group-hover:text-purple-400 transition-colors" />
+            </button>
+            <button
+              onClick={() => router.push('/docs#enhancement')}
+              className="w-full flex items-center justify-between p-4 bg-neutral-900/40 border border-neutral-800 rounded-xl hover:border-green-500/30 transition-colors group"
             >
-              <span className="text-sm text-neutral-300">Non-Surgical Enhancement Guide</span>
-              <ExternalLink size={14} className="text-neutral-500" />
-            </a>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                  <Sparkles size={16} className="text-green-400" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-bold text-white block">Non-Surgical Enhancement Guide</span>
+                  <span className="text-[10px] text-neutral-500">Supplements, lifestyle, minimally invasive options</span>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-neutral-600 group-hover:text-green-400 transition-colors" />
+            </button>
           </div>
         </div>
 

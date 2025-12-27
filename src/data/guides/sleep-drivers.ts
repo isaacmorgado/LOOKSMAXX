@@ -17,7 +17,7 @@ export const sleepDriversGuide: Guide = {
   order: 21,
   tags: ['sleep', 'recovery', 'hormones', 'cortisol', 'melatonin'],
   relatedGuides: ['circadian-rhythm', 'sleep-environment', 'cortisol-management'],
-  productIds: ['magnesium_glycinate'],
+  productIds: ['magnesium_glycinate', 'melatonin_lowdose', 'blue_light_glasses'],
   forumCategory: 'lifestyle',
   heroMedia: {
     id: 'sleep-drivers-hero',

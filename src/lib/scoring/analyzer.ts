@@ -144,7 +144,7 @@ export function analyzeFrontProfile(
   const rightCheilion = getLandmark(landmarks, 'right_cheilion');
   const labraleSuperius = getLandmark(landmarks, 'labrale_superius');
   const labraleInferius = getLandmark(landmarks, 'labrale_inferius');
-  const nasion = getLandmark(landmarks, 'nasion'); // Added for FWHR parity
+  const nasion = getLandmark(landmarks, 'nasion'); // For FWHR calculation
 
   // FACIAL THIRDS
   if (trichion && nasalBase && subnasale && menton) {
@@ -172,7 +172,7 @@ export function analyzeFrontProfile(
   }
 
   // FACE WIDTH TO HEIGHT RATIO (FWHR)
-  // Parity Fix: Use Nasion to Upper Lip (Standard definition) instead of Philtrum
+  // Uses Nasion to Upper Lip (standard cephalometric definition)
   if (leftZygion && rightZygion && nasion && labraleSuperius) {
     const bizygomaticWidth = distance(leftZygion, rightZygion);
     const upperFaceHeight = distance(nasion, labraleSuperius);
@@ -226,8 +226,7 @@ export function analyzeFrontProfile(
   }
 
   // EYE SEPARATION RATIO
-  // Parity Fix: Use IPD / Bizygomatic Width * 100 (Ref expects ~46%)
-  // NOTE: This logic matches 'interpupillaryRatio' below, but ensures correct metric ID parity.
+  // IPD / Bizygomatic Width * 100 (ideal ~46%)
   if (leftPupil && rightPupil && leftZygion && rightZygion) {
     const bizygomatic = distance(leftZygion, rightZygion);
     const ipd = distance(leftPupil, rightPupil);
@@ -303,7 +302,7 @@ export function analyzeFrontProfile(
   }
 
   // MIDFACE RATIO
-  // Parity Fix: Use IPD / (Mid-Pupil to Cupids Bow) based on Ref (CupidsBow, Pupils)
+  // IPD / (Mid-Pupil to Cupids Bow)
   if (leftPupil && rightPupil && labraleSuperius) {
     const ipd = distance(leftPupil, rightPupil);
     const midPupil = {
@@ -318,7 +317,7 @@ export function analyzeFrontProfile(
   }
 
   // CHEEKBONE HEIGHT
-  // Parity Fix: Added missing calculation for 'cheekboneHeight' (Ref Ideal 83-100%)
+  // Vertical position of Zygion within midface (ideal 83-100%)
   if (leftZygion && rightZygion && leftPupil && rightPupil && subnasale) {
     // Calculate vertical position of Zygion within the Midface (Pupil to Subnasale)
     // Higher Zygion (smaller y) -> Larger distance from Subnasale -> Higher %
@@ -508,10 +507,10 @@ export function analyzeSideProfile(
   const cervicalPoint = getLandmark(landmarks, 'cervicalPoint');
   const orbitale = getLandmark(landmarks, 'orbitale');
   const porion = getLandmark(landmarks, 'porion');
-  const gonionTop = getLandmark(landmarks, 'gonionTop'); // Added for Gonial Angle parity
+  const gonionTop = getLandmark(landmarks, 'gonionTop'); // Articulare equivalent for gonial angle
 
   // GONIAL ANGLE
-  // Parity Fix: Preferred use of gonionTop (Articulare) if available, fallback to tragus
+  // Uses gonionTop (Articulare) if available, falls back to tragus
   const ramusTop = gonionTop || tragus;
   if (ramusTop && gonionBottom && menton) {
     const angle = calculateAngle(ramusTop, gonionBottom, menton);

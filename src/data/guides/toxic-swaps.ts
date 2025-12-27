@@ -16,8 +16,8 @@ export const toxicSwapsGuide: Guide = {
   estimatedReadTime: 4,
   order: 41,
   tags: ['toxins', 'swaps', 'products', 'environment', 'biohacking'],
-  relatedGuides: ['toxins-aesthetics', 'environmental-stress', 'skincare-basics'],
-  productIds: [],
+  relatedGuides: ['toxins-aesthetics', 'environmental-stress', 'skincare'],
+  productIds: ['water_jug', 'cerave_cleanser', 'cerave_moisturizer'],
   forumCategory: 'lifestyle',
   heroMedia: {
     id: 'toxic-swaps-hero',

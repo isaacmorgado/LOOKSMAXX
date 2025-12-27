@@ -391,7 +391,7 @@ export function OverviewTab() {
       rightContent={
         <div className="flex items-center gap-2">
           <ShareButton score={overallScore} frontScore={frontScore} sideScore={sideScore} />
-          <ExportButton elementId="results-overview" />
+          <ExportButton />
         </div>
       }
     >

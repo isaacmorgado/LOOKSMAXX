@@ -641,12 +641,12 @@ export const SIDE_LANDMARK_CATEGORIES: LandmarkCategory[] = [
   {
     name: 'Forehead',
     color: '#4ECDC4',
-    landmarks: ['glabella'],
+    landmarks: ['forehead', 'glabella'],
   },
   {
     name: 'Eye Region',
     color: '#45B7D1',
-    landmarks: ['cornealApex', 'orbitale'],
+    landmarks: ['cornealApex', 'orbitale', 'eyelidEnd', 'lowerEyelid'],
   },
   {
     name: 'Nose',
@@ -789,6 +789,26 @@ export const SIDE_PROFILE_LANDMARKS: LandmarkPoint[] = [
     y: 0.34,
     category: 'Eye Region',
   },
+  // 9b. eyelidEnd
+  {
+    id: 'eyelidEnd',
+    label: 'Eyelid End',
+    medicalTerm: 'Lateral Eyelid',
+    description: 'Lateral end point of the visible eyelid in profile view',
+    x: 0.38,
+    y: 0.33,
+    category: 'Eye Region',
+  },
+  // 9c. lowerEyelid
+  {
+    id: 'lowerEyelid',
+    label: 'Lower Eyelid',
+    medicalTerm: 'Palpebra Inferior',
+    description: 'Lower eyelid margin as seen from side profile',
+    x: 0.32,
+    y: 0.36,
+    category: 'Eye Region',
+  },
   // 10. cheekbone
   {
     id: 'cheekbone',
@@ -808,6 +828,16 @@ export const SIDE_PROFILE_LANDMARKS: LandmarkPoint[] = [
     x: 0.35,
     y: 0.1,
     category: 'Cranium',
+  },
+  // 11b. forehead
+  {
+    id: 'forehead',
+    label: 'Forehead',
+    medicalTerm: 'Frontalis',
+    description: 'Most prominent point of the forehead between hairline and brow ridge',
+    x: 0.30,
+    y: 0.20,
+    category: 'Forehead',
   },
   // 12. glabella
   {

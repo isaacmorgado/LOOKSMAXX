@@ -149,7 +149,7 @@ export default function HomePage() {
               Sign In
             </Link>
             <Link
-              href="/gender"
+              href="/signup"
               className="h-10 px-5 rounded-xl bg-cyan-500 text-black text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/20"
             >
               Start Analysis <ArrowRight size={12} />
@@ -206,7 +206,7 @@ export default function HomePage() {
               className="flex flex-col sm:flex-row items-center gap-4 mb-16"
             >
               <Link
-                href="/gender"
+                href="/signup"
                 className="group h-14 px-10 bg-cyan-500 text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-cyan-400 transition-all flex items-center gap-3 shadow-xl shadow-cyan-500/30"
               >
                 Start Free Analysis
@@ -387,7 +387,7 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <Link
-                  href="/gender"
+                  href="/signup"
                   className={`w-full h-12 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center transition-all ${
                     plan.highlighted
                       ? 'bg-cyan-500 text-black hover:bg-cyan-400'
@@ -424,7 +424,7 @@ export default function HomePage() {
             <div>
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-4">Product</h4>
               <ul className="space-y-3">
-                <li><Link href="/gender" className="text-xs text-neutral-600 hover:text-cyan-400 transition-colors font-medium">Start Analysis</Link></li>
+                <li><Link href="/signup" className="text-xs text-neutral-600 hover:text-cyan-400 transition-colors font-medium">Start Analysis</Link></li>
                 <li><Link href="/forum" className="text-xs text-neutral-600 hover:text-cyan-400 transition-colors font-medium">Community</Link></li>
                 <li><Link href="#pricing" className="text-xs text-neutral-600 hover:text-cyan-400 transition-colors font-medium">Pricing</Link></li>
               </ul>

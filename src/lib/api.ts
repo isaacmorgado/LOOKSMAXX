@@ -611,6 +611,16 @@ class ApiClient {
     });
   }
 
+  async verifyEmail(token: string): Promise<{ message: string; email: string }> {
+    return this.request(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+  }
+
+  async resendVerification(): Promise<{ message: string }> {
+    return this.request('/auth/resend-verification', {
+      method: 'POST',
+    });
+  }
+
   // === FORUM ===
 
   // Categories

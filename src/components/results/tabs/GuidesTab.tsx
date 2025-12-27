@@ -287,7 +287,6 @@ function GuideStatsCard() {
 
   return (
     <div className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-6 mb-8">
-
       <div className="flex items-center gap-4 mb-6">
         <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center">
           <BookOpen size={22} className="text-cyan-400" />

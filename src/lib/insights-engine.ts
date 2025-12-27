@@ -1576,7 +1576,7 @@ export function getSeverityLabel(severity: SeverityLevel): string {
 /**
  * Calculate confidence level for flaw detection based on Z-score magnitude.
  *
- * Logic from FaceIQ:
+ * Confidence level logic:
  * - confirmed: |z| >= 2 (high statistical certainty - 2+ standard deviations)
  * - likely: 1 <= |z| < 2 (moderate certainty - 1-2 standard deviations)
  * - possible: 0.5 <= |z| < 1 (low certainty - 0.5-1 standard deviation)
@@ -1642,6 +1642,233 @@ export function calculateFlawConfidence(
 
   // Fall back to score-based confidence
   return calculateConfidenceFromScore(avgScore);
+}
+
+// ============================================
+// STANDARDIZED IMPACT CALCULATION
+// ============================================
+
+/**
+ * StandardizedImpact range constants
+ * Range: 0.07 (minimal) to 1.29 (maximum severity)
+ */
+const STANDARDIZED_IMPACT_MIN = 0.07;
+const STANDARDIZED_IMPACT_MAX = 1.29;
+const STANDARDIZED_IMPACT_RANGE = STANDARDIZED_IMPACT_MAX - STANDARDIZED_IMPACT_MIN;
+
+/**
+ * Maximum Z-score for normalization (3+ standard deviations = maximum severity)
+ */
+const MAX_Z_SCORE_FOR_NORMALIZATION = 3.0;
+
+/**
+ * Calculate standardized impact score for consistent flaw ranking.
+ *
+ * This normalizes the deviation relative to metric's typical variance,
+ * producing a score in the 0.07-1.29 range.
+ * Higher values indicate more severe flaws.
+ *
+ * Formula:
+ * 1. Calculate Z-score for each contributing metric
+ * 2. Take the maximum Z-score (worst deviation = most impact)
+ * 3. Normalize to 0.07-1.29 range:
+ *    - Z = 0 maps to 0.07 (minimal impact)
+ *    - Z >= 3 maps to 1.29 (maximum impact)
+ *    - Linear interpolation in between
+ *
+ * @param matchedMetrics - Array of metrics contributing to the flaw
+ * @param avgScore - Fallback: average score when Z-scores unavailable
+ * @returns Normalized standardized impact (0.07-1.29)
+ */
+export function calculateStandardizedImpact(
+  matchedMetrics: MatchedMetric[],
+  avgScore: number
+): number {
+  // Calculate Z-scores for each metric if we have the config
+  const zScores: number[] = [];
+
+  for (const metric of matchedMetrics) {
+    const config = MASTER_SCORING_DB[metric.metricId];
+    if (config && config.std_dev > 0) {
+      const zScore = calculateZScore(metric.value, config.mean, config.std_dev);
+      zScores.push(zScore);
+    }
+  }
+
+  let normalizedScore: number;
+
+  if (zScores.length > 0) {
+    // Use maximum Z-score (highest deviation = highest severity)
+    const maxZScore = Math.max(...zScores);
+
+    // Clamp Z-score to 0-3 range, then normalize
+    const clampedZScore = Math.min(maxZScore, MAX_Z_SCORE_FOR_NORMALIZATION);
+    const normalized = clampedZScore / MAX_Z_SCORE_FOR_NORMALIZATION;
+
+    // Map to 0.07-1.29 range
+    normalizedScore = STANDARDIZED_IMPACT_MIN + (normalized * STANDARDIZED_IMPACT_RANGE);
+  } else {
+    // Fallback: derive from score (0-10 scale)
+    // Score 0 = max impact (1.29), Score 10 = min impact (0.07)
+    const scoreNormalized = Math.max(0, Math.min(10, 10 - avgScore)) / 10;
+    normalizedScore = STANDARDIZED_IMPACT_MIN + (scoreNormalized * STANDARDIZED_IMPACT_RANGE);
+  }
+
+  // Round to 2 decimal places for consistency
+  return Math.round(normalizedScore * 100) / 100;
+}
+
+/**
+ * Calculate standardized impact from score only (no Z-scores).
+ * Used when metric values/configs are not available.
+ *
+ * @param score - Score on 0-10 scale (lower = worse)
+ * @returns Normalized standardized impact (0.07-1.29)
+ */
+export function calculateStandardizedImpactFromScore(score: number): number {
+  // Score 0 = max impact (1.29), Score 10 = min impact (0.07)
+  const safeScore = Math.max(0, Math.min(10, score));
+  const scoreNormalized = (10 - safeScore) / 10;
+  const impact = STANDARDIZED_IMPACT_MIN + (scoreNormalized * STANDARDIZED_IMPACT_RANGE);
+  return Math.round(impact * 100) / 100;
+}
+
+/**
+ * Calculate cumulative/rolling standardized impact.
+ * Sums multiple impacts with diminishing returns to prevent excessive totals.
+ *
+ * @param impacts - Array of individual standardizedImpact values
+ * @returns Cumulative impact with diminishing returns applied
+ */
+export function calculateRollingStandardizedImpact(impacts: number[]): number {
+  if (impacts.length === 0) return STANDARDIZED_IMPACT_MIN;
+
+  // Sort by severity (highest first) for proper diminishing returns
+  const sorted = [...impacts].sort((a, b) => b - a);
+
+  let total = 0;
+  sorted.forEach((impact, index) => {
+    // Each subsequent impact contributes 80% of the previous
+    const diminishingFactor = Math.pow(0.8, index);
+    total += impact * diminishingFactor;
+  });
+
+  // Cap at a reasonable maximum (e.g., 5.0 for extreme cases)
+  return Math.round(Math.min(total, 5.0) * 100) / 100;
+}
+
+// ============================================
+// HARMONY PERCENTAGE LOST CALCULATION
+// ============================================
+
+/**
+ * HarmonyPercentageLost range constants
+ * Range: 0.7% (minimal flaw) to 13% (maximum severity)
+ */
+const HARMONY_PERCENTAGE_MIN = 0.7;
+const HARMONY_PERCENTAGE_MAX = 13.0;
+
+/**
+ * Calculate harmonyPercentageLost for a flaw.
+ *
+ * The calculation considers:
+ * 1. Deviation magnitude (Z-score) - How far from ideal the metric is
+ * 2. Metric weight - Some metrics matter more than others (from METRIC_CONFIGS)
+ * 3. Score severity - Lower scores indicate worse deviations
+ *
+ * Range: 0.7% to 13% per flaw
+ * The sum of all harmonyPercentageLost should approximate total points lost from ideal.
+ *
+ * Formula: harmonyPercentageLost = baseImpact * weightMultiplier * zScoreMultiplier
+ * - baseImpact: (10 - avgScore) / 10 * 10 = points lost (0-10 scale)
+ * - weightMultiplier: Average weight of matched metrics, normalized (0.5 to 2.0)
+ * - zScoreMultiplier: Based on confidence level (0.85 to 1.5)
+ *
+ * The result is clamped to 0.7%-13% range.
+ *
+ * @param avgScore - Average score of the flaw (0-10 scale)
+ * @param matchedMetrics - Array of metrics contributing to the flaw
+ * @param confidence - Confidence level (confirmed/likely/possible)
+ * @returns Harmony percentage lost (0.7-13.0)
+ */
+export function calculateHarmonyPercentageLost(
+  avgScore: number,
+  matchedMetrics: MatchedMetric[],
+  confidence: ConfidenceLevel
+): number {
+  // 1. Base impact: How many points lost from ideal (10)
+  // Score of 5 = 50% of max impact, Score of 2 = 80% of max impact
+  const pointsLost = 10 - Math.max(0, Math.min(10, avgScore));
+  const normalizedImpact = pointsLost / 10; // 0 to 1 scale
+
+  // 2. Calculate average metric weight for this flaw
+  let totalWeight = 0;
+  let weightCount = 0;
+
+  for (const metric of matchedMetrics) {
+    const config = METRIC_CONFIGS[metric.metricId];
+    if (config && config.weight) {
+      totalWeight += config.weight;
+      weightCount++;
+    }
+  }
+
+  // Average weight (default to 0.03 if no weights found, which is typical)
+  const avgWeight = weightCount > 0 ? totalWeight / weightCount : 0.03;
+
+  // Normalize weight to a multiplier (0.03 is typical, so 0.03 -> 1.0)
+  // Range: 0.01 (low importance) -> 0.5x, 0.06 (high importance) -> 2.0x
+  const weightMultiplier = Math.max(0.5, Math.min(2.0, avgWeight / 0.03));
+
+  // 3. Z-score based multiplier from confidence level
+  // Higher confidence (confirmed) = higher Z-score = bigger impact
+  let zScoreMultiplier: number;
+  switch (confidence) {
+    case 'confirmed':
+      zScoreMultiplier = 1.5; // |z| >= 2
+      break;
+    case 'likely':
+      zScoreMultiplier = 1.15; // 1 <= |z| < 2
+      break;
+    case 'possible':
+    default:
+      zScoreMultiplier = 0.85; // 0.5 <= |z| < 1
+      break;
+  }
+
+  // 4. Calculate raw harmony percentage lost
+  // Base formula: 10% max impact scaled by weight and Z-score
+  const basePercentage = 10; // Max 10% for a complete flaw
+  const rawPercentageLost = basePercentage * normalizedImpact * weightMultiplier * zScoreMultiplier;
+
+  // 5. Clamp to valid range: 0.7% to 13%
+  const harmonyPercentageLost = Math.max(HARMONY_PERCENTAGE_MIN, Math.min(HARMONY_PERCENTAGE_MAX, rawPercentageLost));
+
+  return Math.round(harmonyPercentageLost * 100) / 100; // Round to 2 decimal places
+}
+
+/**
+ * Calculate rolling/cumulative harmony percentage lost across multiple flaws.
+ * Applies diminishing returns to prevent unrealistic total impact.
+ *
+ * @param percentages - Array of individual harmonyPercentageLost values
+ * @returns Cumulative percentage with diminishing returns
+ */
+export function calculateRollingHarmonyPercentageLost(percentages: number[]): number {
+  if (percentages.length === 0) return 0;
+
+  // Sort by severity (highest first) for proper diminishing returns
+  const sorted = [...percentages].sort((a, b) => b - a);
+
+  let total = 0;
+  sorted.forEach((pct, index) => {
+    // Each subsequent flaw contributes 85% of full value (less aggressive than standardizedImpact)
+    const diminishingFactor = Math.pow(0.85, index);
+    total += pct * diminishingFactor;
+  });
+
+  // Cap at 100% (complete harmony loss is theoretically impossible)
+  return Math.round(Math.min(total, 100) * 100) / 100;
 }
 
 // ============================================
@@ -1722,11 +1949,215 @@ export interface MatchedMetric {
   idealMax: number;
   unit: string;
   category: string;
+  /** Facial landmarks used to calculate this metric */
+  usedLandmarks?: string[];
+}
+
+// ============================================
+// OVERLAP TRACKING FOR DEDUPLICATION
+// ============================================
+
+/**
+ * Tracks which metrics and landmarks have already contributed to point deductions.
+ * Used to prevent double-counting related flaws that share contributing metrics.
+ */
+export interface OverlapTracker {
+  /** Set of metric IDs that have already been fully counted */
+  usedMetrics: Set<string>;
+  /** Set of landmark IDs that have already contributed to deductions */
+  usedLandmarks: Set<string>;
+  /** Map of metric ID to the percentage of its impact already counted (0-1) */
+  metricUsage: Map<string, number>;
+}
+
+/**
+ * Result of adjusting a flaw's impact for overlap with previous flaws
+ */
+export interface OverlapAdjustment {
+  /** The adjusted impact after accounting for overlap (may be reduced) */
+  adjustedImpact: number;
+  /** Percentage of original impact that was applied (0-1) */
+  appliedPercentage: number;
+  /** List of overlapping metric IDs that caused reduction */
+  overlappingMetrics: string[];
+  /** List of overlapping landmark IDs that caused reduction */
+  overlappingLandmarks: string[];
 }
 
 export interface InsightClassificationResult {
   strengths: ClassifiedStrength[];
   weaknesses: ClassifiedWeakness[];
+}
+
+// ============================================
+// OVERLAP DEDUPLICATION FUNCTIONS
+// ============================================
+
+/**
+ * Creates a new empty overlap tracker.
+ * Used to track which metrics/landmarks have contributed to point deductions.
+ */
+export function createOverlapTracker(): OverlapTracker {
+  return {
+    usedMetrics: new Set<string>(),
+    usedLandmarks: new Set<string>(),
+    metricUsage: new Map<string, number>(),
+  };
+}
+
+/**
+ * Gets the landmarks used by a metric from METRIC_CONFIGS.
+ * Falls back to the MatchedMetric's usedLandmarks if present.
+ */
+export function getLandmarksForMetric(metricId: string, matchedMetric?: MatchedMetric): string[] {
+  // First check the matched metric for landmarks (may have been enriched)
+  if (matchedMetric?.usedLandmarks && matchedMetric.usedLandmarks.length > 0) {
+    return matchedMetric.usedLandmarks;
+  }
+
+  // Check METRIC_CONFIGS for usedLandmarks
+  const config = METRIC_CONFIGS[metricId];
+  if (config?.usedLandmarks && config.usedLandmarks.length > 0) {
+    return config.usedLandmarks;
+  }
+
+  // No landmarks found
+  return [];
+}
+
+/**
+ * Calculates the overlap percentage between a flaw's metrics/landmarks and previously counted ones.
+ * Returns a value between 0 (no overlap) and 1 (complete overlap).
+ *
+ * The overlap is calculated as:
+ * - 50% weight on metric overlap (metrics that have already been counted)
+ * - 50% weight on landmark overlap (landmarks that have already been used)
+ *
+ * @param matchedMetrics - The metrics contributing to the current flaw
+ * @param tracker - The current overlap tracker state
+ * @returns A value between 0-1 indicating overlap percentage
+ */
+export function calculateOverlapPercentage(
+  matchedMetrics: MatchedMetric[],
+  tracker: OverlapTracker
+): { overlap: number; overlappingMetrics: string[]; overlappingLandmarks: string[] } {
+  if (matchedMetrics.length === 0) {
+    return { overlap: 0, overlappingMetrics: [], overlappingLandmarks: [] };
+  }
+
+  const overlappingMetrics: string[] = [];
+  const overlappingLandmarks: string[] = [];
+
+  // Calculate metric overlap
+  let metricOverlapSum = 0;
+  for (const metric of matchedMetrics) {
+    const usagePercent = tracker.metricUsage.get(metric.metricId) || 0;
+    if (usagePercent > 0) {
+      overlappingMetrics.push(metric.metricId);
+      metricOverlapSum += usagePercent;
+    }
+  }
+  const metricOverlap = metricOverlapSum / matchedMetrics.length;
+
+  // Calculate landmark overlap
+  const allLandmarks = new Set<string>();
+  let overlappingLandmarkCount = 0;
+
+  for (const metric of matchedMetrics) {
+    const landmarks = getLandmarksForMetric(metric.metricId, metric);
+    for (const landmark of landmarks) {
+      allLandmarks.add(landmark);
+      if (tracker.usedLandmarks.has(landmark)) {
+        overlappingLandmarkCount++;
+        if (!overlappingLandmarks.includes(landmark)) {
+          overlappingLandmarks.push(landmark);
+        }
+      }
+    }
+  }
+
+  const landmarkOverlap = allLandmarks.size > 0
+    ? overlappingLandmarkCount / allLandmarks.size
+    : 0;
+
+  // Weighted average: 50% metric overlap + 50% landmark overlap
+  const totalOverlap = (metricOverlap * 0.5) + (landmarkOverlap * 0.5);
+
+  return {
+    overlap: Math.min(1, totalOverlap),  // Cap at 100%
+    overlappingMetrics,
+    overlappingLandmarks,
+  };
+}
+
+/**
+ * Adjusts a flaw's impact based on overlap with previously counted flaws.
+ *
+ * This prevents double-counting when multiple flaws share:
+ * - The same metrics (e.g., both "weak jaw" and "recessed chin" use "Gonial Angle")
+ * - The same landmarks (e.g., both use "menton" or "left_zygion")
+ *
+ * The adjustment follows a diminishing returns model:
+ * - First flaw to use a metric/landmark gets full impact
+ * - Subsequent flaws get reduced impact proportional to overlap
+ *
+ * @param flaw - The classified weakness being processed
+ * @param tracker - The current overlap tracker state (will be mutated)
+ * @param rawImpact - The raw impact before adjustment (typically (10 - avgScore) * 0.5)
+ * @returns OverlapAdjustment with the adjusted impact and metadata
+ */
+export function adjustForOverlap(
+  flaw: ClassifiedWeakness,
+  tracker: OverlapTracker,
+  rawImpact: number
+): OverlapAdjustment {
+  const { matchedMetrics } = flaw;
+
+  // Calculate overlap with previously counted metrics/landmarks
+  const { overlap, overlappingMetrics, overlappingLandmarks } = calculateOverlapPercentage(
+    matchedMetrics,
+    tracker
+  );
+
+  // Apply diminishing returns: reduce impact by overlap percentage
+  // If 50% overlap, apply 50% of the raw impact
+  const appliedPercentage = 1 - overlap;
+  const adjustedImpact = rawImpact * appliedPercentage;
+
+  // Update the tracker with this flaw's metrics and landmarks
+  for (const metric of matchedMetrics) {
+    // Mark metric as used (track cumulative usage, max 1.0)
+    const currentUsage = tracker.metricUsage.get(metric.metricId) || 0;
+    tracker.metricUsage.set(metric.metricId, Math.min(1, currentUsage + (1 / matchedMetrics.length)));
+    tracker.usedMetrics.add(metric.metricId);
+
+    // Mark landmarks as used
+    const landmarks = getLandmarksForMetric(metric.metricId, metric);
+    for (const landmark of landmarks) {
+      tracker.usedLandmarks.add(landmark);
+    }
+  }
+
+  return {
+    adjustedImpact,
+    appliedPercentage,
+    overlappingMetrics,
+    overlappingLandmarks,
+  };
+}
+
+/**
+ * Enriches matched metrics with usedLandmarks from METRIC_CONFIGS.
+ * This allows the deduplication logic to access landmark data.
+ */
+export function enrichMatchedMetricsWithLandmarks(matchedMetrics: MatchedMetric[]): MatchedMetric[] {
+  return matchedMetrics.map(metric => {
+    const landmarks = getLandmarksForMetric(metric.metricId, metric);
+    return {
+      ...metric,
+      usedLandmarks: landmarks.length > 0 ? landmarks : undefined,
+    };
+  });
 }
 
 // ============================================
@@ -2676,18 +3107,66 @@ export function convertToStrength(classified: ClassifiedStrength): Strength {
 }
 
 /**
- * Convert ClassifiedWeakness to Flaw type for UI compatibility
+ * Convert ClassifiedWeakness to Flaw type for UI compatibility.
+ *
+ * @param classified - The classified weakness to convert
+ * @param index - Index of this flaw in the list (unused, kept for backwards compatibility)
+ * @param rollingLost - The cumulative rolling points lost so far
+ * @param rollingImpacts - Array of previous standardized impacts for rolling calculation
+ * @param rollingPercentages - Array of previous harmony percentages for rolling calculation
+ * @param overlapAdjustment - Optional overlap adjustment from deduplication logic
+ * @returns Flaw object for UI display
  */
-export function convertToFlaw(classified: ClassifiedWeakness, index: number, rollingLost: number): Flaw {
-  const impact = (10 - classified.avgScore) * 0.5;
-  const newRollingLost = rollingLost + impact;
+export function convertToFlaw(
+  classified: ClassifiedWeakness,
+  index: number,
+  rollingLost: number,
+  rollingImpacts: number[] = [],
+  rollingPercentages: number[] = [],
+  overlapAdjustment?: OverlapAdjustment
+): Flaw {
+  // Calculate raw harmonyPercentageLost (0.7%-13% range)
+  const rawHarmonyPercentageLost = calculateHarmonyPercentageLost(
+    classified.avgScore,
+    classified.matchedMetrics,
+    classified.confidence
+  );
+
+  // Apply overlap adjustment if provided, otherwise use raw value
+  // This prevents double-counting related flaws that share metrics/landmarks
+  const harmonyPercentageLost = overlapAdjustment
+    ? rawHarmonyPercentageLost * overlapAdjustment.appliedPercentage
+    : rawHarmonyPercentageLost;
+
+  // Legacy rolling points (simple sum for backward compatibility)
+  const newRollingLost = rollingLost + harmonyPercentageLost;
+
+  // Calculate normalized standardizedImpact using Z-scores (0.07-1.29 range)
+  const rawStandardizedImpact = calculateStandardizedImpact(
+    classified.matchedMetrics,
+    classified.avgScore
+  );
+
+  // Apply overlap reduction to standardized impact as well
+  const standardizedImpact = overlapAdjustment
+    ? rawStandardizedImpact * overlapAdjustment.appliedPercentage
+    : rawStandardizedImpact;
+
+  // Update rolling impacts array and calculate rolling standardized impact
+  const newRollingImpacts = [...rollingImpacts, standardizedImpact];
+  const rollingStandardizedImpact = calculateRollingStandardizedImpact(newRollingImpacts);
+
+  // Update rolling percentages and calculate with diminishing returns
+  const newRollingPercentages = [...rollingPercentages, harmonyPercentageLost];
+  const rollingHarmonyPercentageLost = calculateRollingHarmonyPercentageLost(newRollingPercentages);
 
   return {
     id: `insight_flaw_${classified.insightId}`,
     flawName: `${classified.title} (${classified.severityLabel})`,
     summary: classified.description,
-    harmonyPercentageLost: impact,
-    standardizedImpact: impact / 10,
+    // Use adjusted impact for harmony percentage (accounts for overlap)
+    harmonyPercentageLost,
+    standardizedImpact,
     categoryName: classified.matchedMetrics[0]?.category || 'General',
     responsibleRatios: classified.matchedMetrics.map(m => ({
       ratioName: m.metricName,
@@ -2699,28 +3178,64 @@ export function convertToFlaw(classified: ClassifiedWeakness, index: number, rol
       unit: m.unit,
       category: m.category,
     })),
+    // Rolling values use deduplicated totals
     rollingPointsDeducted: newRollingLost,
-    rollingHarmonyPercentageLost: newRollingLost,
-    rollingStandardizedImpact: newRollingLost / 10,
+    rollingHarmonyPercentageLost,
+    rollingStandardizedImpact,
     confidence: classified.confidence,
   };
 }
 
 /**
- * Main function: Generate strengths and flaws from measurements using insights
+ * Main function: Generate strengths and flaws from measurements using insights.
+ *
+ * Uses overlap deduplication to prevent double-counting related flaws that share
+ * contributing metrics or landmarks. The first flaw to use a metric/landmark
+ * gets full impact; subsequent flaws sharing those metrics get reduced impact.
+ *
+ * @param measurements - Array of scored metric results
+ * @returns Object containing strengths and flaws arrays
  */
 export function generateInsightBasedResults(
   measurements: MetricScoreResult[]
 ): { strengths: Strength[]; flaws: Flaw[] } {
   const { strengths: classifiedStrengths, weaknesses: classifiedWeaknesses } = classifyInsights(measurements);
 
-  // Convert to UI-compatible types
+  // Convert strengths to UI-compatible types
   const strengths = classifiedStrengths.map((s) => convertToStrength(s));
 
+  // Initialize overlap tracker for deduplication
+  const tracker = createOverlapTracker();
+
+  // Track rolling values for cumulative calculations
   let rollingLost = 0;
+  const rollingImpacts: number[] = [];
+  const rollingPercentages: number[] = [];
+
+  // Process weaknesses with overlap deduplication
   const flaws = classifiedWeaknesses.map((w, i) => {
-    const flaw = convertToFlaw(w, i, rollingLost);
+    // Enrich matched metrics with landmark data for deduplication
+    const enrichedWeakness: ClassifiedWeakness = {
+      ...w,
+      matchedMetrics: enrichMatchedMetricsWithLandmarks(w.matchedMetrics),
+    };
+
+    // Calculate raw impact for overlap adjustment
+    const rawHarmonyPercentageLost = calculateHarmonyPercentageLost(
+      enrichedWeakness.avgScore,
+      enrichedWeakness.matchedMetrics,
+      enrichedWeakness.confidence
+    );
+
+    // Adjust impact based on overlap with previously counted flaws
+    const overlapAdjustment = adjustForOverlap(enrichedWeakness, tracker, rawHarmonyPercentageLost);
+
+    // Convert to Flaw with deduplication applied
+    const flaw = convertToFlaw(enrichedWeakness, i, rollingLost, rollingImpacts, rollingPercentages, overlapAdjustment);
     rollingLost = flaw.rollingPointsDeducted || 0;
+    rollingImpacts.push(flaw.standardizedImpact);
+    rollingPercentages.push(flaw.harmonyPercentageLost);
+
     return flaw;
   });
 

@@ -6,13 +6,16 @@ import { Download, FileImage, FileText, Loader2, Check, X } from 'lucide-react';
 import { exportToImage, exportToPDF, generateFilename } from '@/lib/exportReport';
 
 interface ExportButtonProps {
-  elementId: string;
+  elementId?: string;
   variant?: 'button' | 'icon';
   className?: string;
 }
 
+// Default to the PDF report container which has the full analysis report
+const DEFAULT_ELEMENT_ID = 'pdf-report-container-layout';
+
 export function ExportButton({
-  elementId,
+  elementId = DEFAULT_ELEMENT_ID,
   variant = 'button',
   className = '',
 }: ExportButtonProps) {

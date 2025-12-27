@@ -88,16 +88,47 @@ interface HeroBundleProps {
   savings: number;
   gradient: string;
   icon: React.ReactNode;
+  bundleUrl?: string;
 }
 
-function HeroBundleCard({ title, subtitle, products, savings, gradient, icon }: HeroBundleProps) {
-  const { formatAmount } = useRegion();
+function HeroBundleCard({ title, subtitle, products, savings, gradient, icon, bundleUrl }: HeroBundleProps) {
+  const { formatAmount, getLink } = useRegion();
 
   const totalPrice = useMemo(() => {
     return products.reduce((sum, p) => sum + (p.priceRange?.max || 0), 0);
   }, [products]);
 
   const bundlePrice = Math.round(totalPrice * (1 - savings / 100));
+
+  // Generate Amazon add-to-cart URL for multiple items
+  const generateBundleLink = () => {
+    if (bundleUrl) return bundleUrl;
+
+    // Build Amazon add-to-cart URL with multiple ASINs
+    // Format: https://www.amazon.com/gp/aws/cart/add.html?ASIN.1=XXX&Quantity.1=1&ASIN.2=YYY&Quantity.2=1...
+    const baseUrl = 'https://www.amazon.com/gp/aws/cart/add.html?';
+    const params = products
+      .slice(0, 4)
+      .map((p, idx) => {
+        // Extract ASIN from regionLinks.us URL
+        const usLink = p.regionLinks?.['us'] || '';
+        const asinMatch = usLink.match(/\/dp\/([A-Z0-9]{10})/);
+        const asin = asinMatch ? asinMatch[1] : '';
+        if (!asin) return '';
+        return `ASIN.${idx + 1}=${asin}&Quantity.${idx + 1}=1`;
+      })
+      .filter(Boolean)
+      .join('&');
+
+    return params ? `${baseUrl}${params}&tag=looksmaxx-20` : '#';
+  };
+
+  const handleBundleClick = () => {
+    const link = generateBundleLink();
+    if (link !== '#') {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <motion.div
@@ -126,20 +157,29 @@ function HeroBundleCard({ title, subtitle, products, savings, gradient, icon }: 
 
         {/* Products grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {products.slice(0, 4).map((product, idx) => (
-            <div
-              key={product.id}
-              className="bg-black/30 rounded-xl p-3 border border-white/10 overflow-hidden"
-            >
-              <div className="flex items-center gap-2 mb-2 min-w-0">
-                <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-black text-white/80">{idx + 1}</span>
+          {products.slice(0, 4).map((product, idx) => {
+            const productLink = product.regionLinks ? getLink(product.regionLinks) : '#';
+            return (
+              <a
+                key={product.id}
+                href={productLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-black/30 rounded-xl p-3 border border-white/10 overflow-hidden hover:border-white/30 transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-2 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-black text-white/80">{idx + 1}</span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 truncate">{product.brand}</span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 truncate">{product.brand}</span>
-              </div>
-              <p className="text-sm font-bold text-white truncate">{product.name}</p>
-            </div>
-          ))}
+                <p className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 leading-tight">{product.name}</p>
+                {product.priceRange && (
+                  <p className="text-[10px] font-bold text-white/50 mt-1">${product.priceRange.min}-${product.priceRange.max}</p>
+                )}
+              </a>
+            );
+          })}
         </div>
 
         {/* Pricing & CTA */}
@@ -151,9 +191,12 @@ function HeroBundleCard({ title, subtitle, products, savings, gradient, icon }: 
               <span className="text-sm font-bold text-white/50 line-through">{formatAmount(totalPrice)}</span>
             </div>
           </div>
-          <button className="px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2">
+          <button
+            onClick={handleBundleClick}
+            className="px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2"
+          >
             <ShoppingBag size={16} />
-            Get Bundle
+            Add All to Cart
           </button>
         </div>
       </div>
@@ -203,7 +246,7 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
               </span>
             )}
           </div>
-          <h4 className="text-sm font-black uppercase tracking-wider text-white group-hover:text-cyan-400 transition-colors truncate">
+          <h4 className="text-sm font-black uppercase tracking-wider text-white group-hover:text-cyan-400 transition-colors leading-tight">
             {product.name}
           </h4>
         </div>
@@ -332,6 +375,30 @@ export function ShopTab() {
     ).slice(0, 4);
   }, [allProducts]);
 
+  // Supplements bundle
+  const supplementBundle = useMemo(() => {
+    return allProducts.filter(p => p.category === 'supplements').slice(0, 4);
+  }, [allProducts]);
+
+  // Hair growth bundle (minoxidil, dermaroller, etc)
+  const hairBundle = useMemo(() => {
+    return allProducts.filter(p =>
+      p.category === 'hair' ||
+      p.name.toLowerCase().includes('minox') ||
+      p.name.toLowerCase().includes('derma')
+    ).slice(0, 4);
+  }, [allProducts]);
+
+  // Teeth/smile bundle
+  const teethBundle = useMemo(() => {
+    return allProducts.filter(p =>
+      p.category === 'teeth' ||
+      p.name.toLowerCase().includes('whiten') ||
+      p.name.toLowerCase().includes('tooth') ||
+      p.name.toLowerCase().includes('dental')
+    ).slice(0, 4);
+  }, [allProducts]);
+
   return (
     <TabContent
       title="Shop"
@@ -368,8 +435,33 @@ export function ShopTab() {
             />
           </div>
 
+          {/* Second row of bundles */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            {supplementBundle.length >= 4 && (
+              <HeroBundleCard
+                title="Supplement Stack"
+                subtitle="Optimize hormones, skin, and recovery"
+                products={supplementBundle}
+                savings={15}
+                gradient="bg-gradient-to-br from-green-600 to-emerald-700"
+                icon={<Pill size={24} className="text-white" />}
+              />
+            )}
+            {hairBundle.length >= 3 && (
+              <HeroBundleCard
+                title="Hair Growth Protocol"
+                subtitle="Combat hair loss and boost density"
+                products={hairBundle}
+                savings={18}
+                gradient="bg-gradient-to-br from-amber-600 to-orange-700"
+                icon={<TrendingUp size={24} className="text-white" />}
+              />
+            )}
+          </div>
+
+          {/* Third row - gender specific */}
           {gender === 'male' && maleBundle.length >= 4 && (
-            <div className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               <HeroBundleCard
                 title="Male Grooming Kit"
                 subtitle="Essential grooming for peak appearance"
@@ -378,6 +470,16 @@ export function ShopTab() {
                 gradient="bg-gradient-to-br from-neutral-700 to-neutral-900"
                 icon={<Scissors size={24} className="text-white" />}
               />
+              {teethBundle.length >= 2 && (
+                <HeroBundleCard
+                  title="Smile Makeover"
+                  subtitle="Whiten and perfect your smile"
+                  products={teethBundle}
+                  savings={12}
+                  gradient="bg-gradient-to-br from-violet-600 to-purple-700"
+                  icon={<Smile size={24} className="text-white" />}
+                />
+              )}
             </div>
           )}
         </section>

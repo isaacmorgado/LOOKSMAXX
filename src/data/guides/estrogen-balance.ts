@@ -16,7 +16,7 @@ export const estrogenBalanceGuide: Guide = {
   estimatedReadTime: 4,
   order: 33,
   tags: ['estrogen', 'testosterone', 'hormones', 'aromatase', 'balance'],
-  relatedGuides: ['testosterone-lifestyle', 'testosterone-nutrition', 'body-fat-basics'],
+  relatedGuides: ['testosterone-lifestyle', 'testosterone-nutrition', 'body-fat'],
   productIds: ['zinc', 'vitamin_d3_k2'],
   forumCategory: 'lifestyle',
   heroMedia: {

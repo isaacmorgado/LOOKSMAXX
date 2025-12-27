@@ -18,7 +18,7 @@ export const rhinoplastyGuide: Guide = {
   order: 20,
   tags: ['surgery', 'rhinoplasty', 'nose-job', 'facial-harmony', 'plastic-surgery'],
   relatedGuides: ['facial-procedures', 'filler-botox'],
-  productIds: ['arnica_gel', 'scar_gel'],
+  productIds: ['arnica_gel', 'scar_gel', 'compression_garment'],
   forumCategory: 'hardmaxxing',
   heroMedia: {
     id: 'rhinoplasty-hero',

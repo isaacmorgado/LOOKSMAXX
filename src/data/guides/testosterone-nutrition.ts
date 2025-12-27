@@ -16,7 +16,7 @@ export const testosteroneNutritionGuide: Guide = {
   estimatedReadTime: 5,
   order: 31,
   tags: ['testosterone', 'nutrition', 'body-fat', 'diet', 'micronutrients'],
-  relatedGuides: ['testosterone-lifestyle', 'body-fat-basics', 'nutrition-basics'],
+  relatedGuides: ['testosterone-lifestyle', 'body-fat', 'nutrition-basics'],
   productIds: ['zinc', 'magnesium_glycinate', 'vitamin_d3_k2', 'omega_3'],
   forumCategory: 'nutrition',
   heroMedia: {

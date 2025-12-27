@@ -142,11 +142,10 @@ function FilterTabs({
         <button
           key={filter.id}
           onClick={() => setActiveFilter(filter.id)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-            activeFilter === filter.id
-              ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-              : 'text-neutral-600 hover:text-white border border-transparent'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeFilter === filter.id
+            ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+            : 'text-neutral-600 hover:text-white border border-transparent'
+            }`}
         >
           <filter.icon size={12} />
           {filter.label}
@@ -323,15 +322,17 @@ export default function ForumPage() {
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Popular Topics</h3>
               </div>
               <div className="space-y-3">
-                {categories.slice(0, 5).flatMap(c => c.subForums.slice(0, 1)).slice(0, 5).map((sf, i) => (
-                  <div key={sf.id} className="flex items-center gap-3 group cursor-pointer">
-                    <span className="w-5 h-5 rounded-md bg-neutral-900 border border-white/5 flex items-center justify-center text-[10px] text-neutral-600 font-black">
-                      {i + 1}
-                    </span>
-                    <span className="text-xs text-neutral-400 group-hover:text-cyan-400 transition-colors truncate">
-                      {sf.name}
-                    </span>
-                  </div>
+                {categories.slice(0, 5).flatMap(c => c.subForums.slice(0, 1).map(sf => ({ ...sf, categorySlug: c.slug }))).slice(0, 5).map((sf, i) => (
+                  <Link href={`/forum/${sf.categorySlug}?topic=${sf.slug}`} key={sf.id}>
+                    <div className="flex items-center gap-3 group cursor-pointer">
+                      <span className="w-5 h-5 rounded-md bg-neutral-900 border border-white/5 flex items-center justify-center text-[10px] text-neutral-600 font-black">
+                        {i + 1}
+                      </span>
+                      <span className="text-xs text-neutral-400 group-hover:text-cyan-400 transition-colors truncate">
+                        {sf.name}
+                      </span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>

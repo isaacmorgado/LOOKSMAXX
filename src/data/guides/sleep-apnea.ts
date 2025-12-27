@@ -17,7 +17,7 @@ export const sleepApneaGuide: Guide = {
   order: 23,
   tags: ['sleep', 'apnea', 'recovery', 'hormones', 'testosterone'],
   relatedGuides: ['sleep-drivers', 'sleep-environment', 'hormone-killers'],
-  productIds: [],
+  productIds: ['sleep_mask', 'magnesium_glycinate'],
   forumCategory: 'lifestyle',
   heroMedia: {
     id: 'sleep-apnea-hero',

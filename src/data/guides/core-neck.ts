@@ -19,6 +19,13 @@ export const coreNeckGuide: Guide = {
   relatedGuides: ['training', 'v-taper', 'body-fat'],
   productIds: ['creatine_mono'],
   forumCategory: 'height-frame',
+  heroMedia: {
+    id: 'core-neck-hero',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1200&q=80',
+    alt: 'Core and neck training for aesthetics',
+    placement: 'hero',
+  },
   sections: [
     {
       id: 'intro',

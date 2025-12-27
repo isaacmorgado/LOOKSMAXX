@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Copy, Check, X, Twitter, Link2 } from 'lucide-react';
+import { Share2, Copy, Check, X, Twitter, Link2, FileImage, Loader2 } from 'lucide-react';
 import {
   shareResults,
   generateShareText,
   isNativeShareSupported,
   getShareableUrl
 } from '@/lib/shareResults';
+import { exportToImage } from '@/lib/exportReport';
 
 interface ShareButtonProps {
   score: number | string;
@@ -17,6 +18,9 @@ interface ShareButtonProps {
   variant?: 'button' | 'icon';
   className?: string;
 }
+
+// Default to the PDF report container for image export
+const DEFAULT_EXPORT_ELEMENT_ID = 'pdf-report-container-layout';
 
 export function ShareButton({
   score,
@@ -28,6 +32,7 @@ export function ShareButton({
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [isExportingImage, setIsExportingImage] = useState(false);
 
   const shareText = generateShareText(score, frontScore, sideScore);
   const shareUrl = getShareableUrl();
@@ -72,6 +77,28 @@ export function ShareButton({
       'noopener,noreferrer'
     );
     setIsOpen(false);
+  };
+
+  const handleExportImage = async () => {
+    setIsExportingImage(true);
+    try {
+      const result = await exportToImage(DEFAULT_EXPORT_ELEMENT_ID, {
+        filename: `LooxsmaxxLabs_Card_${new Date().toISOString().split('T')[0]}`,
+        scale: 2
+      });
+      if (result.success) {
+        setShareStatus('Image saved! Ready to share.');
+        setTimeout(() => setShareStatus(null), 2000);
+      } else {
+        setShareStatus('Failed to generate image');
+        setTimeout(() => setShareStatus(null), 2000);
+      }
+    } catch {
+      setShareStatus('Export failed');
+      setTimeout(() => setShareStatus(null), 2000);
+    } finally {
+      setIsExportingImage(false);
+    }
   };
 
   if (variant === 'icon') {
@@ -167,6 +194,22 @@ export function ShareButton({
                     <span className="text-sm text-neutral-200">Twitter</span>
                   </button>
                 </div>
+
+                {/* Save as Image */}
+                <button
+                  onClick={handleExportImage}
+                  disabled={isExportingImage}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isExportingImage ? (
+                    <Loader2 size={16} className="text-purple-400 animate-spin" />
+                  ) : (
+                    <FileImage size={16} className="text-purple-400" />
+                  )}
+                  <span className="text-sm text-purple-400">
+                    {isExportingImage ? 'Generating...' : 'Save as Image'}
+                  </span>
+                </button>
 
                 {/* Direct link copy */}
                 <button

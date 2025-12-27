@@ -16,7 +16,7 @@ export const nutritionBasicsGuide: Guide = {
   estimatedReadTime: 5,
   order: 70,
   tags: ['nutrition', 'calories', 'protein', 'macros', 'diet'],
-  relatedGuides: ['cutting-guide', 'bulking-guide', 'body-fat-basics'],
+  relatedGuides: ['cutting-guide', 'bulking-guide', 'body-fat'],
   productIds: ['protein_powder'],
   forumCategory: 'nutrition',
   heroMedia: {

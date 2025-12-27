@@ -16,7 +16,7 @@ export const debloatingProtocolGuide: Guide = {
   estimatedReadTime: 5,
   order: 75,
   tags: ['debloating', 'water-retention', 'bloating', 'aesthetics', 'puffiness'],
-  relatedGuides: ['water-retention', 'cortisol-management', 'body-fat-basics'],
+  relatedGuides: ['nutrition-basics', 'cortisol-management', 'body-fat'],
   productIds: ['magnesium_glycinate'],
   forumCategory: 'lifestyle',
   heroMedia: {

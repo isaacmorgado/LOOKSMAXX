@@ -11,7 +11,7 @@ https://looksmaxx-app.vercel.app
 npm run lint && npx tsc --noEmit
 ```
 
-## Feature Parity Status: 100% Complete ✅
+## Feature Status: 100% Complete ✅
 
 ### Scoring System (Verified 2025-12-25)
 
@@ -37,7 +37,7 @@ npm run lint && npx tsc --noEmit
 | **Order of Operations** | Yes | `src/lib/recommendations/engine.ts:517-577` | `generateOrderOfOperations()` with prerequisites |
 | **Gender-Specific Treatments** | Yes | `src/lib/advice-engine.ts` | V-line Surgery, Masseter Botox (female-only) |
 
-### FaceIQ Parity Features (Implemented 2025-12-26) ✅
+### Advanced Features (Implemented 2025-12-26) ✅
 
 | Feature | File | Details |
 |---------|------|---------|
@@ -52,6 +52,80 @@ npm run lint && npx tsc --noEmit
 **Exclusive Categories:** jaw_augmentation, jaw_reduction, chin_augmentation, cheekbone_augmentation, lip_augmentation, lip_reduction, submental_fat_removal, neck_procedures, eye_lateral_canthus, maxillary_surgery
 
 **Metrics with Landmarks:** faceWidthToHeight, gonialAngle, lateralCanthalTilt, nasalIndex, nasolabialAngle, facialConvexity, mandibularPlaneAngle, etc. (30 total)
+
+### Scoring & Analysis Features (Implemented 2025-12-26) ✅
+
+| Feature | File | Details |
+|---------|------|---------|
+| **harmonyPercentageLost** | `src/lib/insights-engine.ts` | Per-flaw harmony impact (0.7-13% range), cumulative with 85% diminishing returns |
+| **standardizedImpact** | `src/lib/insights-engine.ts` | Z-score normalized severity (0.07-1.29 range) for consistent flaw ranking |
+| **rollingPointsDeducted** | `src/lib/insights-engine.ts` | Overlap deduplication via `OverlapTracker`, prevents double-counting shared metrics/landmarks |
+| **riskPercentage** | `src/lib/recommendations/types.ts` | Explicit 0-60% risk field on all 118 treatments |
+| **Calibrated Ratio Impacts** | `src/lib/advice-engine.ts` | Conservative 0.8-5% range (down from 3-80%), calibrated for realism |
+
+**harmonyPercentageLost Formula:**
+```
+baseImpact = (10 - avgScore) / 10
+weightMultiplier = normalize(metricWeight, 0.5, 2.0)
+zScoreMultiplier = confidence: confirmed=1.5, likely=1.15, possible=0.85
+harmonyPercentageLost = clamp(baseImpact × weightMultiplier × zScoreMultiplier × 10, 0.7, 13.0)
+```
+
+**standardizedImpact Formula:**
+```
+zScore = |actualValue - idealMean| / stdDev
+standardizedImpact = 0.07 + (min(zScore, 3) / 3) × (1.29 - 0.07)
+```
+
+**riskPercentage Mapping:**
+| Risk Level | Percentage |
+|------------|------------|
+| none | 0% |
+| very_low | 5% |
+| low | 12% |
+| medium | 28% |
+| high | 45% |
+| very_high | 55% |
+
+**Ratio Impact Calibration (27 treatments):**
+| Original | Calibrated | Example |
+|----------|------------|---------|
+| 2-5% | 0.8-1.5% | Jaw Fillers, Mewing |
+| 5-10% | 1.5-2.5% | Weight Loss, Rhinoplasty |
+| 10-15% | 2.5-3.5% | Genioplasty, Kybella |
+| 15-20% | 3.5-5% | Lip Lift, Jaw Implants |
+| 20-80% | 4-5% (capped) | Canthoplasty, Septoplasty |
+
+### Landmark Detection (Implemented 2025-12-26) ✅
+
+| Feature | File | Details |
+|---------|------|---------|
+| **Zoom Levels** | `src/components/LandmarkAnalysisTool.tsx` | 2x/4x/8x discrete levels for precision |
+| **Landmark-specific Auto-Zoom** | `LANDMARK_ZOOM_LEVELS` constant | 52 front + 28 side landmarks with assigned zoom levels |
+| **Front Landmark Offsets** | `src/lib/mediapipeDetection.ts` | Cephalometric offsets for 12 landmarks |
+| **Side Profile Detection** | `src/lib/serverSideDetection.ts` | InsightFace API (106 landmarks → 28 cephalometric) |
+| **Frankfort Plane Calculation** | `serverSideDetection.ts` | Auto-calculated from orbitale + porion |
+
+**Front Landmark Offsets (Cephalometric):**
+| Landmark | X Offset | Y Offset |
+|----------|----------|----------|
+| trichion (hairline) | - | -0.06 |
+| left_pupila | +0.0015 | -0.005 |
+| right_pupila | -0.0015 | -0.005 |
+| left_ala_nasi | +0.0025 | - |
+| right_ala_nasi | -0.0025 | - |
+| left/right_temporal | - | -0.01 |
+| left_auricular_lateral | -0.04 | - |
+| right_auricular_lateral | +0.04 | - |
+| left/right_cervical_lateralis | - | +0.05 |
+| left/right_pretarsal_skin_crease | - | -0.015 |
+
+**Zoom Level Distribution:**
+| Zoom | Front Landmarks | Side Landmarks |
+|------|----------------|----------------|
+| 2x | trichion, temples, ears, cheekbones | vertex, occiput, neckPoint, forehead |
+| 4x | Most landmarks (pupils, brows, nose, mouth, jaw) | All nasal, lip, ear, cheek landmarks |
+| 8x | Eyelid detail (palpebra, pretarsal crease) | - |
 
 ### Detailed Feature Breakdown
 

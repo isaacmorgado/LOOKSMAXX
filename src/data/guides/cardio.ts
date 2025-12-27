@@ -17,7 +17,7 @@ export const cardioGuide: Guide = {
   order: 7,
   tags: ['cardio', 'fat-loss', 'conditioning', 'heart-health'],
   relatedGuides: ['body-fat', 'training', 'diet'],
-  productIds: [],
+  productIds: ['magnesium_glycinate', 'omega3_fish_oil'],
   forumCategory: 'body-composition',
   heroMedia: {
     id: 'cardio-hero',

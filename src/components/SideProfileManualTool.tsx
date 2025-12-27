@@ -33,7 +33,7 @@ export function SideProfileManualTool({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isGuided, setIsGuided] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3>(1); // 1=2x, 2=4x, 3=8x (FaceIQ parity)
+  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3>(1); // 1=2x, 2=4x, 3=8x discrete levels
   const zoom = zoomLevel === 1 ? 2 : zoomLevel === 2 ? 4 : 8;
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectionError, setDetectionError] = useState<string | null>(null);

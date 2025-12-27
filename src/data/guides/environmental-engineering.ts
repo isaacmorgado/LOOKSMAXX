@@ -17,7 +17,7 @@ export const environmentalEngineeringGuide: Guide = {
   order: 61,
   tags: ['environment', 'productivity', 'focus', 'habits', 'willpower'],
   relatedGuides: ['dopamine-optimization', 'brain-fuel', 'cortisol-management'],
-  productIds: [],
+  productIds: ['water_jug', 'blue_light_glasses', 'posture_corrector'],
   forumCategory: 'lifestyle',
   heroMedia: {
     id: 'environmental-engineering-hero',

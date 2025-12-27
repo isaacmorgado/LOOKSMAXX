@@ -401,10 +401,10 @@ export function RatiosTab({ profileType }: RatiosTabProps) {
           )}
         </div>
 
-        {/* Face Visualization Panel */}
+        {/* Face Visualization Panel - Sticky on desktop */}
         {photo && (
           <div className="lg:w-[400px] lg:flex-shrink-0">
-            <div className="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]">
+            <div className="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
               <FaceOverlay
                 photo={photo}
                 landmarks={landmarks}

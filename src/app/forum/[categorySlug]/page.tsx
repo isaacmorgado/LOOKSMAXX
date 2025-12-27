@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForum } from '@/contexts/ForumContext';
@@ -36,11 +36,10 @@ function SortTabs({ sortOrder, setSortOrder }: { sortOrder: SortOrder; setSortOr
         <button
           key={sort.id}
           onClick={() => setSortOrder(sort.id)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-            sortOrder === sort.id
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${sortOrder === sort.id
               ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
               : 'text-neutral-600 hover:text-white border border-transparent'
-          }`}
+            }`}
         >
           <sort.icon size={12} />
           {sort.label}
@@ -68,11 +67,10 @@ function TopicPills({
         <button
           key={sf.id}
           onClick={() => onSelect(sf.slug)}
-          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-            selected === sf.slug
+          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${selected === sf.slug
               ? 'bg-cyan-500 text-black'
               : 'bg-neutral-900/50 border border-white/5 text-neutral-400 hover:border-cyan-500/30 hover:text-cyan-400'
-          }`}
+            }`}
         >
           {sf.name}
           {sf.postCount > 0 && (
@@ -118,8 +116,10 @@ function PostSkeleton() {
 // ============================================
 export default function CategoryPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const categorySlug = params.categorySlug as string;
+  const topicParam = searchParams.get('topic');
   const isInitialMount = useRef(true);
 
   const {
@@ -138,12 +138,14 @@ export default function CategoryPage() {
   } = useForum();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedSubForum, setSelectedSubForum] = useState<string | null>(null);
+  const [selectedSubForum, setSelectedSubForum] = useState<string | null>(topicParam);
 
   useEffect(() => {
     fetchCategory(categorySlug);
-    fetchPosts(categorySlug);
-  }, [categorySlug, fetchCategory, fetchPosts]);
+    // If topic param is present, fetch posts filtered by it immediately
+    fetchPosts(categorySlug, topicParam || undefined);
+    setSelectedSubForum(topicParam);
+  }, [categorySlug, topicParam, fetchCategory, fetchPosts]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -347,11 +349,10 @@ export default function CategoryPage() {
                     <button
                       key={sf.id}
                       onClick={() => handleSubForumClick(sf.slug)}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm transition-all flex justify-between items-center ${
-                        selectedSubForum === sf.slug
-                          ? 'bg-cyan-500/10 text-cyan-400'
-                          : 'text-neutral-400 hover:bg-white/5 hover:text-white'
-                      }`}
+                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm transition-all flex justify-between items-center ${selectedSubForum === sf.slug
+                        ? 'bg-cyan-500/10 text-cyan-400'
+                        : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+                        }`}
                     >
                       <span>{sf.name}</span>
                       <span className="text-[10px] text-neutral-600">{sf.postCount}</span>
