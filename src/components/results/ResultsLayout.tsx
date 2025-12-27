@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -23,12 +23,18 @@ import {
   Share2,
   Download,
   ShieldCheck,
+  ShoppingBag,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useLeaderboardOptional } from '@/contexts/LeaderboardContext';
 import { ResultsTab } from '@/types/results';
 import { ScoreCircle, RankBadge } from './shared';
 import { api } from '@/lib/api';
+import { exportToPDF } from '@/lib/exportReport';
+import { AnalysisReport } from './reports/AnalysisReport';
+import { useQuota } from '@/hooks/useQuota';
 
 // ============================================
 // TAB NAVIGATION
@@ -49,6 +55,7 @@ const TABS: TabConfig[] = [
   { id: 'archetype', label: 'Archetype', icon: <Shapes size={16} /> },
   { id: 'plan', label: 'Your Plan', icon: <Sparkles size={16} /> },
   { id: 'guides', label: 'Guides', icon: <BookOpen size={16} /> },
+  { id: 'shop', label: 'Shop', icon: <ShoppingBag size={16} /> },
   { id: 'community', label: 'Community', icon: <Users size={16} /> },
   { id: 'referrals', label: 'Referrals', icon: <Gift size={16} /> },
   { id: 'options', label: 'Options', icon: <Settings size={16} /> },
@@ -344,6 +351,54 @@ interface TabContentProps {
 }
 
 export function TabContent({ title, subtitle, children, rightContent, actions }: TabContentProps) {
+  const { frontRatios, sideRatios, overallScore, pslRating } = useResults();
+  const { plan } = useQuota();
+  const [isExporting, setIsExporting] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const result = await exportToPDF('pdf-report-container-layout', {
+        filename: `LooksmaxxLabs_Report_${new Date().toISOString().split('T')[0]}`,
+        scale: 2,
+        pageFormat: 'a4',
+        margins: 10
+      });
+
+      if (result.success) {
+        showToast('PDF exported successfully!');
+      } else {
+        showToast('Failed to generate PDF', 'error');
+      }
+    } catch {
+      showToast('Export failed', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [showToast]);
+
+  const handleShare = useCallback(async () => {
+    // Share URL with results
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My Looksmaxx Results', url });
+        showToast('Shared successfully!');
+      } catch {
+        // User cancelled or share failed
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      showToast('Link copied to clipboard!');
+    }
+  }, [showToast]);
+
   // Handle both string titles (auto-highlight last word) and ReactNode titles (custom styling)
   const renderTitle = () => {
     if (typeof title === 'string') {
@@ -357,8 +412,27 @@ export function TabContent({ title, subtitle, children, rightContent, actions }:
 
   return (
     <div className="p-6 md:p-10 lg:p-12 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-14">
+      {/* Toast notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+              toast.type === 'success'
+                ? 'bg-neutral-800 border border-neutral-700'
+                : 'bg-red-900/80 border border-red-700'
+            }`}
+          >
+            <CheckCircle size={16} className={toast.type === 'success' ? 'text-cyan-400' : 'text-red-400'} />
+            <span className="text-sm text-white">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Header - pr-[180px] on desktop to prevent overlap with fixed FloatingRankCard */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-10 md:mb-14 md:pr-[180px]">
         <div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter italic uppercase mb-3">
             {renderTitle()}
@@ -373,13 +447,19 @@ export function TabContent({ title, subtitle, children, rightContent, actions }:
           <div className="mt-6 md:mt-0 flex items-center gap-3">
             {actions && (
               <div className="flex items-center gap-2">
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-neutral-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500/30 transition-all"
+                >
                   <Share2 size={14} />
                   Share
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-neutral-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
-                  <Download size={14} />
-                  Export
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:bg-white/10 transition-all disabled:opacity-50"
+                >
+                  {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                 </button>
               </div>
             )}
@@ -390,6 +470,41 @@ export function TabContent({ title, subtitle, children, rightContent, actions }:
 
       {/* Content */}
       {children}
+
+      {/* Hidden PDF Report Container */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+        <div id="pdf-report-container-layout">
+          <AnalysisReport
+            analysis={{
+              front_image_url: typeof window !== 'undefined' ? localStorage.getItem('looksmaxx_front_photo') : null,
+              side_image_url: typeof window !== 'undefined' ? localStorage.getItem('looksmaxx_side_photo') : null,
+              front_landmarks: (() => {
+                try {
+                  if (typeof window === 'undefined') return [];
+                  const results = JSON.parse(localStorage.getItem('looksmaxx_results') || '{}');
+                  return results?.analysis?.front_landmarks || [];
+                } catch { return []; }
+              })(),
+              side_landmarks: (() => {
+                try {
+                  if (typeof window === 'undefined') return [];
+                  const results = JSON.parse(localStorage.getItem('looksmaxx_results') || '{}');
+                  return results?.analysis?.side_landmarks || [];
+                } catch { return []; }
+              })(),
+              scores: { masculinity: 50, femininity: 50, symmetry: 50, skinQuality: 50, aging: 25 },
+            }}
+            results={{ overallScore, pslRating, frontRatios, sideRatios }}
+            userName={(() => {
+              try {
+                if (typeof window === 'undefined') return 'User';
+                return JSON.parse(localStorage.getItem('user') || '{}').username || 'User';
+              } catch { return 'User'; }
+            })()}
+            isUnlocked={plan === 'pro' || plan === 'plus'}
+          />
+        </div>
+      </div>
     </div>
   );
 }

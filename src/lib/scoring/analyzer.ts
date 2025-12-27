@@ -144,6 +144,7 @@ export function analyzeFrontProfile(
   const rightCheilion = getLandmark(landmarks, 'right_cheilion');
   const labraleSuperius = getLandmark(landmarks, 'labrale_superius');
   const labraleInferius = getLandmark(landmarks, 'labrale_inferius');
+  const nasion = getLandmark(landmarks, 'nasion'); // Added for FWHR parity
 
   // FACIAL THIRDS
   if (trichion && nasalBase && subnasale && menton) {
@@ -171,9 +172,10 @@ export function analyzeFrontProfile(
   }
 
   // FACE WIDTH TO HEIGHT RATIO (FWHR)
-  if (leftZygion && rightZygion && nasalBase && labraleSuperius) {
+  // Parity Fix: Use Nasion to Upper Lip (Standard definition) instead of Philtrum
+  if (leftZygion && rightZygion && nasion && labraleSuperius) {
     const bizygomaticWidth = distance(leftZygion, rightZygion);
-    const upperFaceHeight = distance(nasalBase, labraleSuperius);
+    const upperFaceHeight = distance(nasion, labraleSuperius);
     if (upperFaceHeight > 0) {
       addMeasurement('faceWidthToHeight', bizygomaticWidth / upperFaceHeight);
     }
@@ -224,11 +226,13 @@ export function analyzeFrontProfile(
   }
 
   // EYE SEPARATION RATIO
-  if (leftCanthusM && rightCanthusM && leftZygion && rightZygion) {
-    const intercanthal = distance(leftCanthusM, rightCanthusM);
+  // Parity Fix: Use IPD / Bizygomatic Width * 100 (Ref expects ~46%)
+  // NOTE: This logic matches 'interpupillaryRatio' below, but ensures correct metric ID parity.
+  if (leftPupil && rightPupil && leftZygion && rightZygion) {
     const bizygomatic = distance(leftZygion, rightZygion);
+    const ipd = distance(leftPupil, rightPupil);
     if (bizygomatic > 0) {
-      addMeasurement('eyeSeparationRatio', intercanthal / bizygomatic);
+      addMeasurement('eyeSeparationRatio', (ipd / bizygomatic) * 100);
     }
   }
 
@@ -299,11 +303,35 @@ export function analyzeFrontProfile(
   }
 
   // MIDFACE RATIO
-  if (leftZygion && rightZygion && nasalBase && subnasale) {
-    const midfaceWidth = distance(leftZygion, rightZygion);
-    const midfaceHeight = distance(nasalBase, subnasale);
+  // Parity Fix: Use IPD / (Mid-Pupil to Cupids Bow) based on Ref (CupidsBow, Pupils)
+  if (leftPupil && rightPupil && labraleSuperius) {
+    const ipd = distance(leftPupil, rightPupil);
+    const midPupil = {
+      x: (leftPupil.x + rightPupil.x) / 2,
+      y: (leftPupil.y + rightPupil.y) / 2,
+    };
+    const midfaceHeight = distance(midPupil, labraleSuperius);
+
     if (midfaceHeight > 0) {
-      addMeasurement('midfaceRatio', midfaceWidth / midfaceHeight / 10); // Normalized
+      addMeasurement('midfaceRatio', ipd / midfaceHeight);
+    }
+  }
+
+  // CHEEKBONE HEIGHT
+  // Parity Fix: Added missing calculation for 'cheekboneHeight' (Ref Ideal 83-100%)
+  if (leftZygion && rightZygion && leftPupil && rightPupil && subnasale) {
+    // Calculate vertical position of Zygion within the Midface (Pupil to Subnasale)
+    // Higher Zygion (smaller y) -> Larger distance from Subnasale -> Higher %
+    const leftMidfaceH = subnasale.y - leftPupil.y;
+    const rightMidfaceH = subnasale.y - rightPupil.y;
+
+    const leftZygionH = subnasale.y - leftZygion.y;
+    const rightZygionH = subnasale.y - rightZygion.y;
+
+    if (leftMidfaceH > 0 && rightMidfaceH > 0) {
+      const leftRatio = (leftZygionH / leftMidfaceH) * 100;
+      const rightRatio = (rightZygionH / rightMidfaceH) * 100;
+      addMeasurement('cheekboneHeight', (leftRatio + rightRatio) / 2);
     }
   }
 
@@ -480,10 +508,13 @@ export function analyzeSideProfile(
   const cervicalPoint = getLandmark(landmarks, 'cervicalPoint');
   const orbitale = getLandmark(landmarks, 'orbitale');
   const porion = getLandmark(landmarks, 'porion');
+  const gonionTop = getLandmark(landmarks, 'gonionTop'); // Added for Gonial Angle parity
 
   // GONIAL ANGLE
-  if (tragus && gonionBottom && menton) {
-    const angle = calculateAngle(tragus, gonionBottom, menton);
+  // Parity Fix: Preferred use of gonionTop (Articulare) if available, fallback to tragus
+  const ramusTop = gonionTop || tragus;
+  if (ramusTop && gonionBottom && menton) {
+    const angle = calculateAngle(ramusTop, gonionBottom, menton);
     addMeasurement('gonialAngle', angle);
   }
 
@@ -726,7 +757,7 @@ export function analyzeHarmony(
     .sort((a, b) => {
       const severityOrder = { extremely_severe: 0, severe: 1, major: 2, moderate: 3 };
       return (severityOrder[a.severity as keyof typeof severityOrder] ?? 4) -
-             (severityOrder[b.severity as keyof typeof severityOrder] ?? 4);
+        (severityOrder[b.severity as keyof typeof severityOrder] ?? 4);
     });
 
   // Identify strengths (ideal measurements)

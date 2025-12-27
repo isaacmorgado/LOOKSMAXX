@@ -93,8 +93,8 @@ export function BellCurveChart({
       </div>
 
       {/* Chart */}
-      <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ height, minHeight: height }}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={150}>
           <AreaChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 10, bottom: 20 }}

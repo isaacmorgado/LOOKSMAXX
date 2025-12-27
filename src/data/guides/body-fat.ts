@@ -92,9 +92,9 @@ Below 10% is diminishing returns unless you're competing or doing a photoshoot.`
         {
           id: 'bf-visual-guide',
           type: 'image',
-          url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80',
-          alt: 'Visual guide showing different body fat percentages',
-          caption: 'Reference guide for estimating your body fat percentage',
+          url: 'https://www.builtlean.com/wp-content/uploads/2012/09/body-fat-percentage-men-759x1024.jpg',
+          alt: 'Male body fat percentage visual comparison chart',
+          caption: 'Visual guide: What each body fat percentage actually looks like',
           placement: 'inline',
         },
       ],

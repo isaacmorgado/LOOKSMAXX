@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
@@ -12,12 +12,13 @@ import {
   BookOpen,
   CheckCircle,
   Trash2,
-  Plus,
   Sparkles,
   ExternalLink,
 } from 'lucide-react';
 import { Recommendation } from '@/types/results';
 import { Gender, Ethnicity } from '@/lib/harmony-scoring';
+import { SURGICAL_TREATMENTS } from '@/lib/recommendations/hardmaxxing';
+import { MapPin, Globe } from 'lucide-react';
 
 // ============================================
 // TYPES
@@ -52,7 +53,9 @@ interface ResearchCitation {
 }
 
 const RESEARCH_CITATIONS: ResearchCitation[] = [
-  // Rhinoplasty Research
+  // ==========================================
+  // RHINOPLASTY (SUR-02)
+  // ==========================================
   {
     title: 'Ethnic Considerations in Rhinoplasty',
     authors: 'Rohrich RJ, Bolden K',
@@ -60,7 +63,7 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     year: 2010,
     doi: '10.1097/PRS.0b013e3181c6b2b7',
     summary: 'Discusses the importance of preserving ethnic identity while achieving aesthetic goals in rhinoplasty across different ethnicities.',
-    procedureRefs: ['SUR-02', 'MIN-04'],
+    procedureRefs: ['SUR-02'],
     genderRelevance: 'both',
     ethnicityRelevance: ['black', 'east_asian', 'south_asian', 'middle_eastern', 'hispanic'],
   },
@@ -70,26 +73,51 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Facial Plastic Surgery',
     year: 2008,
     summary: 'Examines unique considerations for male rhinoplasty including maintaining masculine features and avoiding feminization.',
-    procedureRefs: ['SUR-02', 'MIN-04'],
+    procedureRefs: ['SUR-02'],
     genderRelevance: 'male',
   },
-  // Jaw/Chin Research
+
+  // ==========================================
+  // CHIN/GENIOPLASTY (SUR-01, MIN-01)
+  // ==========================================
   {
     title: 'Sliding Genioplasty: A Systematic Review',
     authors: 'Park JH, Tae-Hoon K',
     journal: 'Journal of Oral and Maxillofacial Surgery',
     year: 2018,
     summary: 'Comprehensive analysis of chin advancement outcomes and patient satisfaction rates across demographics.',
-    procedureRefs: ['SUR-01', 'MIN-02'],
+    procedureRefs: ['SUR-01'],
     genderRelevance: 'both',
   },
+  {
+    title: 'Chin Augmentation with Hyaluronic Acid Fillers',
+    authors: 'Braz A, Eduardo C',
+    journal: 'Dermatologic Surgery',
+    year: 2017,
+    summary: 'Safety and efficacy of HA fillers for chin projection enhancement as non-surgical alternative.',
+    procedureRefs: ['MIN-01'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Jawline Contouring with Injectable Fillers',
+    authors: 'Braz A, Humphrey S',
+    journal: 'Plastic and Reconstructive Surgery',
+    year: 2019,
+    summary: 'Techniques for achieving masculine jawline definition using dermal fillers.',
+    procedureRefs: ['MIN-01'],
+    genderRelevance: 'male',
+  },
+
+  // ==========================================
+  // JAW ANGLE IMPLANTS (SUR-03)
+  // ==========================================
   {
     title: 'Gender Differences in Jaw Angle Aesthetics',
     authors: 'Kim YH, Cho J',
     journal: 'Aesthetic Plastic Surgery',
     year: 2020,
     summary: 'Research on ideal jaw angle parameters for males (90-110°) versus females (110-120°).',
-    procedureRefs: ['SUR-03', 'MIN-03'],
+    procedureRefs: ['SUR-03'],
     genderRelevance: 'both',
   },
   {
@@ -98,18 +126,21 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Asian Journal of Beauty and Cosmetology',
     year: 2019,
     summary: 'Study on jaw angle enhancement specific to East Asian facial structure and aesthetic preferences.',
-    procedureRefs: ['SUR-03', 'MIN-03'],
+    procedureRefs: ['SUR-03'],
     genderRelevance: 'both',
     ethnicityRelevance: ['east_asian', 'south_asian'],
   },
-  // Lip Research
+
+  // ==========================================
+  // LIP FILLER (MIN-03)
+  // ==========================================
   {
     title: 'Ideal Lip Proportions Across Ethnicities',
     authors: 'Farkas LG, Katic MJ',
     journal: 'Aesthetic Surgery Journal',
     year: 2003,
     summary: 'Anthropometric study establishing ethnic-specific ideal lip ratios and proportions.',
-    procedureRefs: ['MIN-01', 'FND-01'],
+    procedureRefs: ['MIN-03'],
     genderRelevance: 'both',
     ethnicityRelevance: ['white', 'black', 'east_asian', 'hispanic'],
   },
@@ -119,11 +150,14 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Facial Plastic Surgery Clinics',
     year: 2014,
     summary: 'Guidelines for maintaining ethnic characteristics while enhancing lip aesthetics.',
-    procedureRefs: ['MIN-01'],
+    procedureRefs: ['MIN-03'],
     genderRelevance: 'both',
     ethnicityRelevance: ['black'],
   },
-  // Eye/Canthal Research
+
+  // ==========================================
+  // CANTHOPLASTY & PDO THREAD LIFT (SUR-05, MIN-04)
+  // ==========================================
   {
     title: 'Canthal Tilt and Facial Attractiveness',
     authors: 'Rhee SC, et al.',
@@ -143,14 +177,26 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     genderRelevance: 'both',
     ethnicityRelevance: ['east_asian', 'south_asian'],
   },
-  // Midface/Cheek Research
+  {
+    title: 'PDO Thread Lift for Canthal Positioning',
+    authors: 'Kim J, Park H',
+    journal: 'Journal of Cosmetic Dermatology',
+    year: 2020,
+    summary: 'Non-surgical thread lift techniques for improving lateral canthal tilt and eye appearance.',
+    procedureRefs: ['MIN-04'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // CHEEK IMPLANTS & FILLER (SUR-06, MIN-02)
+  // ==========================================
   {
     title: 'Cheekbone Enhancement for Facial Harmony',
     authors: 'Mendelson B, Wong CH',
     journal: 'Clinics in Plastic Surgery',
     year: 2015,
     summary: 'Analysis of malar augmentation effects on overall facial harmony and perceived attractiveness.',
-    procedureRefs: ['SUR-06', 'MIN-05'],
+    procedureRefs: ['SUR-06', 'MIN-02'],
     genderRelevance: 'both',
   },
   {
@@ -159,18 +205,114 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Aesthetic Surgery Journal',
     year: 2021,
     summary: 'Ethnic considerations for midface enhancement in Middle Eastern patients.',
-    procedureRefs: ['SUR-06', 'MIN-05'],
+    procedureRefs: ['SUR-06', 'MIN-02'],
     genderRelevance: 'both',
     ethnicityRelevance: ['middle_eastern'],
   },
-  // Foundational/Non-Surgical Research
+  {
+    title: 'Cheek Filler Injection Techniques',
+    authors: 'Fitzgerald R, et al.',
+    journal: 'Aesthetic Surgery Journal',
+    year: 2019,
+    summary: 'Safe injection zones and techniques for HA filler in the malar and submalar regions.',
+    procedureRefs: ['MIN-02'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // NECK PROCEDURES (SUR-07, MIN-06)
+  // ==========================================
+  {
+    title: 'Submentoplasty and Neck Contouring',
+    authors: 'Feldman JJ',
+    journal: 'Plastic and Reconstructive Surgery',
+    year: 2014,
+    summary: 'Comprehensive approach to neck rejuvenation including liposuction and platysmaplasty.',
+    procedureRefs: ['SUR-07'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Cervicomental Angle and Attractiveness',
+    authors: 'Ellenbogen R, Karlin JV',
+    journal: 'Annals of Plastic Surgery',
+    year: 1980,
+    summary: 'Defines ideal neck-chin angle (105-120°) and its importance in facial aesthetics.',
+    procedureRefs: ['SUR-07', 'MIN-06'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Kybella (Deoxycholic Acid) for Submental Fat',
+    authors: 'Humphrey S, et al.',
+    journal: 'Dermatologic Surgery',
+    year: 2016,
+    summary: 'Clinical efficacy and safety of injectable deoxycholic acid for reducing submental fat.',
+    procedureRefs: ['MIN-06'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // BROW BONE (SUR-08)
+  // ==========================================
+  {
+    title: 'Forehead and Brow Contouring',
+    authors: 'Spiegel JH',
+    journal: 'Facial Plastic Surgery',
+    year: 2011,
+    summary: 'Techniques for brow bone reduction and augmentation to achieve gender-appropriate forehead aesthetics.',
+    procedureRefs: ['SUR-08'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Upper Third Facial Aesthetics',
+    authors: 'Ousterhout DK',
+    journal: 'Annals of Plastic Surgery',
+    year: 2009,
+    summary: 'Analysis of forehead and brow bone shape in relation to perceived masculinity and femininity.',
+    procedureRefs: ['SUR-08'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // MASSETER BOTOX (MIN-05)
+  // ==========================================
+  {
+    title: 'Botulinum Toxin for Masseter Reduction',
+    authors: 'Kim NH, Park RH',
+    journal: 'Archives of Facial Plastic Surgery',
+    year: 2010,
+    summary: 'Efficacy of botulinum toxin for facial slimming through masseter muscle reduction.',
+    procedureRefs: ['MIN-05'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Lower Face Contouring with Botulinum Toxin',
+    authors: 'Wu WT',
+    journal: 'Facial Plastic Surgery',
+    year: 2010,
+    summary: 'Techniques for achieving V-line facial shape using masseter botulinum toxin injections.',
+    procedureRefs: ['MIN-05'],
+    genderRelevance: 'female',
+  },
+
+  // ==========================================
+  // FOUNDATIONAL TREATMENTS
+  // ==========================================
   {
     title: 'Mewing and Orthotropic Treatment',
     authors: 'Mew J, Mew M',
     journal: 'International Journal of Orthodontics',
     year: 2014,
     summary: 'Research on proper tongue posture and its effects on facial development and structure.',
-    procedureRefs: ['FND-02', 'FND-03'],
+    procedureRefs: ['FND-01'],
+    genderRelevance: 'both',
+  },
+  {
+    title: 'Postural Effects on Facial Appearance',
+    authors: 'Solow B, Tallgren A',
+    journal: 'American Journal of Orthodontics',
+    year: 1976,
+    summary: 'Research on how head and neck posture affects facial appearance and cervical angle.',
+    procedureRefs: ['FND-03'],
     genderRelevance: 'both',
   },
   {
@@ -179,7 +321,7 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Aesthetic Surgery Journal',
     year: 2017,
     summary: 'Study on how body fat percentage affects facial definition and perceived attractiveness.',
-    procedureRefs: ['FND-04', 'FND-05'],
+    procedureRefs: ['FND-02'],
     genderRelevance: 'both',
   },
   {
@@ -188,10 +330,22 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'Journal of Applied Social Psychology',
     year: 2011,
     summary: 'Research on how grooming affects perceived competence and attractiveness.',
-    procedureRefs: ['FND-04', 'FND-05'],
+    procedureRefs: ['FND-05'],
     genderRelevance: 'both',
   },
-  // Orthognathic Research
+  {
+    title: 'Topical Retinoids in Skin Aging',
+    authors: 'Mukherjee S, et al.',
+    journal: 'Clinical Interventions in Aging',
+    year: 2006,
+    summary: 'Evidence for retinoids improving skin quality, texture, and reducing signs of aging.',
+    procedureRefs: ['FND-04'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // ORTHOGNATHIC SURGERY (SUR-04)
+  // ==========================================
   {
     title: 'Bimaxillary Surgery Outcomes',
     authors: 'Rustemeyer J, et al.',
@@ -201,14 +355,26 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     procedureRefs: ['SUR-04'],
     genderRelevance: 'both',
   },
-  // General Attractiveness Research
+  {
+    title: 'Le Fort I and BSSO for Facial Harmony',
+    authors: 'Proffit WR, et al.',
+    journal: 'Journal of Oral and Maxillofacial Surgery',
+    year: 2013,
+    summary: 'Combined orthognathic procedures for correcting skeletal malocclusion and improving facial balance.',
+    procedureRefs: ['SUR-04'],
+    genderRelevance: 'both',
+  },
+
+  // ==========================================
+  // GENERAL ATTRACTIVENESS RESEARCH
+  // ==========================================
   {
     title: 'Cross-Cultural Facial Attractiveness',
     authors: 'Perrett DI, et al.',
     journal: 'Nature',
     year: 1998,
     summary: 'Landmark study on universal vs. culture-specific aspects of facial attractiveness.',
-    procedureRefs: ['SUR-01', 'SUR-02', 'SUR-03', 'SUR-04', 'SUR-05', 'SUR-06'],
+    procedureRefs: ['SUR-01', 'SUR-02', 'SUR-03', 'SUR-04', 'SUR-05', 'SUR-06', 'SUR-07', 'SUR-08'],
     genderRelevance: 'both',
   },
   {
@@ -217,10 +383,41 @@ const RESEARCH_CITATIONS: ResearchCitation[] = [
     journal: 'International Journal of Cosmetic Surgery',
     year: 2002,
     summary: 'Analysis of mathematical proportions and their relationship to perceived facial beauty.',
-    procedureRefs: ['SUR-01', 'SUR-02', 'SUR-03', 'SUR-04', 'SUR-05', 'SUR-06', 'MIN-01', 'MIN-02'],
+    procedureRefs: ['SUR-01', 'SUR-02', 'SUR-03', 'SUR-04', 'SUR-05', 'SUR-06'],
     genderRelevance: 'both',
   },
 ];
+
+/**
+ * Get regional cost data for a surgical treatment.
+ * Maps recommendation ref_id to SURGICAL_TREATMENTS database.
+ */
+function getRegionalCosts(refId: string, name: string): { region: string; min: number; max: number; currency: string; notes?: string }[] | null {
+  // Map ref_ids to surgery names in hardmaxxing.ts
+  const refToSurgery: Record<string, string> = {
+    'SUR-01': 'genioplasty',
+    'SUR-02': 'rhinoplasty_reduction',
+    'SUR-03': 'jaw_implants',
+    'SUR-04': 'bimax',
+    'SUR-05': 'canthoplasty',
+    'SUR-06': 'cheek_implants',
+    'SUR-07': 'buccal_fat_removal', // Neck Lipo maps to closest
+    'SUR-08': 'forehead_implant',
+  };
+
+  const surgeryId = refToSurgery[refId];
+  if (!surgeryId) {
+    // Try to find by name match
+    const surgery = SURGICAL_TREATMENTS.find(s =>
+      s.name.toLowerCase().includes(name.toLowerCase().split(' ')[0]) ||
+      name.toLowerCase().includes(s.name.toLowerCase().split(' ')[0])
+    );
+    return surgery?.regionalCosts || null;
+  }
+
+  const surgery = SURGICAL_TREATMENTS.find(s => s.id === surgeryId);
+  return surgery?.regionalCosts || null;
+}
 
 function getRelevantCitations(
   procedureRefId: string,
@@ -288,11 +485,6 @@ function getRelevantCitations(
     .sort((a, b) => b.relevance - a.relevance)
     .slice(0, 3)
     .map(item => item.citation);
-}
-
-interface TrackerState {
-  notes: string;
-  checklist: Array<{ id: string; text: string; completed: boolean }>;
 }
 
 // ============================================
@@ -395,93 +587,6 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 }
 
 // ============================================
-// MY TRACKER SECTION
-// ============================================
-
-function MyTracker({
-  tracker,
-  onNotesChange,
-  onAddChecklistItem,
-  onToggleChecklistItem,
-  onRemoveChecklistItem
-}: {
-  tracker: TrackerState;
-  onNotesChange: (notes: string) => void;
-  onAddChecklistItem: () => void;
-  onToggleChecklistItem: (id: string) => void;
-  onRemoveChecklistItem: (id: string) => void;
-}) {
-  return (
-    <div className="md:col-span-5 lg:col-span-4 p-4 sm:p-6 bg-neutral-900/50 md:bg-neutral-800/30 h-full">
-      <h4 className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-white uppercase tracking-wide mb-3 sm:mb-4">
-        <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400" />
-        My Tracker
-      </h4>
-      <div className="space-y-3 sm:space-y-4">
-        {/* Personal Notes */}
-        <div className="space-y-1 sm:space-y-1.5">
-          <label className="text-[11px] sm:text-xs font-medium text-neutral-400">Personal Notes</label>
-          <textarea
-            value={tracker.notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            className="w-full text-xs sm:text-sm p-2.5 sm:p-3 border border-neutral-700 rounded-lg focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 bg-neutral-900 text-white min-h-[80px] sm:min-h-[100px] resize-none placeholder:text-neutral-600 shadow-sm transition-all"
-            placeholder="Track progress, questions, dates..."
-          />
-        </div>
-
-        {/* Checklist */}
-        <div className="space-y-1.5 sm:space-y-2 pt-1 sm:pt-2">
-          <label className="text-[11px] sm:text-xs font-medium text-neutral-400 flex justify-between items-center">
-            <span>Checklist</span>
-            <button
-              onClick={onAddChecklistItem}
-              className="text-cyan-400 hover:text-cyan-300 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide flex items-center gap-0.5 sm:gap-1 bg-cyan-500/20 px-1.5 sm:px-2 py-0.5 rounded-md border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors"
-            >
-              <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              Add
-            </button>
-          </label>
-          <div className="space-y-1.5 sm:space-y-2">
-            {tracker.checklist.length === 0 ? (
-              <div className="text-[11px] sm:text-xs text-neutral-500 text-center py-3 sm:py-4 border border-dashed border-neutral-700 rounded-lg bg-neutral-900/50">
-                No tasks yet
-              </div>
-            ) : (
-              tracker.checklist.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2 p-2 bg-neutral-900 border border-neutral-700 rounded-lg"
-                >
-                  <button
-                    onClick={() => onToggleChecklistItem(item.id)}
-                    className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                      item.completed
-                        ? 'bg-emerald-500 border-emerald-500'
-                        : 'border-neutral-600 hover:border-neutral-500'
-                    }`}
-                  >
-                    {item.completed && <CheckCircle className="w-3 h-3 text-black" />}
-                  </button>
-                  <span className={`text-xs flex-1 ${item.completed ? 'text-neutral-500 line-through' : 'text-neutral-300'}`}>
-                    {item.text}
-                  </span>
-                  <button
-                    onClick={() => onRemoveChecklistItem(item.id)}
-                    className="text-neutral-600 hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
 // MAIN ENHANCED RECOMMENDATION CARD
 // ============================================
 
@@ -497,46 +602,16 @@ export function EnhancedRecommendationCard({
   gender,
   ethnicity,
 }: EnhancedRecommendationCardProps) {
-  // Tracker state (would be persisted in real app)
-  const [tracker, setTracker] = useState<TrackerState>({
-    notes: '',
-    checklist: [],
-  });
-
   // Get relevant research citations based on procedure, gender, and ethnicity
   const citations = useMemo(() => {
     return getRelevantCitations(recommendation.ref_id, gender, ethnicity);
   }, [recommendation.ref_id, gender, ethnicity]);
 
-  const handleNotesChange = useCallback((notes: string) => {
-    setTracker(prev => ({ ...prev, notes }));
-  }, []);
-
-  const handleAddChecklistItem = useCallback(() => {
-    const text = window.prompt('Enter task:');
-    if (text) {
-      setTracker(prev => ({
-        ...prev,
-        checklist: [...prev.checklist, { id: Date.now().toString(), text, completed: false }],
-      }));
-    }
-  }, []);
-
-  const handleToggleChecklistItem = useCallback((id: string) => {
-    setTracker(prev => ({
-      ...prev,
-      checklist: prev.checklist.map(item =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      ),
-    }));
-  }, []);
-
-  const handleRemoveChecklistItem = useCallback((id: string) => {
-    setTracker(prev => ({
-      ...prev,
-      checklist: prev.checklist.filter(item => item.id !== id),
-    }));
-  }, []);
+  // Get regional costs for surgical treatments
+  const regionalCosts = useMemo(() => {
+    if (recommendation.phase !== 'Surgical') return null;
+    return getRegionalCosts(recommendation.ref_id, recommendation.name);
+  }, [recommendation.ref_id, recommendation.name, recommendation.phase]);
 
   // Format cost
   const formatCost = () => {
@@ -666,30 +741,28 @@ export function EnhancedRecommendationCard({
             className="overflow-hidden"
           >
             <div className="border-t border-neutral-800 bg-neutral-900/50">
-              <div className="grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-neutral-800">
-                {/* Main Content */}
-                <div className="md:col-span-7 lg:col-span-8 p-4 sm:p-6 space-y-4 sm:space-y-6">
-                  {/* Improvements */}
-                  <div>
-                    <SectionHeader icon={Target} title="Improvements" />
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {recommendation.matchedFlaws.map((flaw, i) => (
-                          <ImprovementTag key={i} text={flaw} />
-                        ))}
-                        {recommendation.matchedFlaws.length === 0 && recommendation.matchedRatios.slice(0, 3).map((ratio, i) => (
-                          <ImprovementTag key={i} text={ratio} />
-                        ))}
-                      </div>
-                      <div className="bg-neutral-800/50 p-2.5 sm:p-3.5 rounded-lg border border-neutral-700 text-sm shadow-sm">
-                        <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                          <div className="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase">Effectiveness</div>
-                          <div className="h-1 w-1 rounded-full bg-neutral-600" />
-                          <div className="font-medium text-white capitalize text-xs sm:text-sm">{getEffectiveness()}</div>
-                        </div>
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                {/* Improvements - Limited to 3 */}
+                <div>
+                  <SectionHeader icon={Target} title="Improvements" />
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {recommendation.matchedFlaws.slice(0, 3).map((flaw, i) => (
+                        <ImprovementTag key={i} text={flaw} />
+                      ))}
+                      {recommendation.matchedFlaws.length === 0 && recommendation.matchedRatios.slice(0, 3).map((ratio, i) => (
+                        <ImprovementTag key={i} text={ratio} />
+                      ))}
+                    </div>
+                    <div className="bg-neutral-800/50 p-2.5 sm:p-3.5 rounded-lg border border-neutral-700 text-sm shadow-sm">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <div className="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase">Effectiveness</div>
+                        <div className="h-1 w-1 rounded-full bg-neutral-600" />
+                        <div className="font-medium text-white capitalize text-xs sm:text-sm">{getEffectiveness()}</div>
                       </div>
                     </div>
                   </div>
+                </div>
 
                   {/* How It Helps */}
                   <div>
@@ -821,16 +894,40 @@ export function EnhancedRecommendationCard({
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* My Tracker Sidebar */}
-                <MyTracker
-                  tracker={tracker}
-                  onNotesChange={handleNotesChange}
-                  onAddChecklistItem={handleAddChecklistItem}
-                  onToggleChecklistItem={handleToggleChecklistItem}
-                  onRemoveChecklistItem={handleRemoveChecklistItem}
-                />
+                  {/* Regional Costs for Surgical Treatments */}
+                  {regionalCosts && regionalCosts.length > 0 && (
+                    <div className="bg-purple-500/10 p-3 sm:p-4 rounded-lg border border-purple-500/30">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Globe size={14} className="text-purple-400" />
+                        <span className="font-semibold text-purple-400 text-xs sm:text-sm">Medical Tourism Costs</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {regionalCosts.slice(0, 6).map((cost, idx) => (
+                          <div key={idx} className="bg-neutral-900/50 p-2 rounded-lg border border-neutral-700/50">
+                            <div className="flex items-center gap-1 mb-1">
+                              <MapPin size={10} className="text-purple-400" />
+                              <span className="text-[10px] font-semibold text-white">{cost.region}</span>
+                            </div>
+                            <div className="text-[11px] text-purple-300 font-medium">
+                              {cost.currency === 'USD' ? '$' : cost.currency === 'GBP' ? '£' : '€'}
+                              {cost.min.toLocaleString()} - {cost.max.toLocaleString()}
+                            </div>
+                            {cost.notes && (
+                              <div className="text-[9px] text-neutral-500 mt-0.5 line-clamp-1">
+                                {cost.notes}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      {regionalCosts.length > 6 && (
+                        <div className="text-[10px] text-purple-400/70 mt-2 text-center">
+                          +{regionalCosts.length - 6} more destinations available
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
             </div>
           </motion.div>

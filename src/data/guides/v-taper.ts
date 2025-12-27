@@ -44,6 +44,16 @@ Most guys have the opposite—narrow shoulders and wide waists. This is what sit
 
 **The Fix:**
 Build the shoulders and lats wide. Keep the waist narrow. Simple concept, requires consistent work.`,
+      media: [
+        {
+          id: 'v-taper-transformation',
+          type: 'image',
+          url: 'https://outlift.com/wp-content/uploads/2024/09/v-taper-physique.jpg',
+          alt: 'V-taper physique before and after transformation',
+          caption: 'The V-taper transformation: narrow shoulders to wide, wide waist to narrow',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'anatomy',

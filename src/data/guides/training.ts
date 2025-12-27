@@ -63,6 +63,14 @@ Then stick with it for at least 8-12 weeks before changing anything.`,
           caption: 'A written plan is the difference between progress and spinning wheels',
           placement: 'inline',
         },
+        {
+          id: 'pudgy-workout-gif',
+          type: 'gif',
+          url: 'https://media.giphy.com/media/HMzHH3J2RbHzPbRJH5/giphy.gif',
+          alt: 'Pudgy penguin lifting weights',
+          caption: 'No excuses. Get to work.',
+          placement: 'inline',
+        },
       ],
     },
     {
@@ -309,6 +317,14 @@ Add 5 lbs to lower body lifts and 2.5 lbs to upper body lifts each session when 
 
 > **Warning:** This is a lot of volume. If you're not sleeping 8+ hours and eating 1g/lb protein, you won't recover properly.`,
       media: [
+        {
+          id: 'ppl-split-banner',
+          type: 'image',
+          url: 'https://cdn.muscleandstrength.com/sites/default/files/6_day_ppl_-_1200x630.jpg',
+          alt: '6-day Push Pull Legs workout split overview',
+          caption: 'The classic 6-day PPL split: Push, Pull, Legs repeated twice',
+          placement: 'inline',
+        },
         {
           id: 'ohp-form',
           type: 'image',

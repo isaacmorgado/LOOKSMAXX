@@ -5,18 +5,17 @@ import Link from 'next/link';
 import { useResults } from '@/contexts/ResultsContext';
 import { TabContent } from '../ResultsLayout';
 import { api, ArchetypeForumRecommendation } from '@/lib/api';
-import { RecommendedForum, Category } from '@/types/forum';
+import { RecommendedForum, Category, SubForum } from '@/types/forum';
 import { classifyFromRatios } from '@/lib/archetype-classifier';
 import { Ethnicity, Gender } from '@/lib/harmony-scoring';
 import {
   Users,
   ArrowRight,
-  MessageSquare,
   Flame,
   Target,
-  TrendingUp,
   Sparkles,
   Crown,
+  ChevronDown,
 } from 'lucide-react';
 
 export function CommunityTab() {
@@ -291,7 +290,7 @@ export function CommunityTab() {
           </section>
         )}
 
-        {/* All Communities */}
+        {/* All Communities - Organized by Category */}
         {!isLoading && !error && allCategories.length > 0 && (
           <section>
             <div className="flex items-center gap-4 mb-6">
@@ -301,37 +300,64 @@ export function CommunityTab() {
               <h3 className="text-lg font-black text-white">All Communities</h3>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {allCategories.map((category) => (
-                <Link key={category.id} href={`/forum/${category.slug}`}>
-                  <div className="group rounded-xl bg-neutral-900/40 border border-white/5 hover:border-white/10 p-4 transition-all">
-                    <div className="flex items-center gap-3">
+                <div key={category.id} className="rounded-2xl bg-neutral-900/40 border border-white/5 overflow-hidden">
+                  {/* Category Header */}
+                  <Link href={`/forum/${category.slug}`}>
+                    <div className="group flex items-center gap-4 p-5 hover:bg-white/5 transition-all border-b border-white/5">
                       {/* Icon */}
-                      <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-lg flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center text-xl flex-shrink-0">
                         {category.icon || '💬'}
                       </div>
 
-                      {/* Content */}
+                      {/* Category Info */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-white group-hover:text-cyan-400 transition-colors truncate">
+                        <h4 className="font-black text-white group-hover:text-cyan-400 transition-colors">
                           {category.name}
                         </h4>
-                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" />
-                            {category.postCount}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" />
-                            {category.subForums.length} topics
-                          </span>
-                        </div>
+                        <p className="text-[11px] text-neutral-500 line-clamp-1">
+                          {category.description || 'Join the discussion'}
+                        </p>
                       </div>
 
-                      <ArrowRight className="w-4 h-4 text-neutral-700 group-hover:text-cyan-400 transition-colors" />
+                      {/* Stats + Arrow */}
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-sm font-black text-white">{category.postCount}</p>
+                          <p className="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">posts</p>
+                        </div>
+                        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all">
+                          <ChevronDown size={14} className="text-neutral-600 group-hover:text-cyan-400 transition-colors" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+
+                  {/* Sub-forums (Topics) */}
+                  {category.subForums.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-white/5">
+                      {category.subForums.map((subForum: SubForum) => (
+                        <Link
+                          key={subForum.id}
+                          href={`/forum/${category.slug}?sub=${subForum.slug}`}
+                        >
+                          <div className="group bg-neutral-900/60 p-3 hover:bg-cyan-500/10 transition-all">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{subForum.icon || '💬'}</span>
+                              <span className="text-xs font-bold text-neutral-400 group-hover:text-cyan-400 transition-colors truncate">
+                                r/{subForum.slug}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-neutral-600 mt-1 line-clamp-1">
+                              {subForum.postCount} posts
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </section>

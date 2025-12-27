@@ -47,6 +47,19 @@ async function imageUrlToBase64(imageUrl: string): Promise<string> {
   });
 }
 
+
+/**
+ * Get image dimensions
+ */
+function getImageDimensions(imageUrl: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = reject;
+    img.src = imageUrl;
+  });
+}
+
 /**
  * Calculate Frankfort Horizontal Plane from orbitale and porion landmarks
  */
@@ -102,11 +115,15 @@ export async function detectSideProfileServer(
     const resultData = data.data;
     console.log('[ServerDetection] Detection successful, count:', resultData.landmarkCount);
 
-    // Convert namedLandmarks object to array format matching our system
+    // Get image dimensions for normalization
+    const { width, height } = await getImageDimensions(imageUrl);
+    console.log('[ServerDetection] Normalizing landmarks with dimensions:', width, 'x', height);
+
+    // Convert namedLandmarks object to array format matching our system AND NORMALIZE (0-1)
     const landmarks = Object.entries(resultData.namedLandmarks).map(([id, point]) => ({
       id,
-      x: point.x,
-      y: point.y,
+      x: Math.max(0, Math.min(1, point.x / width)),
+      y: Math.max(0, Math.min(1, point.y / height)),
     }));
 
     // Use Frankfort Plane from server if available (future proof), otherwise calculate locally
@@ -117,12 +134,15 @@ export async function detectSideProfileServer(
     if (serverFrankfort) {
       frankfortPlane = serverFrankfort;
       console.log('[ServerDetection] Frankfort Plane angle (from server):', serverFrankfort.angle.toFixed(2), 'degrees');
-    } else if (resultData.namedLandmarks.orbitale && resultData.namedLandmarks.porion) {
-      frankfortPlane = calculateFrankfortPlane(
-        resultData.namedLandmarks.orbitale,
-        resultData.namedLandmarks.porion
-      );
-      console.log('[ServerDetection] Frankfort Plane angle (calculated):', frankfortPlane.angle.toFixed(2), 'degrees');
+    } else {
+      // Find normalized orbitale and porion from our processed list
+      const normOrbitale = landmarks.find(l => l.id === 'orbitale');
+      const normPorion = landmarks.find(l => l.id === 'porion');
+
+      if (normOrbitale && normPorion) {
+        frankfortPlane = calculateFrankfortPlane(normOrbitale, normPorion);
+        console.log('[ServerDetection] Frankfort Plane angle (calculated):', frankfortPlane.angle.toFixed(2), 'degrees');
+      }
     }
 
     return {

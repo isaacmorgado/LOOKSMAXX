@@ -63,6 +63,14 @@ Let's cover the 80% first.`,
           caption: 'Your physique is built in the kitchen',
           placement: 'inline',
         },
+        {
+          id: 'sigma-diet-gif',
+          type: 'gif',
+          url: 'https://media.giphy.com/media/guNXesWtLfqOfnWwmx/giphy.gif',
+          alt: 'Patrick Bateman sigma mindset',
+          caption: 'The sigma diet grindset',
+          placement: 'inline',
+        },
       ],
     },
     {
@@ -143,6 +151,16 @@ Going too aggressive. A 1000 calorie deficit sounds fast but leads to muscle los
 - 30-50g per meal, 3-4 meals
 - Fill gaps with protein shakes if needed
 - Front-load protein earlier in day for satiety`,
+      media: [
+        {
+          id: 'protein-chart',
+          type: 'image',
+          url: 'https://thenutritionjunky.com/wp-content/uploads/2023/08/High-protein-foods-chart-with-printable-PDF-blog-images-1200-x-700-px.jpg',
+          alt: 'High protein foods chart showing protein content per serving',
+          caption: 'Visual guide: Protein content in common foods',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'carbs-fats',

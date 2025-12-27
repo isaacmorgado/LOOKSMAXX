@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, Info } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { PSLResult } from '@/types/psl';
 import { getTierColor } from '@/lib/psl-calculator';
 import { PSLTierBadge } from './PSLTierBadge';
@@ -155,16 +155,6 @@ export function PSLScoreCard({
         </motion.div>
       )}
 
-      {/* Info section */}
-      <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-neutral-900/30 border border-white/5 relative z-10">
-        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center flex-shrink-0">
-          <Info size={14} className="text-neutral-600" />
-        </div>
-        <p className="text-xs text-neutral-500 font-medium leading-relaxed">
-          PSL = (Face x 0.75) + (Height x 0.20) + (Body x 0.05) + Bonuses.
-          Bonuses apply when components exceed 8.5.
-        </p>
-      </div>
     </motion.div>
   );
 }

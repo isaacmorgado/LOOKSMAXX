@@ -175,6 +175,8 @@ interface ProductCalloutProps {
 function ProductCallout({ productId }: ProductCalloutProps) {
   const { getLink } = useRegion();
   const product = getGuideProductById(productId);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   if (!product) return null;
 
@@ -184,17 +186,29 @@ function ProductCallout({ productId }: ProductCalloutProps) {
     <div className="my-6 p-5 rounded-2xl bg-neutral-900/40 border border-white/5 hover:border-cyan-500/20 transition-all">
       <div className="flex items-center gap-4">
         {/* Product Image */}
-        {product.imageUrl && (
-          <div className="w-16 h-16 rounded-xl bg-neutral-900 border border-white/10 overflow-hidden flex-shrink-0">
+        <div className="w-16 h-16 rounded-xl bg-neutral-900 border border-white/10 overflow-hidden flex-shrink-0 relative">
+          {isLoading && !hasError && product.imageUrl && (
+            <div className="absolute inset-0 bg-neutral-900/60 animate-pulse flex items-center justify-center z-10">
+              <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          {hasError || !product.imageUrl ? (
+            <div className="w-full h-full flex items-center justify-center bg-neutral-900">
+              <ShoppingCart size={20} className="text-neutral-600" />
+            </div>
+          ) : (
             <Image
               src={product.imageUrl}
               alt={product.name}
               width={64}
               height={64}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={() => setIsLoading(false)}
+              onError={() => { setHasError(true); setIsLoading(false); }}
+              unoptimized
             />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Product Info */}
         <div className="flex-1 min-w-0">
@@ -311,11 +325,19 @@ function GuideStatsCard() {
 interface GuideViewerProps {
   guide: Guide;
   onClose: () => void;
+  onSwitchGuide: (guide: Guide) => void;
+  allGuides: Guide[];
+  gender: 'male' | 'female';
 }
 
-function GuideViewer({ guide, onClose }: GuideViewerProps) {
+function GuideViewer({ guide, onClose, onSwitchGuide, allGuides, gender }: GuideViewerProps) {
   const [currentSection, setCurrentSection] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(() => {
+    // Find the category of the current guide and expand it by default
+    const currentCategory = GUIDE_CATEGORIES.find(c => c.guideIds.includes(guide.id));
+    return currentCategory ? [currentCategory.id] : [];
+  });
 
   const section = guide.sections[currentSection];
 
@@ -325,6 +347,30 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
   const progress = guide.sections.length > 1
     ? (currentSection / (guide.sections.length - 1)) * 100
     : 100;
+
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  // Filter categories by gender
+  const filteredCategories = GUIDE_CATEGORIES.filter(cat => {
+    if (cat.id === 'male' && gender === 'female') return false;
+    if (cat.id === 'female' && gender === 'male') return false;
+    return true;
+  });
+
+  const colorClasses: Record<string, { text: string; bg: string; border: string }> = {
+    blue: { text: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
+    purple: { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+    amber: { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    pink: { text: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+    emerald: { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+    red: { text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+  };
 
   return (
     <motion.div
@@ -391,90 +437,152 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
           `}
         >
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-neutral-900">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-cyan-400">
-                {getIconComponent(guide.icon, 20)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="font-black uppercase tracking-tight text-white truncate text-sm">{guide.title}</h2>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-600">
-                  <Clock size={10} />
-                  <span>{guide.estimatedReadTime} MIN</span>
-                </div>
-              </div>
+          <div className="p-4 border-b border-neutral-900">
+            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-2">
+              ALL GUIDES
             </div>
-            {guide.subtitle && (
-              <p className="text-xs text-neutral-500 italic">{guide.subtitle}</p>
-            )}
+            <p className="text-xs text-neutral-500">Select a lesson below</p>
           </div>
 
-          {/* Section List */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-4 px-2 flex items-center gap-3">
-              SECTIONS
-              <div className="flex-1 h-px bg-neutral-800" />
-            </div>
-            <ul className="space-y-1">
-              {guide.sections.map((s, idx) => (
-                <li key={s.id}>
+          {/* Categories & Guides List */}
+          <nav className="flex-1 overflow-y-auto p-3">
+            {filteredCategories.map(category => {
+              const categoryGuides = allGuides.filter(g => category.guideIds.includes(g.id));
+              if (categoryGuides.length === 0) return null;
+
+              const isExpanded = expandedCategories.includes(category.id);
+              const styles = colorClasses[category.color] || colorClasses.blue;
+              const hasCurrentGuide = categoryGuides.some(g => g.id === guide.id);
+
+              return (
+                <div key={category.id} className="mb-2">
+                  {/* Category Header */}
                   <button
-                    onClick={() => {
-                      setCurrentSection(idx);
-                      setIsSidebarOpen(false);
-                    }}
+                    onClick={() => toggleCategory(category.id)}
                     className={`
                       w-full text-left px-3 py-3 rounded-xl transition-all
-                      flex items-start gap-3 group
-                      ${currentSection === idx
-                        ? 'bg-neutral-900/50 border border-cyan-500/20'
-                        : 'hover:bg-neutral-900/30 border border-transparent'
-                      }
+                      flex items-center gap-3 group
+                      ${hasCurrentGuide ? `${styles.bg} border ${styles.border}` : 'hover:bg-neutral-900/50 border border-transparent'}
                     `}
                   >
-                    {/* Section number */}
-                    <span
+                    <div className={`w-8 h-8 rounded-xl ${styles.bg} border ${styles.border} flex items-center justify-center ${styles.text} flex-shrink-0`}>
+                      {getIconComponent(category.icon, 16)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs font-black uppercase tracking-wide block ${hasCurrentGuide ? 'text-white' : 'text-neutral-400 group-hover:text-white'}`}>
+                        {category.name}
+                      </span>
+                      <span className="text-[10px] text-neutral-600">
+                        {categoryGuides.length} guide{categoryGuides.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <ChevronRight
+                      size={14}
+                      className={`${styles.text} transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                    />
+                  </button>
+
+                  {/* Guides List (collapsible) */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.ul
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden ml-4 mt-1 space-y-0.5"
+                      >
+                        {categoryGuides.map(g => {
+                          const isCurrentGuide = g.id === guide.id;
+                          return (
+                            <li key={g.id}>
+                              <button
+                                onClick={() => {
+                                  if (isCurrentGuide) {
+                                    // Already on this guide, just close sidebar on mobile
+                                    setIsSidebarOpen(false);
+                                  } else {
+                                    onSwitchGuide(g);
+                                    setIsSidebarOpen(false);
+                                  }
+                                }}
+                                className={`
+                                  w-full text-left px-3 py-2 rounded-lg transition-all
+                                  flex items-center gap-2 group
+                                  ${isCurrentGuide
+                                    ? `${styles.bg} border ${styles.border}`
+                                    : 'hover:bg-neutral-900/30 border border-transparent'
+                                  }
+                                `}
+                              >
+                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isCurrentGuide ? styles.text.replace('text-', 'bg-') : 'bg-neutral-700'}`} />
+                                <span className={`text-xs font-medium truncate ${isCurrentGuide ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-300'}`}>
+                                  {g.title}
+                                </span>
+                                {isCurrentGuide && (
+                                  <span className="ml-auto text-[8px] font-black uppercase tracking-wider text-neutral-600">
+                                    VIEWING
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </nav>
+
+          {/* Current Guide Sections */}
+          <div className="border-t border-neutral-900">
+            <div className="p-3">
+              <div className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 mb-3 px-2 flex items-center gap-2">
+                <BookOpen size={10} />
+                SECTIONS
+              </div>
+              <ul className="space-y-0.5 max-h-48 overflow-y-auto">
+                {guide.sections.map((s, idx) => (
+                  <li key={s.id}>
+                    <button
+                      onClick={() => {
+                        setCurrentSection(idx);
+                        setIsSidebarOpen(false);
+                      }}
                       className={`
-                        flex-shrink-0 w-6 h-6 rounded-lg text-[10px] font-black
-                        flex items-center justify-center transition-colors
+                        w-full text-left px-3 py-2 rounded-lg transition-all
+                        flex items-center gap-2 group
                         ${currentSection === idx
-                          ? 'bg-cyan-500 text-black'
-                          : idx < currentSection
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-neutral-900 border border-white/10 text-neutral-500 group-hover:border-white/20'
+                          ? 'bg-cyan-500/10 border border-cyan-500/20'
+                          : 'hover:bg-neutral-900/30 border border-transparent'
                         }
                       `}
                     >
-                      {idx < currentSection ? (
-                        <CheckCircle2 size={12} />
-                      ) : (
-                        idx + 1
-                      )}
-                    </span>
-
-                    {/* Section info */}
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-xs font-bold uppercase tracking-wide truncate ${currentSection === idx ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-300'
-                          }`}
+                      <span
+                        className={`
+                          flex-shrink-0 w-5 h-5 rounded text-[9px] font-black
+                          flex items-center justify-center transition-colors
+                          ${currentSection === idx
+                            ? 'bg-cyan-500 text-black'
+                            : idx < currentSection
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'bg-neutral-900 border border-white/10 text-neutral-600'
+                          }
+                        `}
                       >
+                        {idx < currentSection ? <CheckCircle2 size={10} /> : idx + 1}
+                      </span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wide truncate ${currentSection === idx ? 'text-white' : 'text-neutral-500'}`}>
                         {s.title}
-                      </p>
-                      {/* Show media indicator if section has media */}
-                      {s.media && s.media.length > 0 && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <Sparkles size={8} className="text-amber-400" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-700">
-                            {s.media.length} VISUAL{s.media.length > 1 ? 'S' : ''}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-neutral-900">
@@ -598,17 +706,21 @@ function GuideViewer({ guide, onClose }: GuideViewerProps) {
                       ),
                       // Headers with clear hierarchy (smaller than section title)
                       h1: ({ children }) => (
-                        <h3 className="text-xl font-black italic uppercase text-white mt-12 mb-6 tracking-tight">
+                        <h3 className="text-xl font-black italic uppercase text-white mt-12 mb-6 tracking-tight flex items-center gap-3">
+                          <span className="w-1.5 h-8 bg-cyan-500 rounded-full" />
                           {children}
                         </h3>
                       ),
                       h2: ({ children }) => (
-                        <h4 className="text-lg font-black italic uppercase text-white mt-10 mb-5 pb-3 border-b border-neutral-900 tracking-tight">
-                          {children}
-                        </h4>
+                        <div className="mt-10 mb-6 p-4 rounded-xl bg-neutral-900/60 border border-white/5">
+                          <h4 className="text-base font-black uppercase text-cyan-400 tracking-wide flex items-center gap-2">
+                            <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                            {children}
+                          </h4>
+                        </div>
                       ),
                       h3: ({ children }) => (
-                        <h5 className="text-base font-black uppercase text-white mt-8 mb-4 tracking-wide">
+                        <h5 className="text-sm font-black uppercase text-white mt-8 mb-4 tracking-wide pl-4 border-l-2 border-purple-500/50">
                           {children}
                         </h5>
                       ),
@@ -1018,6 +1130,10 @@ export function GuidesTab() {
     setSelectedGuide(null);
   };
 
+  const handleSwitchGuide = (guide: Guide) => {
+    setSelectedGuide(guide);
+  };
+
   return (
     <>
       <TabContent
@@ -1063,7 +1179,13 @@ export function GuidesTab() {
       {/* Guide Viewer Modal */}
       <AnimatePresence>
         {selectedGuide && (
-          <GuideViewer guide={selectedGuide} onClose={handleCloseGuide} />
+          <GuideViewer
+            guide={selectedGuide}
+            onClose={handleCloseGuide}
+            onSwitchGuide={handleSwitchGuide}
+            allGuides={genderFilteredGuides}
+            gender={gender}
+          />
         )}
       </AnimatePresence>
     </>

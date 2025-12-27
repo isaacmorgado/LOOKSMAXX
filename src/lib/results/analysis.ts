@@ -770,6 +770,7 @@ export function calculateRelevanceScore(
   allRatios: Ratio[] = []
 ): number {
   let score = 0;
+  let hasDirectMatch = false;
 
   // Check metric ID match (highest priority)
   const metricId = flaw.responsibleRatios[0]?.ratioId || '';
@@ -779,6 +780,7 @@ export function calculateRelevanceScore(
   if (proc.targetMetrics.includes(metricId)) {
     // Base score for metric match
     score += 40;
+    hasDirectMatch = true;
 
     // Boost based on how poor the metric score is (lower score = more improvement potential)
     // Score of 2 adds +20, score of 8 adds +5
@@ -786,12 +788,19 @@ export function calculateRelevanceScore(
     score += metricPoorness;
   }
 
-  // Check category match
-  if (proc.targetCategories.some(cat =>
-    flaw.categoryName.toLowerCase().includes(cat.toLowerCase()) ||
-    cat.toLowerCase().includes(flaw.categoryName.toLowerCase())
-  )) {
+  // Check category match - STRICT: require exact category match
+  const flawCategory = flaw.categoryName.toLowerCase();
+  const categoryMatches = proc.targetCategories.some(cat => {
+    const catLower = cat.toLowerCase();
+    // Exact or close category match only
+    return flawCategory === catLower ||
+           flawCategory.includes(catLower) ||
+           catLower.includes(flawCategory);
+  });
+
+  if (categoryMatches) {
     score += 25;
+    hasDirectMatch = true;
   }
 
   // Check keyword match with weighted scoring
@@ -802,13 +811,24 @@ export function calculateRelevanceScore(
   );
   // Primary keyword match (in flaw name) worth more
   const primaryMatches = matchedKeywords.filter(kw => flawLower.includes(kw.toLowerCase()));
-  score += primaryMatches.length * 15;
-  score += (matchedKeywords.length - primaryMatches.length) * 8;
+
+  // Only count keyword matches if we have a direct match OR multiple strong keywords
+  if (hasDirectMatch || primaryMatches.length >= 2) {
+    score += primaryMatches.length * 15;
+    score += (matchedKeywords.length - primaryMatches.length) * 8;
+    if (primaryMatches.length >= 2) hasDirectMatch = true;
+  }
+
+  // CRITICAL: Without a direct match, return 0 to prevent false positives
+  // This ensures Canthoplasty (Eyes) won't match jaw flaws
+  if (!hasDirectMatch) {
+    return 0;
+  }
 
   // Adjust by flaw severity/impact (more severe = higher priority)
   score += Math.min(flaw.harmonyPercentageLost * 4, 20);
 
-  // Bonus if this procedure addresses multiple flaws
+  // Bonus if this procedure addresses multiple flaws (only count direct matches)
   const otherFlawsAddressed = allFlaws.filter(f =>
     f.id !== flaw.id && (
       proc.targetMetrics.includes(f.responsibleRatios[0]?.ratioId || '') ||

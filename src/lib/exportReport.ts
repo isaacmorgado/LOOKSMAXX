@@ -10,7 +10,15 @@ export interface ExportOptions {
   filename?: string;
   scale?: number;
   backgroundColor?: string;
+  pageFormat?: 'a4' | 'letter';
+  margins?: number; // in mm
 }
+
+// Standard page dimensions in mm
+const PAGE_SIZES = {
+  a4: { width: 210, height: 297 },
+  letter: { width: 215.9, height: 279.4 },
+};
 
 /**
  * Export an element as a PNG image
@@ -20,7 +28,7 @@ export async function exportToImage(
   options: ExportOptions = {}
 ): Promise<{ success: boolean; error?: string }> {
   const {
-    filename = 'looksmaxx-results',
+    filename = 'looxsmaxxlabs-results',
     scale = 2,
     backgroundColor = '#0a0a0a',
   } = options;
@@ -54,16 +62,113 @@ export async function exportToImage(
 }
 
 /**
- * Export an element as a PDF document
+ * Export an element as a PDF document with proper page sizing
  */
 export async function exportToPDF(
   elementId: string,
   options: ExportOptions = {}
 ): Promise<{ success: boolean; error?: string }> {
   const {
-    filename = 'looksmaxx-results',
+    filename = 'looxsmaxxlabs-results',
     scale = 2,
     backgroundColor = '#0a0a0a',
+    pageFormat = 'a4',
+    margins = 10, // 10mm margins by default
+  } = options;
+
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return { success: false, error: 'Element not found' };
+  }
+
+  try {
+    // Capture the element at high resolution
+    const canvas = await html2canvas(element, {
+      scale,
+      backgroundColor,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidthPx = canvas.width;
+    const imgHeightPx = canvas.height;
+
+    // Get page dimensions
+    const pageSize = PAGE_SIZES[pageFormat] || PAGE_SIZES.a4;
+
+    // Calculate the aspect ratio of the image
+    const imgAspectRatio = imgWidthPx / imgHeightPx;
+
+    // Determine orientation based on image aspect ratio
+    const orientation = imgWidthPx > imgHeightPx ? 'l' : 'p';
+
+    // Adjust page dimensions if landscape
+    const pdfWidth = orientation === 'l' ? pageSize.height : pageSize.width;
+    const pdfHeight = orientation === 'l' ? pageSize.width : pageSize.height;
+
+    // Calculate content area for the correct orientation
+    const orientedContentWidth = pdfWidth - (margins * 2);
+    const orientedContentHeight = pdfHeight - (margins * 2);
+
+    let orientedFinalWidth: number;
+    let orientedFinalHeight: number;
+
+    const orientedPageAspectRatio = orientedContentWidth / orientedContentHeight;
+
+    if (imgAspectRatio > orientedPageAspectRatio) {
+      orientedFinalWidth = orientedContentWidth;
+      orientedFinalHeight = orientedContentWidth / imgAspectRatio;
+    } else {
+      orientedFinalHeight = orientedContentHeight;
+      orientedFinalWidth = orientedContentHeight * imgAspectRatio;
+    }
+
+    const orientedXOffset = margins + (orientedContentWidth - orientedFinalWidth) / 2;
+    const orientedYOffset = margins + (orientedContentHeight - orientedFinalHeight) / 2;
+
+    // Create PDF with standard page size
+    const pdf = new jsPDF({
+      orientation,
+      unit: 'mm',
+      format: pageFormat,
+    });
+
+    // Add the image scaled to fit the page with margins
+    pdf.addImage(
+      imgData,
+      'PNG',
+      orientedXOffset,
+      orientedYOffset,
+      orientedFinalWidth,
+      orientedFinalHeight
+    );
+
+    pdf.save(`${filename}.pdf`);
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to export PDF'
+    };
+  }
+}
+
+/**
+ * Export an element as a multi-page PDF if content is too tall
+ */
+export async function exportToMultiPagePDF(
+  elementId: string,
+  options: ExportOptions = {}
+): Promise<{ success: boolean; error?: string }> {
+  const {
+    filename = 'looxsmaxxlabs-results',
+    scale = 2,
+    backgroundColor = '#0a0a0a',
+    pageFormat = 'a4',
+    margins = 10,
   } = options;
 
   const element = document.getElementById(elementId);
@@ -81,20 +186,79 @@ export async function exportToPDF(
     });
 
     const imgData = canvas.toDataURL('image/png');
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
+    const imgWidthPx = canvas.width;
+    const imgHeightPx = canvas.height;
 
-    // Determine orientation based on aspect ratio
-    const orientation = imgWidth > imgHeight ? 'l' : 'p';
+    const pageSize = PAGE_SIZES[pageFormat] || PAGE_SIZES.a4;
+    const contentWidth = pageSize.width - (margins * 2);
+    const contentHeight = pageSize.height - (margins * 2);
 
-    // Create PDF with appropriate dimensions
+    // Scale image to fit page width
+    const scaledWidth = contentWidth;
+    const scaledHeight = (imgHeightPx * contentWidth) / imgWidthPx;
+
+    // Create PDF
     const pdf = new jsPDF({
-      orientation,
-      unit: 'px',
-      format: [imgWidth, imgHeight],
+      orientation: 'p',
+      unit: 'mm',
+      format: pageFormat,
     });
 
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    // Calculate number of pages needed
+    const pageCount = Math.ceil(scaledHeight / contentHeight);
+
+    for (let page = 0; page < pageCount; page++) {
+      if (page > 0) {
+        pdf.addPage();
+      }
+
+      // Calculate the portion of the image to show on this page
+      const sourceY = (page * contentHeight * imgWidthPx) / contentWidth;
+      const sourceHeight = Math.min(
+        (contentHeight * imgWidthPx) / contentWidth,
+        imgHeightPx - sourceY
+      );
+
+      // Create a temporary canvas for this page's portion
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = imgWidthPx;
+      pageCanvas.height = sourceHeight;
+      const ctx = pageCanvas.getContext('2d');
+
+      if (ctx) {
+        const img = new Image();
+        img.src = imgData;
+        await new Promise((resolve) => {
+          img.onload = () => {
+            ctx.drawImage(
+              img,
+              0,
+              sourceY,
+              imgWidthPx,
+              sourceHeight,
+              0,
+              0,
+              imgWidthPx,
+              sourceHeight
+            );
+            resolve(null);
+          };
+        });
+
+        const pageImgData = pageCanvas.toDataURL('image/png');
+        const pageHeight = (sourceHeight * contentWidth) / imgWidthPx;
+
+        pdf.addImage(
+          pageImgData,
+          'PNG',
+          margins,
+          margins,
+          scaledWidth,
+          pageHeight
+        );
+      }
+    }
+
     pdf.save(`${filename}.pdf`);
 
     return { success: true };
@@ -109,7 +273,7 @@ export async function exportToPDF(
 /**
  * Generate a timestamp-based filename
  */
-export function generateFilename(prefix: string = 'looksmaxx'): string {
+export function generateFilename(prefix: string = 'looxsmaxxlabs'): string {
   const date = new Date();
   const timestamp = date.toISOString().split('T')[0];
   return `${prefix}-${timestamp}`;

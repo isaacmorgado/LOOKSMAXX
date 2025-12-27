@@ -87,6 +87,24 @@ Thinnest to thickest consistency:
 4. Moisturizer (seal it in)
 5. Sunscreen (protect from sun)`,
       products: ['cerave_cleanser', 'cerave_moisturizer', 'sunscreen_elta'],
+      media: [
+        {
+          id: 'skincare-routine-infographic',
+          type: 'image',
+          url: 'https://cdn.shopify.com/s/files/1/0513/2409/files/mens_skin_care_routine_infographic.png',
+          alt: 'Men\'s daily skincare routine infographic',
+          caption: 'The basic skincare routine for all skin types',
+          placement: 'inline',
+        },
+        {
+          id: 'kdrama-facemask-gif',
+          type: 'gif',
+          url: 'https://media.giphy.com/media/1npaSqEUpFvZ5H9dqK/giphy.gif',
+          alt: 'Korean drama face mask scene',
+          caption: 'Even K-drama stars do their skincare routine',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'cleansing',

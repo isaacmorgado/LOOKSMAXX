@@ -5,6 +5,11 @@ import { ResultsProvider } from '@/contexts/ResultsContext';
 import { Results } from '@/components/results/Results';
 import { LandmarkPoint, FRONT_PROFILE_LANDMARKS, SIDE_PROFILE_LANDMARKS } from '@/lib/landmarks';
 import { Ethnicity, Gender } from '@/lib/harmony-scoring';
+import {
+  generateSampleData,
+  isSampleMode,
+  getSampleConfigFromURL,
+} from '@/lib/sample-data';
 
 // Error Boundary for catching render errors
 class ResultsErrorBoundary extends Component<
@@ -81,6 +86,7 @@ const createDemoData = () => ({
 
 export default function ResultsPage() {
   const [mounted, setMounted] = useState(false);
+  const [isSample, setIsSample] = useState(false);
   const [initialData, setInitialData] = useState<{
     frontLandmarks: LandmarkPoint[];
     sideLandmarks: LandmarkPoint[];
@@ -88,12 +94,27 @@ export default function ResultsPage() {
     sidePhoto?: string;
     gender: Gender;
     ethnicity?: Ethnicity;
+    isUnlocked?: boolean;
   } | null>(null);
 
   useEffect(() => {
     console.log('[ResultsPage] useEffect running, setting mounted=true');
     // Mark as mounted (client-side only)
     setMounted(true);
+
+    // Check for sample mode first
+    const sampleMode = isSampleMode();
+    setIsSample(sampleMode);
+
+    if (sampleMode) {
+      console.log('[ResultsPage] SAMPLE MODE ENABLED - Loading demo data');
+      const sampleConfig = getSampleConfigFromURL();
+      console.log('[ResultsPage] Sample config:', sampleConfig);
+      const sampleData = generateSampleData(sampleConfig);
+      console.log('[ResultsPage] Sample data generated with', sampleData.frontLandmarks.length, 'front landmarks');
+      setInitialData(sampleData);
+      return;
+    }
 
     try {
       // Try to get data from sessionStorage (set by analysis page)
@@ -141,8 +162,29 @@ export default function ResultsPage() {
 
   return (
     <ResultsErrorBoundary>
+      {/* Sample Mode Banner */}
+      {isSample && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500/90 to-orange-500/90 backdrop-blur-sm py-2 px-4 text-center">
+          <p className="text-sm font-medium text-black">
+            <span className="inline-flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              DEMO MODE - Viewing sample results with simulated face data
+              <a
+                href="/results"
+                className="ml-2 underline hover:no-underline"
+              >
+                Exit Demo
+              </a>
+            </span>
+          </p>
+        </div>
+      )}
       <ResultsProvider initialData={initialData}>
-        <Results />
+        <div className={isSample ? 'pt-10' : ''}>
+          <Results />
+        </div>
       </ResultsProvider>
     </ResultsErrorBoundary>
   );

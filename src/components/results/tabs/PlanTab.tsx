@@ -8,7 +8,6 @@ import {
   Target,
   Zap,
   ChevronRight,
-  Lock,
   CheckCircle,
   Scale,
   Dumbbell,
@@ -17,7 +16,6 @@ import {
   ArrowUp,
   Minus,
   Package,
-  ShoppingCart,
 } from 'lucide-react';
 import { useResults } from '@/contexts/ResultsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,10 +24,8 @@ import { usePhysiqueOptional } from '@/contexts/PhysiqueContext';
 import { TabContent } from '../ResultsLayout';
 import { EnhancedRecommendationCard } from '../cards/EnhancedRecommendationCard';
 import { ScoreCircle, PhaseBadge } from '../shared';
-import { BeforeAfterPreview } from '../visualization/BeforeAfterPreview';
-import { FaceMorphing } from '../visualization/FaceMorphing';
 import { TreatmentTimeline } from '../visualization/TreatmentTimeline';
-import { RecommendationPhase, ProductRecommendation } from '@/types/results';
+import { RecommendationPhase } from '@/types/results';
 import { DailyStackCard } from '../cards/DailyStackCard';
 import { ProductCard } from '../cards/ProductCard';
 import { WeakPointCard } from '../cards/WeakPointCard';
@@ -173,139 +169,6 @@ function PhaseFilter({ selectedPhase, onSelect, counts }: PhaseFilterProps) {
 }
 
 // ============================================
-// BEFORE/AFTER PREVIEW SECTION WITH MORPHING
-// ============================================
-
-type PreviewMode = 'static' | 'morphing';
-
-function BeforeAfterPreviewSection() {
-  const { frontPhoto, overallScore, recommendations, frontLandmarks } = useResults();
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('morphing');
-  const numericScore = typeof overallScore === 'number' ? overallScore : 0;
-
-  // Calculate potential improvement
-  const potentialImprovement = useMemo(() => {
-    if (recommendations.length === 0) return 0;
-    const totalImpact = recommendations.slice(0, 5).reduce((sum, r) => sum + r.impact, 0);
-    return Math.min(totalImpact * 1.5, 10 - numericScore);
-  }, [recommendations, numericScore]);
-
-  const potentialScore = Math.min(10, numericScore + potentialImprovement);
-
-  if (!frontPhoto) return null;
-
-  return (
-    <div className="space-y-4">
-      {/* Mode Toggle */}
-      <div className="flex items-center justify-center gap-1 p-1 bg-neutral-900/50 rounded-xl border border-white/5">
-        <button
-          onClick={() => setPreviewMode('morphing')}
-          className={`flex-1 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-            previewMode === 'morphing'
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-              : 'text-neutral-500 hover:text-white border border-transparent'
-          }`}
-        >
-          Face Morphing
-        </button>
-        <button
-          onClick={() => setPreviewMode('static')}
-          className={`flex-1 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-            previewMode === 'static'
-              ? 'bg-neutral-800 text-white border border-white/10'
-              : 'text-neutral-500 hover:text-white border border-transparent'
-          }`}
-        >
-          Static Preview
-        </button>
-      </div>
-
-      {/* Preview Component */}
-      <AnimatePresence mode="wait">
-        {previewMode === 'morphing' && frontLandmarks.length > 0 ? (
-          <motion.div
-            key="morphing"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <FaceMorphing
-              photo={frontPhoto}
-              frontLandmarks={frontLandmarks}
-              currentScore={numericScore}
-              potentialScore={potentialScore}
-              recommendations={recommendations}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="static"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <BeforeAfterPreview
-              photo={frontPhoto}
-              currentScore={numericScore}
-              potentialScore={potentialScore}
-              recommendations={recommendations}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ============================================
-// ORDER OF OPERATIONS
-// ============================================
-
-function OrderOfOperations() {
-  return (
-    <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
-      <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center">
-          <Target size={14} className="text-cyan-400" />
-        </div>
-        Recommended Order
-      </h4>
-      <div className="space-y-4">
-        <div className="flex items-start gap-4">
-          <div className="w-7 h-7 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-black text-green-400">1</span>
-          </div>
-          <div>
-            <p className="text-sm font-black uppercase tracking-wider text-white">Start with Foundational</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Low-cost, no-risk improvements</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-4">
-          <div className="w-7 h-7 rounded-lg bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-black text-yellow-400">2</span>
-          </div>
-          <div>
-            <p className="text-sm font-black uppercase tracking-wider text-white">Consider Minimally Invasive</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Temporary or reversible options</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-4">
-          <div className="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-black text-red-400">3</span>
-          </div>
-          <div>
-            <p className="text-sm font-black uppercase tracking-wider text-white">Evaluate Surgical Options</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mt-1">Permanent solutions for significant improvements</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
 // YOUR PHASE CARD (Body Composition Phase)
 // ============================================
 
@@ -420,94 +283,74 @@ function YourPhaseCard({ bodyFatPercent, gender }: YourPhaseCardProps) {
 }
 
 // ============================================
-// PRODUCT BUNDLE CTA
+// UNIFIED PRICING SUMMARY CARD
 // ============================================
 
-interface ProductBundleCardProps {
-  products: ProductRecommendation[];
-  title?: string;
+interface UnifiedPricingSummaryProps {
+  dailyStackCost: { min: number; max: number };
+  productCost: number;
+  totalProducts: number;
+  totalSupplements: number;
 }
 
-function ProductBundleCard({ products, title = 'Recommended Bundle' }: ProductBundleCardProps) {
-  // Get top 3 most important products
-  const bundleProducts = products.slice(0, 3);
-
-  // Calculate total cost
-  const totalCost = bundleProducts.reduce((sum, rec) => {
-    const supplement = SUPPLEMENTS.find(s => s.id === rec.product.supplementId);
-    return sum + (supplement?.costPerMonth.min || 0);
-  }, 0);
-
-  if (bundleProducts.length === 0) return null;
+function UnifiedPricingSummary({ dailyStackCost, productCost, totalProducts, totalSupplements }: UnifiedPricingSummaryProps) {
+  const totalMin = dailyStackCost.min + productCost;
+  const totalMax = dailyStackCost.max + productCost;
 
   return (
     <motion.div
-      className="rounded-[2rem] bg-gradient-to-br from-purple-900/50 to-violet-950/50 border border-purple-500/30 p-6"
+      className="rounded-2xl bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border border-cyan-500/20 p-5"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-          <Package size={18} className="text-purple-400" />
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
+          <Package size={16} className="text-cyan-400" />
         </div>
-        <div className="flex-1">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">{title}</h3>
-        </div>
-        <div className="px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-black uppercase tracking-wider rounded-lg">
-          Save 15%
-        </div>
+        <h4 className="text-xs font-black uppercase tracking-wider text-white">Monthly Investment</h4>
       </div>
 
-      <p className="text-sm text-neutral-300 mb-5 leading-relaxed">
-        Your analysis recommends these {bundleProducts.length} supplements - optimized for your specific weak points.
-      </p>
-
-      {/* Bundle Items */}
-      <div className="space-y-2 mb-5">
-        {bundleProducts.map((rec, index) => (
-          <div
-            key={rec.product.id}
-            className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5"
-          >
-            <div className="w-7 h-7 rounded-lg bg-purple-500/30 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-black text-purple-300">{index + 1}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-black uppercase tracking-wider text-white truncate">{rec.product.name}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 truncate">Targets: {rec.targetMetric}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-sm font-black text-white">
-                ${SUPPLEMENTS.find(s => s.id === rec.product.supplementId)?.costPerMonth.min || 0}/mo
-              </p>
-            </div>
+      {/* Cost Breakdown */}
+      <div className="space-y-3 mb-4">
+        <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Foundation Stack</p>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-600">{totalSupplements} supplements</p>
           </div>
-        ))}
+          <span className="text-sm font-black text-white">${dailyStackCost.min}-${dailyStackCost.max}</span>
+        </div>
+        {productCost > 0 && (
+          <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Corrective Products</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-600">{totalProducts} products</p>
+            </div>
+            <span className="text-sm font-black text-white">${productCost}</span>
+          </div>
+        )}
       </div>
 
-      {/* Total & CTA */}
-      <div className="border-t border-purple-500/20 pt-5">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Bundle Total</span>
+      {/* Total */}
+      <div className="border-t border-cyan-500/20 pt-4">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Total Monthly</span>
           <div className="text-right">
-            <span className="text-xl font-black text-white">${totalCost}/mo</span>
-            <span className="text-xs font-bold text-neutral-500 ml-2 line-through">${Math.round(totalCost * 1.15)}/mo</span>
+            <span className="text-xl font-black text-cyan-400">${totalMin}-${totalMax}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block">/month</span>
           </div>
         </div>
-        <button
-          className="w-full flex items-center justify-center gap-3 py-3.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-opacity border border-purple-400/30"
-        >
-          <ShoppingCart size={16} />
-          Get Your Bundle
-        </button>
       </div>
     </motion.div>
   );
 }
 
+
 // ============================================
 // PLAN TAB
 // ============================================
+
+// Plan subtab type
+type PlanSubTab = 'foundation' | 'fixes' | 'treatments';
 
 export function PlanTab() {
   const { recommendations, flaws, gender, ethnicity, frontRatios, sideRatios, overallScore, frontPhoto, vision, isUnlocked } = useResults();
@@ -523,6 +366,9 @@ export function PlanTab() {
     bodyFatPercent?: number;
     frontPhotoUrl?: string;
   } | null>(null);
+
+  // Subtab state for organized navigation
+  const [activeSubTab, setActiveSubTab] = useState<PlanSubTab>('foundation');
 
   // Treatment conflict state
   const [dismissedConflicts, setDismissedConflicts] = useState<Set<string>>(new Set());
@@ -703,150 +549,244 @@ export function PlanTab() {
     }
   }, [expandedId]);
 
+  // Calculate unified pricing
+  const unifiedPricing = useMemo(() => {
+    const stackCost = dailyStack?.totalCostPerMonth
+      ? { min: dailyStack.totalCostPerMonth.min || 0, max: dailyStack.totalCostPerMonth.max || 0 }
+      : { min: 0, max: 0 };
+
+    const productCost = flawProducts.slice(0, 3).reduce((sum, rec) => {
+      const supplement = SUPPLEMENTS.find(s => s.id === rec.product.supplementId);
+      return sum + (supplement?.costPerMonth?.min || 0);
+    }, 0);
+
+    return {
+      stackCost,
+      productCost,
+      totalProducts: flawProducts.length,
+      totalSupplements: dailyStack?.products?.length || 0,
+    };
+  }, [dailyStack, flawProducts]);
+
   return (
     <TabContent
       title="Your Plan & Potential"
       subtitle="Personalized recommendations based on your analysis"
     >
+      {/* Subtab Navigation */}
+      <div className="flex items-center gap-1 p-1.5 bg-neutral-900/50 rounded-2xl border border-white/5 mb-8">
+        {[
+          { id: 'foundation' as PlanSubTab, label: 'Foundation', icon: <Sparkles size={14} /> },
+          { id: 'fixes' as PlanSubTab, label: 'Fix Issues', icon: <Target size={14} />, count: flaws.length },
+          { id: 'treatments' as PlanSubTab, label: 'Treatments', icon: <Zap size={14} />, count: filteredRecommendations.length },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveSubTab(tab.id)}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+              activeSubTab === tab.id
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                : 'text-neutral-500 hover:text-white border border-transparent'
+            }`}
+          >
+            {tab.icon}
+            <span className="hidden sm:inline">{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[9px] ${
+                activeSubTab === tab.id ? 'bg-cyan-500/30' : 'bg-neutral-800'
+              }`}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-10">
-          {/* Your Phase Card - Body Composition Phase */}
-          <YourPhaseCard bodyFatPercent={bodyFatPercent} gender={gender} />
+        <div className="lg:col-span-2 space-y-8">
+          <AnimatePresence mode="wait">
+            {/* FOUNDATION TAB */}
+            {activeSubTab === 'foundation' && (
+              <motion.div
+                key="foundation"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-8"
+              >
+                {/* Your Phase Card */}
+                <YourPhaseCard bodyFatPercent={bodyFatPercent} gender={gender} />
 
-          {/* Daily Stack Card - Hero Element for ALL users */}
-          {dailyStack && <DailyStackCard dailyStack={dailyStack} />}
+                {/* Potential Score */}
+                <PotentialScoreCard />
 
-          {/* Potential Score */}
-          <PotentialScoreCard />
+                {/* Daily Stack Card */}
+                {dailyStack && <DailyStackCard dailyStack={dailyStack} />}
+              </motion.div>
+            )}
 
-          {/* Fix Your Weak Points Section */}
-          {flawsWithProducts.length > 0 && (
-            <section>
-              <SectionHeader title="Fix Your Weak Points">
-                <span className="px-3 py-1.5 bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
-                  {flawsWithProducts.length} Issues
-                </span>
-              </SectionHeader>
-              <div className="space-y-4">
-                {flawsWithProducts.map((item, index) => (
-                  <WeakPointCard
-                    key={item.flaw.id}
-                    flaw={item.flaw}
-                    rank={index + 1}
-                    products={item.products}
-                    treatments={item.treatments}
-                    onViewTreatment={(treatment) => setExpandedId(treatment.ref_id)}
+            {/* FIX ISSUES TAB */}
+            {activeSubTab === 'fixes' && (
+              <motion.div
+                key="fixes"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-8"
+              >
+                {/* Fix Your Weak Points Section */}
+                {flawsWithProducts.length > 0 && (
+                  <section>
+                    <SectionHeader title="Fix Your Weak Points">
+                      <span className="px-3 py-1.5 bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
+                        {flawsWithProducts.length} Issues
+                      </span>
+                    </SectionHeader>
+                    <div className="space-y-4">
+                      {flawsWithProducts.map((item, index) => (
+                        <WeakPointCard
+                          key={item.flaw.id}
+                          flaw={item.flaw}
+                          rank={index + 1}
+                          products={item.products}
+                          treatments={item.treatments}
+                          onViewTreatment={(treatment) => {
+                            setActiveSubTab('treatments');
+                            setExpandedId(treatment.ref_id);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Corrective Products */}
+                {flawProducts.length > 0 && (
+                  <section>
+                    <SectionHeader title="Recommended Products">
+                      <span className="px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
+                        {flawProducts.length} Corrective
+                      </span>
+                    </SectionHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {flawProducts.slice(0, 4).map((rec, index) => (
+                        <ProductCard key={rec.product.id} recommendation={rec} rank={index + 1} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Maintenance Products */}
+                {idealProducts.length > 0 && (
+                  <section>
+                    <SectionHeader title="Protect Your Strengths">
+                      <span className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
+                        Maintenance
+                      </span>
+                    </SectionHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {idealProducts.slice(0, 2).map((rec) => (
+                        <ProductCard key={rec.product.id} recommendation={rec} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </motion.div>
+            )}
+
+            {/* TREATMENTS TAB */}
+            {activeSubTab === 'treatments' && (
+              <motion.div
+                key="treatments"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-8"
+              >
+                {/* Treatment Timeline */}
+                {recommendations.length > 0 && (
+                  <section>
+                    <SectionHeader title="Treatment Timeline" />
+                    <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
+                  </section>
+                )}
+
+                {/* Treatment Conflict Warnings */}
+                {treatmentConflicts.length > 0 && (
+                  <TreatmentConflictList
+                    conflicts={treatmentConflicts}
+                    onDismiss={handleDismissConflict}
+                    onDismissAll={handleDismissAllConflicts}
                   />
-                ))}
-              </div>
-            </section>
-          )}
+                )}
 
-          {/* Targeted Product Recommendations - Corrective */}
-          {flawProducts.length > 0 && (
-            <section>
-              <SectionHeader title="Recommended Products">
-                <span className="px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
-                  Corrective
-                </span>
-              </SectionHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {flawProducts.slice(0, 6).map((rec, index) => (
-                  <ProductCard key={rec.product.id} recommendation={rec} rank={index + 1} />
-                ))}
-              </div>
-            </section>
-          )}
+                {/* Phase Filter */}
+                <section>
+                  <SectionHeader title="Treatment Options" />
+                  <PhaseFilter
+                    selectedPhase={selectedPhase}
+                    onSelect={setSelectedPhase}
+                    counts={phaseCounts}
+                  />
+                </section>
 
-          {/* Targeted Product Recommendations - Maintenance */}
-          {idealProducts.length > 0 && (
-            <section>
-              <SectionHeader title="Protect Your Strengths">
-                <span className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg">
-                  Maintenance
-                </span>
-              </SectionHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {idealProducts.slice(0, 4).map((rec) => (
-                  <ProductCard key={rec.product.id} recommendation={rec} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Treatment Timeline */}
-          {recommendations.length > 0 && (
-            <section>
-              <SectionHeader title="Treatment Timeline" />
-              <TreatmentTimeline recommendations={recommendations.filter(r => !removedIds.has(r.ref_id))} />
-            </section>
-          )}
-
-          {/* Treatment Conflict Warnings */}
-          {treatmentConflicts.length > 0 && (
-            <TreatmentConflictList
-              conflicts={treatmentConflicts}
-              onDismiss={handleDismissConflict}
-              onDismissAll={handleDismissAllConflicts}
-            />
-          )}
-
-          {/* Phase Filter Section */}
-          <section>
-            <SectionHeader title="Treatment Options" />
-            <PhaseFilter
-              selectedPhase={selectedPhase}
-              onSelect={setSelectedPhase}
-              counts={phaseCounts}
-            />
-          </section>
-
-          {/* Recommendations List */}
-          {hasRecommendations ? (
-            <motion.div className="space-y-4" layout>
-              <AnimatePresence mode="popLayout">
-                {filteredRecommendations.map((rec, index) => (
-                  <motion.div
-                    key={rec.ref_id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                  >
-                    <EnhancedRecommendationCard
-                      recommendation={rec}
-                      rank={index + 1}
-                      isExpanded={expandedId === rec.ref_id}
-                      onToggle={() => setExpandedId(
-                        expandedId === rec.ref_id ? null : rec.ref_id
-                      )}
-                      onMarkComplete={handleMarkComplete}
-                      onRemove={handleRemove}
-                      isCompleted={completedIds.has(rec.ref_id)}
-                      gender={gender}
-                      ethnicity={ethnicity}
-                    />
+                {/* Recommendations List */}
+                {hasRecommendations ? (
+                  <motion.div className="space-y-4" layout>
+                    <AnimatePresence mode="popLayout">
+                      {filteredRecommendations.map((rec, index) => (
+                        <motion.div
+                          key={rec.ref_id}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                          <EnhancedRecommendationCard
+                            recommendation={rec}
+                            rank={index + 1}
+                            isExpanded={expandedId === rec.ref_id}
+                            onToggle={() => setExpandedId(
+                              expandedId === rec.ref_id ? null : rec.ref_id
+                            )}
+                            onMarkComplete={handleMarkComplete}
+                            onRemove={handleRemove}
+                            isCompleted={completedIds.has(rec.ref_id)}
+                            gender={gender}
+                            ethnicity={ethnicity}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          ) : (
-            <div className="rounded-[2rem] bg-neutral-900/40 border border-white/5 p-10 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-5">
-                <Sparkles size={28} className="text-neutral-600" />
-              </div>
-              <h3 className="text-lg font-black uppercase tracking-wider text-white mb-2">No Recommendations Yet</h3>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
-                Complete a facial analysis to get personalized recommendations
-              </p>
-            </div>
-          )}
+                ) : (
+                  <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-10 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-5">
+                      <Sparkles size={28} className="text-neutral-600" />
+                    </div>
+                    <h3 className="text-lg font-black uppercase tracking-wider text-white mb-2">No Recommendations Yet</h3>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                      Complete a facial analysis to get personalized recommendations
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        {/* Simplified Sidebar */}
+        <div className="space-y-5">
+          {/* Unified Pricing Summary - Always visible */}
+          <UnifiedPricingSummary
+            dailyStackCost={unifiedPricing.stackCost}
+            productCost={unifiedPricing.productCost}
+            totalProducts={unifiedPricing.totalProducts}
+            totalSupplements={unifiedPricing.totalSupplements}
+          />
+
           {/* Medical Prescription Card (Dental) */}
           {vision?.teeth && (
             <MedicalPrescriptionCard vision={vision} isUnlocked={isUnlocked} />
@@ -864,103 +804,44 @@ export function PlanTab() {
             onUploadNewPhoto={handleProgressPhotoUpload}
           />
 
-          {/* Product Bundle CTA */}
-          {flawProducts.length >= 3 && (
-            <ProductBundleCard
-              products={flawProducts}
-              title="Your Fix Bundle"
-            />
-          )}
 
-          {/* Before/After Preview */}
-          <BeforeAfterPreviewSection />
-
-          {/* Order of Operations */}
-          <OrderOfOperations />
-
-          {/* My Plan Summary */}
-          <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
-            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center">
-                <Zap size={14} className="text-yellow-400" />
-              </div>
-              My Plan
-            </h4>
-            <div className="text-center py-8">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center">
-                <Lock size={20} className="text-neutral-600" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-2">
-                Add recommendations to build your personalized plan
-              </p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-700">
-                0 items selected
-              </p>
-            </div>
-          </div>
-
-          {/* Issues Summary */}
-          <div className="rounded-2xl bg-neutral-900/40 border border-white/5 p-5">
-            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4">Detected Issues</h4>
-            <div className="space-y-2">
-              {flaws.slice(0, 5).map(flaw => (
-                <div
-                  key={flaw.id}
-                  className="flex items-center justify-between p-3 bg-neutral-900/50 border border-white/5 rounded-xl hover:border-white/10 transition-colors"
-                >
-                  <span className="text-sm font-bold text-neutral-300 truncate">{flaw.flawName}</span>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-red-400 flex-shrink-0 px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-lg">
-                    -{flaw.harmonyPercentageLost.toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-              {flaws.length === 0 && (
-                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 text-center py-6">
-                  No issues detected
-                </p>
-              )}
-            </div>
-          </div>
 
           {/* Upgrade CTA or Premium Badge */}
           {hasPaidPlan ? (
             <motion.div
-              className="rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-600/10 border border-green-500/30 p-5"
+              className="rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-600/10 border border-green-500/30 p-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
             >
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center">
                   <CheckCircle size={14} className="text-green-400" />
                 </div>
-                <span className="text-xs font-black uppercase tracking-wider text-white">
-                  {user?.plan === 'pro' ? 'Pro Plan' : 'Basic Plan'} Active
-                </span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white block">
+                    {user?.plan === 'pro' ? 'Pro Plan' : 'Basic Plan'} Active
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">
+                    Full access enabled
+                  </span>
+                </div>
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-                You have full access to all {user?.plan === 'pro' ? 'features' : 'non-surgical recommendations'}.
-              </p>
             </motion.div>
           ) : (
             <motion.div
-              className="rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 p-5"
+              className="rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 p-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
                   <Sparkles size={14} className="text-cyan-400" />
                 </div>
-                <span className="text-xs font-black uppercase tracking-wider text-white">Unlock Full Plan</span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-white">Unlock Full Plan</span>
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-4">
-                Get detailed treatment guides, cost estimates, and provider recommendations.
-              </p>
               <button
                 onClick={() => openPricingModal('plan_sidebar')}
-                className="block w-full py-3 bg-cyan-500 text-black text-xs font-black uppercase tracking-wider rounded-xl text-center hover:bg-cyan-400 transition-colors"
+                className="block w-full py-2.5 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-wider rounded-xl text-center hover:bg-cyan-400 transition-colors"
               >
                 Upgrade Now
               </button>

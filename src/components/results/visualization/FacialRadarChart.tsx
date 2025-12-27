@@ -94,8 +94,8 @@ export function FacialRadarChart({
   }
 
   return (
-    <div className="w-full" style={{ height }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full" style={{ height, minHeight: height }}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
         <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
           <PolarGrid
             stroke="#374151"

@@ -60,6 +60,8 @@ export const MEDIAPIPE_FRONT_MAPPING: Record<string, number> = {
   left_ala_nasi: 48,
   right_ala_nasi: 278,
   subnasale: 2, // noseBottom in landmarkers.js
+  nasion: 6, // Added for correct FWHR calculation
+  glabella: 9, // Added for reference
 
   // Mouth
   labrale_superius: 267, // cupidsBow - peak of cupid's bow

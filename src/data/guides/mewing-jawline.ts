@@ -55,6 +55,16 @@ Named after Dr. Mike Mew, an orthodontist who proposes that tongue posture affec
 3. Realistic expectations by age
 4. Complementary practices
 5. When to consider alternatives`,
+      media: [
+        {
+          id: 'thomas-sigma-gif',
+          type: 'gif',
+          url: 'https://media.giphy.com/media/XXjKznjBKmdTcDT4Xp/giphy.gif',
+          alt: 'Thomas Shelby jawline meme',
+          caption: 'The jawline goal. Genetics not included.',
+          placement: 'inline',
+        },
+      ],
     },
     {
       id: 'science',
@@ -133,6 +143,22 @@ Named after Dr. Mike Mew, an orthodontist who proposes that tongue posture affec
 - Tongue held without conscious effort (eventually)
 - Slight hollow under chin when swallowing`,
       media: [
+        {
+          id: 'mewing-diagram',
+          type: 'image',
+          url: 'https://mewing.coach/blog/wp-content/uploads/2022/11/how-to-mew-properly-diagram.png',
+          alt: 'How to mew properly diagram showing tongue placement',
+          caption: 'Proper mewing technique: entire tongue against the palate',
+          placement: 'inline',
+        },
+        {
+          id: 'correct-incorrect-posture',
+          type: 'image',
+          url: 'https://mewing.coach/blog/wp-content/uploads/2022/11/example-of-correct-and-incorrect-tongue-posture.png',
+          alt: 'Correct vs incorrect tongue posture comparison',
+          caption: 'Left: incorrect (tongue down). Right: correct (tongue up)',
+          placement: 'inline',
+        },
         {
           id: 'mewing-technique',
           type: 'gif',

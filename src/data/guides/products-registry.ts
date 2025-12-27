@@ -873,7 +873,7 @@ export const GUIDE_PRODUCTS: GuideProduct[] = [
     isBaseStack: false,
   },
   {
-    id: 'jaw_exerciser',
+    id: 'jawline_exerciser_pro',
     name: 'Jawline Exerciser',
     brand: 'JawlineMe',
     category: 'beard',

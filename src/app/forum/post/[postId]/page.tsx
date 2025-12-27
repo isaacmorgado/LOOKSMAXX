@@ -260,25 +260,45 @@ export default function PostDetailPage() {
             </h2>
 
             {/* Comment Input */}
-            <div className="rounded-2xl bg-neutral-900/30 border border-white/5 p-5 mb-8">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="What are your thoughts?"
-                rows={4}
-                className="w-full bg-transparent text-white placeholder-neutral-600 text-sm resize-none focus:outline-none leading-relaxed"
-              />
-              <div className="flex justify-end mt-3 pt-3 border-t border-white/5">
-                <button
-                  onClick={handleSubmitComment}
-                  disabled={isSubmitting || !newComment.trim()}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20"
-                >
-                  <Send size={12} />
-                  {isSubmitting ? 'Posting...' : 'Comment'}
-                </button>
+            {currentUserId ? (
+              <div className="rounded-2xl bg-neutral-900/30 border border-white/5 p-5 mb-8">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="What are your thoughts?"
+                  rows={4}
+                  className="w-full bg-transparent text-white placeholder-neutral-600 text-sm resize-none focus:outline-none leading-relaxed"
+                />
+                <div className="flex justify-end mt-3 pt-3 border-t border-white/5">
+                  <button
+                    onClick={handleSubmitComment}
+                    disabled={isSubmitting || !newComment.trim()}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20"
+                  >
+                    <Send size={12} />
+                    {isSubmitting ? 'Posting...' : 'Comment'}
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="rounded-2xl bg-neutral-900/30 border border-white/5 p-5 mb-8 text-center">
+                <p className="text-neutral-400 text-sm mb-4">Sign in to join the discussion</p>
+                <div className="flex justify-center gap-3">
+                  <Link
+                    href="/login"
+                    className="px-5 py-2.5 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="px-5 py-2.5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/5 transition-all"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* Comments List */}
             {isLoadingComments && comments.length === 0 ? (

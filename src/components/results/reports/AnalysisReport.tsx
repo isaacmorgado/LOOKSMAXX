@@ -60,7 +60,7 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                             <ShieldCheck className="text-white w-7 h-7" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black tracking-tighter text-white">LOOKS<span className="text-cyan-400">MAXX</span></h1>
+                            <h1 className="text-2xl font-black tracking-tighter text-white">LOOXSMAXX<span className="text-cyan-400">LABS</span></h1>
                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">Scientific Aesthetic Validation</p>
                         </div>
                     </div>
@@ -157,19 +157,19 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                         {!isUnlocked && <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded uppercase tracking-tighter">Pro Feature Locked</span>}
                     </div>
 
-                    <div className="relative rounded-2xl border border-neutral-800 bg-neutral-900/30 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-neutral-800/50 bg-neutral-900/50">
-                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter">Metric Attribute</th>
-                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Measured</th>
-                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Ideal Range</th>
-                                        <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-right">Deviance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <LockBlur isUnlocked={isUnlocked} overlayText="Join LooksMaxx Pro to reveal the complete list of 60+ biometric ratios and their exact scientific measurements.">
+                    <LockBlur isUnlocked={isUnlocked} overlayText="Join LooxsmaxxLabs Pro to reveal the complete list of 60+ biometric ratios and their exact scientific measurements.">
+                        <div className="relative rounded-2xl border border-neutral-800 bg-neutral-900/30 overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-neutral-800/50 bg-neutral-900/50">
+                                            <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter">Metric Attribute</th>
+                                            <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Measured</th>
+                                            <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-center">Ideal Range</th>
+                                            <th className="p-3 text-[9px] uppercase font-black text-neutral-400 tracking-tighter text-right">Deviance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         {measurements.slice(0, 12).map((m: any, idx: number) => {
                                             return (
                                                 <tr key={idx} className="border-b border-neutral-800/20 hover:bg-white/[0.02] transition-colors">
@@ -195,11 +195,11 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                                                 <td colSpan={4} className="p-3 text-center text-[10px] text-neutral-600 font-bold uppercase tracking-widest">+ {measurements.length - 12} additional biometric identifiers mapped</td>
                                             </tr>
                                         )}
-                                    </LockBlur>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+                    </LockBlur>
                 </div>
 
                 {/* -- FOOTER -- */}
@@ -216,10 +216,10 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] font-black italic text-neutral-600 mb-1 leading-none uppercase tracking-tighter">Generated on looksmaxx.app</p>
+                        <p className="text-[10px] font-black italic text-neutral-600 mb-1 leading-none uppercase tracking-tighter">Generated on looxsmaxxlabs.com</p>
                         <div className="flex items-center gap-2 justify-end">
                             <ShieldCheck size={12} className="text-cyan-500" />
-                            <span className="text-[10px] text-white font-black tracking-tight uppercase">LooksMaxx Advanced Analysis v4.2</span>
+                            <span className="text-[10px] text-white font-black tracking-tight uppercase">LooxsmaxxLabs Advanced Analysis v4.2</span>
                         </div>
                     </div>
                 </div>

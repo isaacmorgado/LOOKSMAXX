@@ -207,6 +207,7 @@ export type ResultsTab =
   | 'archetype'
   | 'plan'
   | 'guides'
+  | 'shop'
   | 'community'
   | 'referrals'
   | 'options'

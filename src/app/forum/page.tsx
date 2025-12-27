@@ -15,7 +15,7 @@ import {
   Zap,
   ChevronRight,
   BookOpen,
-  ShieldCheck
+  ShieldCheck,
 } from 'lucide-react';
 
 // ============================================

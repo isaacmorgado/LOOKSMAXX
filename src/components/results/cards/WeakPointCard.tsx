@@ -58,6 +58,7 @@ interface WeakPointCardProps {
   products: ProductRecommendation[];
   treatments: Recommendation[];
   onViewTreatment?: (treatment: Recommendation) => void;
+  variant?: 'detailed' | 'compact';
 }
 
 export function WeakPointCard({
@@ -66,6 +67,7 @@ export function WeakPointCard({
   products,
   treatments,
   onViewTreatment,
+  variant = 'detailed',
 }: WeakPointCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -105,10 +107,18 @@ export function WeakPointCard({
 
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <span className={`text-sm font-semibold ${colors.text}`}>
-              -{flaw.harmonyPercentageLost.toFixed(1)}%
-            </span>
-            <p className="text-xs text-neutral-500">harmony lost</p>
+            {variant === 'detailed' ? (
+              <>
+                <span className={`text-sm font-semibold ${colors.text}`}>
+                  -{flaw.harmonyPercentageLost.toFixed(1)}%
+                </span>
+                <p className="text-xs text-neutral-500">harmony lost</p>
+              </>
+            ) : (
+              <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                View Solution
+              </span>
+            )}
           </div>
           {isExpanded ? (
             <ChevronUp size={20} className="text-neutral-400" />
@@ -132,8 +142,8 @@ export function WeakPointCard({
               {/* Summary */}
               <p className="text-sm text-neutral-300">{flaw.summary}</p>
 
-              {/* Contributing Ratios */}
-              {flaw.responsibleRatios.length > 0 && (
+              {/* Contributing Ratios - Only in Detailed Mode */}
+              {variant === 'detailed' && flaw.responsibleRatios.length > 0 && (
                 <div className="space-y-2">
                   <h5 className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
                     Contributing Metrics
@@ -193,13 +203,12 @@ export function WeakPointCard({
                         className="w-full flex items-center justify-between p-3 bg-neutral-800/50 rounded-lg hover:bg-neutral-800 transition-colors group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`px-2 py-0.5 rounded text-xs font-medium ${
-                            treatment.phase === 'Foundational'
+                          <div className={`px-2 py-0.5 rounded text-xs font-medium ${treatment.phase === 'Foundational'
                               ? 'bg-green-500/20 text-green-400'
                               : treatment.phase === 'Minimally Invasive'
                                 ? 'bg-yellow-500/20 text-yellow-400'
                                 : 'bg-red-500/20 text-red-400'
-                          }`}>
+                            }`}>
                             {treatment.phase}
                           </div>
                           <span className="text-sm text-white">{treatment.name}</span>

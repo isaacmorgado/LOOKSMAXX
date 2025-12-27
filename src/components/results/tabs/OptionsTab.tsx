@@ -172,8 +172,10 @@ export function OptionsTab() {
     try {
       // Use existing utility which handles html2canvas + jsPDF
       const result = await exportToPDF('pdf-report-container', {
-        filename: `LooksMaxx_Report_${new Date().toISOString().split('T')[0]}`,
-        scale: 2 // High quality
+        filename: `LooxsmaxxLabs_Report_${new Date().toISOString().split('T')[0]}`,
+        scale: 2, // High quality
+        pageFormat: 'a4',
+        margins: 10
       });
 
       if (result.success) {
@@ -193,7 +195,7 @@ export function OptionsTab() {
       // Just export the same report as an image for now, or we could target a specific subsection
       // Ideally we'd have a specific "SocialCard" element, but the report is good too.
       const result = await exportToImage('pdf-report-container', {
-        filename: `LooksMaxx_Card_${new Date().toISOString().split('T')[0]}`,
+        filename: `LooxsmaxxLabs_Card_${new Date().toISOString().split('T')[0]}`,
         scale: 2
       });
 

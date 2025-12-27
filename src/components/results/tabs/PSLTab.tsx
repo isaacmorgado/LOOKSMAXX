@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
   Ruler,
   Scale,
-  Info,
   TrendingUp,
   Calculator,
   Dumbbell,
@@ -671,9 +670,6 @@ export function PSLTab() {
             currentScore={pslResult.score}
           />
 
-          {/* Formula explainer */}
-          <PSLFormulaExplainer bodyMethod={pslResult.breakdown.bodyInfo?.method} />
-
           {/* Potential improvements */}
           {pslResult.potential > pslResult.score && (
             <motion.div
@@ -731,25 +727,6 @@ export function PSLTab() {
         </div>
       )}
 
-      {/* Info section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 p-5 rounded-2xl bg-neutral-900/40 border border-white/5"
-      >
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center flex-shrink-0">
-            <Info className="w-4 h-4 text-neutral-500" />
-          </div>
-          <p className="text-xs text-neutral-500 font-medium leading-relaxed">
-            PSL (Pretty Scale Level) is a comprehensive attractiveness rating that combines
-            facial harmony (75%), height (20%), and body composition (5%). Bonuses are applied
-            for exceptional scores (8.5+) in any category, with synergy bonuses for multiple
-            high-scoring areas.
-          </p>
-        </div>
-      </motion.div>
     </TabContent>
   );
 }
