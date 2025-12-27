@@ -3,13 +3,13 @@
 import { useState, useCallback } from 'react';
 
 interface UseZoomPanOptions {
-  /** Initial zoom level (default: 1) */
+  /** Initial zoom level (default: 2) - matches FaceIQ starting zoom */
   initialZoom?: number;
-  /** Minimum zoom level (default: 1) */
+  /** Minimum zoom level (default: 2) - FaceIQ minimum */
   minZoom?: number;
-  /** Maximum zoom level (default: 4) */
+  /** Maximum zoom level (default: 8) - FaceIQ maximum */
   maxZoom?: number;
-  /** Available zoom levels for quick selection (default: [1, 2, 4]) */
+  /** Available zoom levels for quick selection (default: [2, 4, 8]) - FaceIQ parity */
   zoomLevels?: number[];
 }
 
@@ -60,10 +60,10 @@ interface UseZoomPanReturn {
  */
 export function useZoomPan(options: UseZoomPanOptions = {}): UseZoomPanReturn {
   const {
-    initialZoom = 1,
-    minZoom = 1,
-    maxZoom = 4,
-    zoomLevels = [1, 2, 4],
+    initialZoom = 2,
+    minZoom = 2,
+    maxZoom = 8,
+    zoomLevels = [2, 4, 8],
   } = options;
 
   const [zoomLevel, setZoomLevelState] = useState(initialZoom);

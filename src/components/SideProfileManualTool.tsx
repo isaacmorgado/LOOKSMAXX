@@ -33,7 +33,8 @@ export function SideProfileManualTool({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isGuided, setIsGuided] = useState(true);
-  const [zoom, setZoom] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3>(1); // 1=2x, 2=4x, 3=8x (FaceIQ parity)
+  const zoom = zoomLevel === 1 ? 2 : zoomLevel === 2 ? 4 : 8;
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectionError, setDetectionError] = useState<string | null>(null);
 
@@ -185,9 +186,18 @@ export function SideProfileManualTool({
     }
   }, [faceApiReady, detect]);
 
-  // Zoom controls
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  // Zoom controls - FaceIQ parity: 2x, 4x, 8x discrete levels
+  const handleZoomIn = () => {
+    if (zoomLevel >= 3) return;
+    setZoomLevel((prev) => (prev + 1) as 2 | 3);
+  };
+  const handleZoomOut = () => {
+    if (zoomLevel <= 1) return;
+    setZoomLevel((prev) => (prev - 1) as 1 | 2);
+  };
+  const handleSetZoomLevel = (level: 1 | 2 | 3) => {
+    setZoomLevel(level);
+  };
 
   const handleMouseDown = useCallback((id: string) => {
     setActiveLandmark(id);
@@ -344,21 +354,33 @@ export function SideProfileManualTool({
 
         <div className="w-px h-8 bg-neutral-800" />
 
-        {/* Zoom Controls */}
+        {/* Zoom Controls - FaceIQ parity: 2x, 4x, 8x */}
         <div className="flex items-center gap-1">
           <button
             onClick={handleZoomOut}
-            disabled={zoom <= 0.5}
+            disabled={zoomLevel <= 1}
             className="p-2 rounded-lg bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
-          <span className="text-xs text-neutral-400 w-12 text-center">
-            {(zoom * 100).toFixed(0)}%
-          </span>
+          <div className="flex gap-1">
+            {([1, 2, 3] as const).map((level) => (
+              <button
+                key={level}
+                onClick={() => handleSetZoomLevel(level)}
+                className={`px-2 py-1 rounded text-xs font-mono transition-colors ${
+                  zoomLevel === level
+                    ? 'bg-[#00f3ff] text-black'
+                    : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                }`}
+              >
+                {level === 1 ? '2x' : level === 2 ? '4x' : '8x'}
+              </button>
+            ))}
+          </div>
           <button
             onClick={handleZoomIn}
-            disabled={zoom >= 3}
+            disabled={zoomLevel >= 3}
             className="p-2 rounded-lg bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ZoomIn className="w-4 h-4" />

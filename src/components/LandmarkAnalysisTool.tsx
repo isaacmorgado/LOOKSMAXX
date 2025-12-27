@@ -61,7 +61,7 @@ export function LandmarkAnalysisTool({
     initialLandmarks || defaultLandmarks
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(2.5); // Start zoomed in for precision
+  const [zoomLevel, setZoomLevel] = useState(2); // FaceIQ parity: 2x/4x/8x discrete levels
 
   // Reset state when mode changes (fixes side profile starting at step 52)
   useEffect(() => {
@@ -72,7 +72,7 @@ export function LandmarkAnalysisTool({
     setDetectionFailed(false);
     setLandmarks(newLandmarks);
     setPan({ x: 0, y: 0 });
-    setZoomLevel(2.5);
+    setZoomLevel(2); // FaceIQ parity: start at 2x
   }, [mode]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -242,7 +242,7 @@ export function LandmarkAnalysisTool({
   }, []);
 
   const handleResetZoom = useCallback(() => {
-    setZoomLevel(2.5);
+    setZoomLevel(2); // FaceIQ parity: reset to 2x
     setPan({ x: 0, y: 0 });
   }, []);
 
@@ -291,8 +291,8 @@ export function LandmarkAnalysisTool({
     const bounds = getImageBounds();
     if (bounds.renderedWidth <= 1 || bounds.renderedHeight <= 1) return; // Bounds not ready
 
-    // Zoom to 2.5x for good precision
-    const newZoom = 2.5;
+    // FaceIQ parity: Zoom to 2x for good precision
+    const newZoom = 2;
     setZoomLevel(newZoom);
 
     // Calculate pan so the landmark appears at container center (under the fixed orb)
@@ -609,15 +609,12 @@ export function LandmarkAnalysisTool({
                 Zoom Level
               </p>
               <div className="flex gap-2">
-                {[1, 2, 4].map((level) => (
+                {/* FaceIQ parity: 2x/4x/8x discrete zoom levels */}
+                {[2, 4, 8].map((level) => (
                   <button
                     key={level}
                     onClick={() => {
-                      if (level === 1) {
-                        // Reset to 1x: no zoom, no pan
-                        setZoomLevel(1);
-                        setPan({ x: 0, y: 0 });
-                      } else if (containerSize) {
+                      if (containerSize) {
                         // Adjust pan to keep the same center point visible when zoom changes
                         // Current center in image space: imageCenter = (containerCenter - pan) / oldZoom
                         // New pan to show same center: newPan = containerCenter - imageCenter * newZoom

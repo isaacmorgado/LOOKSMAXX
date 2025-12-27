@@ -19,7 +19,9 @@ import { detectSideProfileServer } from './serverSideDetection';
 // Uses SUBJECT's perspective: "left" = subject's left (appears on RIGHT side of image)
 export const MEDIAPIPE_FRONT_MAPPING: Record<string, number> = {
   // Head
-  trichion: 10, // hairline
+  // Note: MediaPipe 10 is the forehead/glabella, not actual hairline
+  // We apply a Y offset during mapping to estimate the hairline position
+  trichion: 10, // hairline (requires Y offset - see TRICHION_Y_OFFSET)
 
   // Left Eye (subject's LEFT eye - appears on RIGHT of image)
   left_pupila: 468,
@@ -290,20 +292,30 @@ export async function detectFromImageUrl(
     const NECK_Y_OFFSET = 0.05;
     const NECK_LANDMARKS = ['left_cervical_lateralis', 'right_cervical_lateralis'];
 
+    // Hairline (trichion) offset: MediaPipe index 10 is forehead/glabella, not actual hairline
+    // Apply negative Y offset to move up toward the actual hairline
+    // FaceIQ parity: Hairline is approximately 8% of face height above glabella
+    const TRICHION_Y_OFFSET = -0.08;
+
     // Map keypoints to our landmarks
     const landmarks = Object.entries(mapping).map(([id, index]) => {
       // Handle index bounds
       const safeIndex = Math.min(index, faceLandmarks.length - 1);
       const landmark = faceLandmarks[safeIndex];
 
-      // Apply yOffset for neck landmarks
-      const yOffset = NECK_LANDMARKS.includes(id) ? NECK_Y_OFFSET : 0;
+      // Apply yOffset for special landmarks
+      let yOffset = 0;
+      if (NECK_LANDMARKS.includes(id)) {
+        yOffset = NECK_Y_OFFSET;
+      } else if (id === 'trichion') {
+        yOffset = TRICHION_Y_OFFSET;
+      }
 
       return {
         id,
         // MediaPipe returns normalized coordinates (0-1)
         x: landmark ? landmark.x : 0.5,
-        y: landmark ? Math.min(landmark.y + yOffset, 1) : 0.5,
+        y: landmark ? Math.max(0, Math.min(landmark.y + yOffset, 1)) : 0.5,
       };
     });
 
