@@ -231,6 +231,9 @@ File: `src/lib/recommendations/hardmaxxing.ts`
 - `/login` - Email/password login
 - `/forgot-password` - Password reset request
 - `/reset-password` - Password reset form (with token)
+- `/verify-email` - Email verification landing page (2025-12-27)
+- `/checkout` - Stripe checkout page (2025-12-27)
+- `/success` - Payment success page (2025-12-27)
 - `/terms` - Terms & Conditions
 - `/gender` - Gender selection
 - `/ethnicity` - Ethnicity selection
@@ -592,14 +595,49 @@ Adopted patterns from `/Users/imorgado/content-cat`:
 | **Form Loading State** | `disabled:animate-pulse` on fieldsets |
 | **Cursor Pagination** | useSWRInfinite pattern for infinite scroll |
 
-## E2E Test Results (2025-12-26)
+## E2E Test Results (2025-12-27)
 
 | Test | Status |
 |------|--------|
 | TypeScript | ✅ No errors |
 | ESLint | ✅ Only warnings (img vs Image) |
-| Build | ✅ 28 pages compiled |
+| Build | ✅ 31 pages compiled |
 | Face Morphing | ✅ Canvas rendering, animation works |
 | Quota System | ✅ Plan quotas enforced, UI displays correctly |
 | Analysis History | ✅ Snapshots saved, comparison works |
 | Surgery Consent | ✅ Two-step flow, age verification works |
+| Email Verification | ✅ Loading/success/error states work |
+| Checkout Flow | ✅ Stripe integration functional |
+
+## New Features (2025-12-27) ✅
+
+### Email Verification Page
+| Component | File | Details |
+|-----------|------|---------|
+| **VerifyEmailPage** | `src/app/verify-email/page.tsx` | Token-based verification landing page |
+
+**Features:**
+- Auto-verifies on page load using URL token
+- Loading state with mail icon animation
+- Success state with green checkmark, "Continue to Login" CTA
+- Error state with red X, helpful message
+- Suspense boundary for SSR compatibility
+
+### API Methods Added
+| Method | File | Details |
+|--------|------|---------|
+| **verifyEmail()** | `src/lib/api.ts` | `GET /auth/verify-email?token=xxx` |
+| **resendVerification()** | `src/lib/api.ts` | `POST /auth/resend-verification` |
+
+### Checkout Pages
+| Page | File | Details |
+|------|------|---------|
+| **Checkout** | `src/app/checkout/page.tsx` | Stripe checkout with plan selection |
+| **Success** | `src/app/success/page.tsx` | Payment confirmation page |
+| **CheckoutForm** | `src/components/checkout/CheckoutForm.tsx` | Form component with Stripe integration |
+
+## Deployment (2025-12-27)
+
+- **Vercel**: Deployed commit `930abfc` - 31 pages compiled
+- **Live URL**: https://looksmaxx-app.vercel.app
+- **Verify Email**: https://looksmaxx-app.vercel.app/verify-email?token=test
